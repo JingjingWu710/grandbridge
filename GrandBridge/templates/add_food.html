@@ -1,0 +1,116 @@
+{% extends "layout.html" %}
+{% block content %}
+<h2>🍛 Add Food Entry</h2>
+<p>Record your daily food and get nutrition and menu advice.</p>
+
+{% if error %}
+<div class="alert alert-danger">{{ error }}</div>
+{% endif %}
+
+<form method="POST" id="food-form">
+    {{ form.hidden_tag() }}
+    
+    <div class="form-group">
+        {{ form.start_date.label(class="form-label") }} 
+        {{ form.start_date(class="form-control") }}
+        {% if form.start_date.errors %}
+        <div class="text-danger">{{ form.start_date.errors[0] }}</div>
+        {% endif %}
+
+        {{ form.end_date.label(class="form-label") }} 
+        {{ form.end_date(class="form-control") }}
+        {% if form.end_date.errors %}
+        <div class="text-danger">{{ form.end_date.errors[0] }}</div>
+        {% endif %}
+    </div>
+
+    <!-- Food Items Section -->
+    <div id="food-items">
+        <h4>Food Items:</h4>
+        {% for item_form in form.items %}
+        <div class="food-item form-group border p-3 mb-3">
+            <div class="row">
+                <div class="col-md-4">
+                    {{ item_form.food_name.label(class="form-label") }}
+                    {{ item_form.food_name(class="form-control") }}
+                    {% if item_form.food_name.errors %}
+                    <div class="text-danger">{{ item_form.food_name.errors[0] }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-3">
+                    {{ item_form.amount.label(class="form-label") }}
+                    {{ item_form.amount(class="form-control", step="0.01") }}
+                    {% if item_form.amount.errors %}
+                    <div class="text-danger">{{ item_form.amount.errors[0] }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-3">
+                    {{ item_form.unit.label(class="form-label") }}
+                    {{ item_form.unit(class="form-control") }}
+                    {% if item_form.unit.errors %}
+                    <div class="text-danger">{{ item_form.unit.errors[0] }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="button" class="btn btn-danger btn-sm remove-item" onclick="removeItem(this)">Remove</button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <button type="button" class="btn btn-secondary" onclick="addFoodItem()">➕ Add More Food</button>
+    <br><br>
+    {{ form.submit(class="btn btn-primary") }}
+</form>
+
+<script>
+let itemIndex = {{ form.items|length }};
+
+function addFoodItem() {
+    const container = document.getElementById('food-items');
+    
+    const newItem = document.createElement('div');
+    newItem.className = 'food-item form-group border p-3 mb-3';
+    newItem.innerHTML = `
+        <div class="row">
+            <div class="col-md-4">
+                <label class="form-label" for="items-${itemIndex}-food_name">Food Name</label>
+                <input class="form-control" id="items-${itemIndex}-food_name" name="items-${itemIndex}-food_name" required type="text" value="">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label" for="items-${itemIndex}-amount">Amount</label>
+                <input class="form-control" id="items-${itemIndex}-amount" name="items-${itemIndex}-amount" required step="0.01" type="number" value="">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label" for="items-${itemIndex}-unit">Unit</label>
+                <select class="form-control" id="items-${itemIndex}-unit" name="items-${itemIndex}-unit" required>
+                    <option value="g">g</option>
+                    <option value="kg">kg</option>
+                    <option value="ml">ml</option>
+                    <option value="l">l</option>
+                    <option value="pieces">pieces</option>
+                    <option value="tbsp">tbsp</option>
+                    <option value="tsp">tsp</option>
+                </select>
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="button" class="btn btn-danger btn-sm remove-item" onclick="removeItem(this)">Remove</button>
+            </div>
+        </div>
+    `;
+    
+    container.appendChild(newItem);
+    itemIndex++;
+}
+
+function removeItem(button) {
+    const item = button.closest('.food-item');
+    if (document.querySelectorAll('.food-item').length > 1) {
+        item.remove();
+    } else {
+        alert('You must have at least one food item.');
+    }
+}
+</script>
+{% endblock %}

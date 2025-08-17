@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+{% block content %}
+<h2>📜 Food Records</h2>
+<a href="{{ url_for('nutrition.add_food') }}" class="btn btn-primary" 
+     style="font-size: 1.3rem; padding: 12px 25px; border-radius: 8px; margin-bottom: 1em; display: inline-block;">
+    Add Food Record
+  </a>
+{% if records %}
+  {% for record in records %}
+    <div style="border: 1px solid #ccc; margin-bottom: 20px; padding: 10px;">
+      <p><strong>Record ID:</strong> {{ record.id }}</p>
+      <p><strong>Submitted At:</strong> {{ record.submitted_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+        ({{ record.entries[0].start_date }} → {{ record.entries[0].end_date }})
+      {% if record.nutrition_advice %}
+        <p><strong>Nutrition Advice:</strong> {{ record.nutrition_advice }}</p>
+      {% endif %}
+
+      <h4>Entries:</h4>
+      <ul>
+        {% for entry in record.entries %}
+          <li>
+            {{ entry.food_name }} - {{ entry.amount }} {{ entry.unit }}
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endfor %}
+{% else %}
+  <p>No records found.</p>
+{% endif %}
+{% endblock %}

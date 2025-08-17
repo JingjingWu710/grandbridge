@@ -1,0 +1,59 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">All Families</h1>
+  <a href="{{ url_for('users.create_family') }}" class="btn btn-primary" 
+     style="font-size: 1.3rem; padding: 12px 25px; border-radius: 8px; margin-bottom: 1em; display: inline-block;">
+    Add New Family
+  </a>
+    {% if families %}
+        <table class="table table-bordered table-hover">
+            <thead class="thead-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Members (Full Name / Address / Contact Info)</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for family in families %}
+                <tr>
+                    <td>{{ family.id }}</td>
+                    <td>{{ family.name }}</td>
+                    <td>
+                        {% if family.members %}
+                            <ul class="list-unstyled mb-0">
+                                {% for member in family.members %}
+                                <li>
+                                    <strong>{{ member.username }}</strong>
+                                    {% if member.address %} — {{ member.address }}{% endif %}
+                                    {% if member.contact_info %} — {{ member.contact_info }}{% endif %}
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <em>No members</em>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{{ url_for('users.edit_family', family_id=family.id) }}" 
+                           class="btn btn-sm btn-primary">Edit</a>
+                        <form action="{{ url_for('users.remove_admin', family_id=family.id) }}" 
+                              method="POST" style="display:inline;">
+                            <button type="submit" 
+                                    class="btn btn-sm btn-danger" 
+                                    onclick="return confirm('Remove this family?');">
+                                Remove
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>You are not managing any families yet.</p>
+    {% endif %}
+</div>
+{% endblock %}

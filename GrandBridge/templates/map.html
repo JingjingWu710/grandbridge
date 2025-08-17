@@ -1,0 +1,1253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Community Food Sharing Map</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #e8f5e9, #fff3e0);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .admin-panel {
+            background: #fff3e0;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border: 3px solid #f57c00;
+        }
+        
+        .search-section {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border: 3px solid #4a7c59;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #4a7c59;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+        
+        /* Important: Style for Google Places dropdown */
+        .pac-container {
+            z-index: 10000 !important;
+            border-radius: 10px;
+            border: 2px solid #4a7c59;
+            margin-top: 5px;
+            font-family: Arial, sans-serif;
+        }
+        
+        .pac-item {
+            padding: 10px;
+            font-size: 14px;
+        }
+        
+        .pac-item:hover {
+            background-color: #e8f5e9;
+        }
+        
+        .btn-custom {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary-custom {
+            background: #4a7c59;
+            color: white;
+        }
+        
+        .btn-primary-custom:hover {
+            background: #2c6f4f;
+        }
+        
+        .btn-secondary-custom {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-danger-custom {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .map-container {
+            height: 500px;
+            border-radius: 15px;
+            overflow: hidden;
+            border: 3px solid #4a7c59;
+            margin: 20px 0;
+            position: relative;
+        }
+        
+        #map {
+            height: 100%;
+            width: 100%;
+        }
+        
+        .radius-selector {
+            margin: 15px 0;
+        }
+        
+        .radius-options {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .radius-option {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .info-box {
+            background: #e8f5e9;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        
+        .status-active {
+            background: #4caf50;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .location-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 15px 0;
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s ease;
+        }
+        
+        .location-card:hover {
+            border-color: #4a7c59;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .distance-badge {
+            background: #4a7c59;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-left: 10px;
+        }
+        
+        .row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .col-md-6 {
+            flex: 1;
+        }
+        
+        .col-md-8 {
+            flex: 2;
+        }
+        
+        .col-md-4 {
+            flex: 1;
+        }
+        
+        .w-100 {
+            width: 100%;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.show {
+            display: flex;
+        }
+        
+        .modal-dialog {
+            position: relative;
+            max-width: 600px;
+            width: 90%;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            border: 3px solid #4a7c59;
+        }
+        
+        .modal-header {
+            background: linear-gradient(135deg, #e8f5e9, #fff3e0);
+            padding: 20px;
+            border-radius: 12px 12px 0 0;
+            position: relative;
+        }
+        
+        .modal-body {
+            padding: 20px;
+            font-size: 1.1rem;
+        }
+        
+        .modal-footer {
+            padding: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            min-width: 250px;
+            padding: 15px;
+            border-radius: 10px;
+            color: white;
+            font-weight: bold;
+            animation: slideIn 0.3s ease;
+        }
+        
+        .alert-success {
+            background: #4caf50;
+        }
+        
+        .alert-error {
+            background: #f44336;
+        }
+        
+        .alert-warning {
+            background: #ff9800;
+        }
+        
+        .alert-info {
+            background: #2196f3;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+        
+        /* Loading spinner */
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #4a7c59;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 style="color: #2c6f4f; font-size: 2rem; margin-bottom: 20px;">
+            🍽️ Community Food Sharing Map
+        </h2>
+        
+        <!-- Admin Panel -->
+        <div class="admin-panel" id="admin-panel" style="display: none;">
+            <h3 style="color: #f57c00;">📍 Admin Controls</h3>
+            <p style="font-size: 1.1rem;">Add new food pickup locations for the community</p>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <input id="admin-search-box" 
+                           type="text" 
+                           class="search-input" 
+                           placeholder="Search for a location to add..."
+                           autocomplete="off">
+                </div>
+                <div class="col-md-6">
+                    <input id="location-name" 
+                           type="text" 
+                           class="search-input" 
+                           placeholder="Give this location a friendly name...">
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <input id="location-address" 
+                           type="text" 
+                           class="search-input" 
+                           placeholder="Full address (auto-filled)..."
+                           readonly
+                           style="background-color: #f5f5f5;">
+                </div>
+            </div>
+            
+            <button onclick="addLocationFromSearch()" class="btn-custom btn-primary-custom">
+                ➕ Add This Location
+            </button>
+            <button onclick="clearAdminForm()" class="btn-custom btn-secondary-custom">
+                🔄 Clear Form
+            </button>
+        </div>
+        
+        <!-- User Search Section -->
+        <div class="search-section">
+            <h3 style="color: #2c6f4f;">🔍 Find Food Near You</h3>
+            
+            <div class="info-box">
+                <span class="status-indicator status-active"></span>
+                <strong id="location-count">0</strong> food pickup locations available
+            </div>
+            
+            <div class="row">
+                <div class="col-md-8">
+                    <input id="user-search-box" 
+                           type="text" 
+                           class="search-input" 
+                           placeholder="Enter your location or use current location..."
+                           autocomplete="off">
+                </div>
+                <div class="col-md-4">
+                    <button onclick="useCurrentLocation()" class="btn-custom btn-primary-custom w-100">
+                        📍 Use My Location
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Radius Selector -->
+            <div class="radius-selector">
+                <h4 style="color: #2c6f4f;">Search Radius:</h4>
+                <div class="radius-options">
+                    <div class="radius-option">
+                        <input type="radio" name="radius" id="radius-1" value="1" checked>
+                        <label for="radius-1">1 km</label>
+                    </div>
+                    <div class="radius-option">
+                        <input type="radio" name="radius" id="radius-3" value="3">
+                        <label for="radius-3">3 km</label>
+                    </div>
+                    <div class="radius-option">
+                        <input type="radio" name="radius" id="radius-5" value="5">
+                        <label for="radius-5">5 km</label>
+                    </div>
+                    <div class="radius-option">
+                        <input type="radio" name="radius" id="radius-10" value="10">
+                        <label for="radius-10">10 km</label>
+                    </div>
+                </div>
+            </div>
+            
+            <button onclick="searchNearbyLocations()" class="btn-custom btn-primary-custom">
+                🔍 Search Nearby
+            </button>
+            <button onclick="showAllLocations()" class="btn-custom btn-secondary-custom">
+                🗺️ Show All Locations
+            </button>
+        </div>
+        
+        <!-- Map Container -->
+        <div class="map-container">
+            <div id="map"></div>
+        </div>
+        
+        <!-- Locations List -->
+        <div id="locations-list" style="margin-top: 20px;">
+            <h3 style="color: #2c6f4f;">📍 Food Pickup Points</h3>
+            <div id="location-cards"></div>
+        </div>
+    </div>
+
+    <!-- Location Detail Modal -->
+    <div class="modal" id="locationModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" style="color: #2c6f4f; font-size: 1.5rem;">📍 Location Details</h4>
+                    <button type="button" class="close" onclick="closeModal()">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="modal-content"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-custom btn-primary-custom" onclick="getDirections()">
+                        🧭 Get Directions
+                    </button>
+                    <button type="button" id="delete-btn" class="btn-custom btn-danger-custom" onclick="deleteCurrentLocation()" style="display: none;">
+                        🗑️ Delete Location
+                    </button>
+                    <button type="button" class="btn-custom btn-secondary-custom" onclick="closeModal()">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toggle Admin Button -->
+    <div style="position: fixed; bottom: 20px; right: 20px; z-index: 1000;">
+        <button onclick="toggleAdminMode()" class="btn-custom btn-secondary-custom">
+            🔧 Toggle Admin Mode
+        </button>
+    </div>
+
+    <script>
+        // Global variables
+        let isAdmin = false;
+        let map;
+        let markers = [];
+        let userMarker = null;
+        let selectedLocation = null;
+        let selectedPlace = null;
+        let allLocations = [];
+        let searchCircle = null;
+        let infoWindow = null;
+        let adminAutocomplete = null;
+        let userAutocomplete = null;
+        let tempMarker = null;
+        
+        // Mock data for testing
+        const mockLocations = [
+            {
+                id: 1,
+                lat: 51.4816,
+                lng: -3.1791,
+                name: "Cardiff Central Food Hub",
+                address: "Cardiff Central, Cardiff CF10 1EP, UK"
+            },
+            {
+                id: 2,
+                lat: 51.4889,
+                lng: -3.1828,
+                name: "Cathays Community Center",
+                address: "Cathays Park, Cardiff CF10 3NQ, UK"
+            },
+            {
+                id: 3,
+                lat: 51.4769,
+                lng: -3.1681,
+                name: "Cardiff Bay Food Point",
+                address: "Cardiff Bay, Cardiff CF10 5AL, UK"
+            }
+        ];
+        
+        function initMap() {
+            console.log('Initializing map...');
+            
+            // Initialize map centered on Cardiff
+            map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 12,
+                center: { lat: 51.4816, lng: -3.1791 },
+                styles: [
+                    {
+                        featureType: "poi",
+                        elementType: "labels",
+                        stylers: [{ visibility: "off" }]
+                    }
+                ],
+                mapTypeControl: true,
+                mapTypeControlOptions: {
+                    style: google.maps.MapTypeControlStyle.DROPDOWN_MENU,
+                    position: google.maps.ControlPosition.TOP_RIGHT
+                },
+                streetViewControl: true,
+                fullscreenControl: true
+            });
+            
+            // Initialize info window
+            infoWindow = new google.maps.InfoWindow();
+            
+            // Initialize autocomplete after map is ready
+            setupAutocomplete();
+            
+            // Show admin panel if user is admin
+            if (isAdmin) {
+                document.getElementById('admin-panel').style.display = 'block';
+                document.getElementById('delete-btn').style.display = 'inline-block';
+            }
+            
+            // Load existing locations
+            loadLocations();
+        }
+        
+        function setupAutocomplete() {
+            console.log('Setting up autocomplete...');
+            
+            // Setup admin autocomplete
+            const adminSearchBox = document.getElementById('admin-search-box');
+            if (adminSearchBox) {
+                adminAutocomplete = new google.maps.places.Autocomplete(adminSearchBox, {
+                    types: ['establishment', 'geocode'],
+                    componentRestrictions: { country: 'gb' },
+                    fields: ['name', 'geometry', 'formatted_address', 'place_id']
+                });
+                
+                adminAutocomplete.addListener('place_changed', function() {
+                    const place = adminAutocomplete.getPlace();
+                    console.log('Admin place selected:', place);
+                    
+                    if (place.geometry) {
+                        selectedPlace = place;
+                        
+                        // Center map on selected place
+                        map.setCenter(place.geometry.location);
+                        map.setZoom(15);
+                        
+                        // Auto-fill address field
+                        const addressField = document.getElementById('location-address');
+                        if (addressField) {
+                            addressField.value = place.formatted_address || '';
+                        }
+                        
+                        // Add temporary marker
+                        addTemporaryMarker(place.geometry.location);
+                    }
+                });
+            }
+            
+            // Setup user autocomplete
+            const userSearchBox = document.getElementById('user-search-box');
+            if (userSearchBox) {
+                userAutocomplete = new google.maps.places.Autocomplete(userSearchBox, {
+                    types: ['geocode'],
+                    componentRestrictions: { country: 'gb' },
+                    fields: ['geometry', 'formatted_address']
+                });
+                
+                userAutocomplete.addListener('place_changed', function() {
+                    const place = userAutocomplete.getPlace();
+                    console.log('User place selected:', place);
+                    
+                    if (place.geometry) {
+                        updateUserLocation(place.geometry.location);
+                    }
+                });
+            }
+        }
+        
+        function addTemporaryMarker(location) {
+            // Remove existing temporary marker
+            if (tempMarker) {
+                tempMarker.setMap(null);
+            }
+            
+            // Add new temporary marker
+            tempMarker = new google.maps.Marker({
+                position: location,
+                map: map,
+                title: 'New Location',
+                icon: {
+                    url: 'http://maps.google.com/mapfiles/ms/icons/yellow-dot.png',
+                    scaledSize: new google.maps.Size(40, 40)
+                },
+                animation: google.maps.Animation.BOUNCE
+            });
+            
+            // Stop bouncing after 2 seconds
+            setTimeout(() => {
+                if (tempMarker) {
+                    tempMarker.setAnimation(null);
+                }
+            }, 2000);
+        }
+        
+        function loadLocations() {
+            console.log('Loading locations...');
+            
+            // Simulate API response with mock data
+            setTimeout(() => {
+                allLocations = mockLocations;
+                updateLocationCount(allLocations.length);
+                displayMarkers(allLocations);
+                displayLocationCards(allLocations);
+            }, 100);
+        }
+        
+        function displayMarkers(locations) {
+            console.log('Displaying markers for', locations.length, 'locations');
+            
+            // Clear existing markers
+            clearMarkers();
+            
+            if (!locations || locations.length === 0) {
+                console.log('No locations to display');
+                return;
+            }
+            
+            const bounds = new google.maps.LatLngBounds();
+            
+            locations.forEach((location, index) => {
+                const lat = parseFloat(location.lat);
+                const lng = parseFloat(location.lng);
+                
+                if (isNaN(lat) || isNaN(lng)) {
+                    console.error('Invalid coordinates for location:', location);
+                    return;
+                }
+                
+                const marker = new google.maps.Marker({
+                    position: { lat: lat, lng: lng },
+                    map: map,
+                    title: location.name || 'Food Pickup Point',
+                    icon: {
+                        url: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png',
+                        scaledSize: new google.maps.Size(35, 35)
+                    }
+                });
+                
+                // Stagger the drop animation
+                setTimeout(() => {
+                    marker.setAnimation(google.maps.Animation.DROP);
+                }, index * 100);
+                
+                // Add click listener for info window
+                marker.addListener('click', () => {
+                    showMarkerInfo(location, marker);
+                });
+                
+                markers.push(marker);
+                bounds.extend(marker.getPosition());
+            });
+            
+            // Fit bounds to show all markers
+            if (markers.length > 0) {
+                map.fitBounds(bounds);
+                
+                // Don't zoom in too much for single marker
+                if (markers.length === 1) {
+                    setTimeout(() => {
+                        map.setZoom(Math.min(map.getZoom(), 14));
+                    }, 100);
+                }
+            }
+        }
+        
+        function clearMarkers() {
+            markers.forEach(marker => marker.setMap(null));
+            markers = [];
+        }
+        
+        function showMarkerInfo(location, marker) {
+            const content = `
+                <div style="padding: 10px; max-width: 300px;">
+                    <h4 style="color: #2c6f4f; margin: 0 0 10px 0;">
+                        ${location.name || 'Food Pickup Point'}
+                    </h4>
+                    <p style="margin: 5px 0;">
+                        <strong>📍 Address:</strong><br>
+                        ${location.address || 'Address not specified'}
+                    </p>
+                    ${location.distance ? `
+                        <p style="margin: 5px 0;">
+                            <strong>📏 Distance:</strong> ${location.distance.toFixed(1)} km
+                        </p>
+                    ` : ''}
+                    <div style="margin-top: 10px;">
+                        <button onclick="showLocationDetails(${location.id})" 
+                                style="background: #4a7c59; color: white; border: none; padding: 5px 10px; border-radius: 5px; margin-right: 5px; cursor: pointer;">
+                            View Details
+                        </button>
+                        <button onclick="getDirectionsToLocation(${location.lat}, ${location.lng})" 
+                                style="background: #28a745; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">
+                            Directions
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            infoWindow.setContent(content);
+            infoWindow.open(map, marker);
+        }
+        
+        function displayLocationCards(locations) {
+            console.log('Displaying location cards for', locations.length, 'locations');
+            
+            const container = document.getElementById('location-cards');
+            if (!container) {
+                console.error('Location cards container not found');
+                return;
+            }
+            
+            container.innerHTML = '';
+            
+            if (!locations || locations.length === 0) {
+                container.innerHTML = '<div class="info-box">No food pickup points found. Try adjusting your search radius or check back later!</div>';
+                return;
+            }
+            
+            locations.forEach(location => {
+                const card = document.createElement('div');
+                card.className = 'location-card';
+                
+                card.innerHTML = `
+                    <h4 style="color: #2c6f4f;">
+                        ${location.name || 'Food Pickup Point'}
+                        ${location.distance !== undefined ? `<span class="distance-badge">${location.distance.toFixed(1)} km away</span>` : ''}
+                    </h4>
+                    <p style="font-size: 1.1rem; margin: 10px 0;">
+                        <strong>📍 Address:</strong> ${location.address || 'Address not specified'}
+                    </p>
+                    <button onclick="showLocationDetails(${location.id})" 
+                            class="btn-custom btn-primary-custom">
+                        View Details
+                    </button>
+                    <button onclick="centerOnLocation(${location.lat}, ${location.lng})" 
+                            class="btn-custom btn-secondary-custom">
+                        Show on Map
+                    </button>
+                `;
+                container.appendChild(card);
+            });
+        }
+        
+        function updateLocationCount(count) {
+            const countElement = document.getElementById('location-count');
+            if (countElement) {
+                countElement.textContent = count;
+            }
+        }
+        
+        function useCurrentLocation() {
+            if (navigator.geolocation) {
+                showNotification('Getting your location...', 'info');
+                
+                navigator.geolocation.getCurrentPosition(
+                    position => {
+                        const pos = new google.maps.LatLng(
+                            position.coords.latitude,
+                            position.coords.longitude
+                        );
+                        updateUserLocation(pos);
+                        showNotification('Location found!', 'success');
+                    },
+                    error => {
+                        console.error('Geolocation error:', error);
+                        let errorMessage = 'Unable to get your location.';
+                        
+                        switch(error.code) {
+                            case error.PERMISSION_DENIED:
+                                errorMessage = 'Location permission denied. Please enable location access.';
+                                break;
+                            case error.POSITION_UNAVAILABLE:
+                                errorMessage = 'Location information unavailable.';
+                                break;
+                            case error.TIMEOUT:
+                                errorMessage = 'Location request timed out.';
+                                break;
+                        }
+                        
+                        showNotification(errorMessage, 'error');
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 60000
+                    }
+                );
+            } else {
+                showNotification('Your browser doesn\'t support geolocation.', 'error');
+            }
+        }
+        
+        function updateUserLocation(location) {
+            // Remove existing user marker
+            if (userMarker) {
+                userMarker.setMap(null);
+            }
+            
+            // Add new user marker
+            userMarker = new google.maps.Marker({
+                position: location,
+                map: map,
+                title: 'Your Location',
+                icon: {
+                    path: google.maps.SymbolPath.CIRCLE,
+                    scale: 8,
+                    fillColor: '#4285F4',
+                    fillOpacity: 1,
+                    strokeColor: '#ffffff',
+                    strokeWeight: 2
+                },
+                animation: google.maps.Animation.DROP
+            });
+            
+            // Add accuracy circle
+            new google.maps.Circle({
+                strokeColor: '#4285F4',
+                strokeOpacity: 0.3,
+                strokeWeight: 1,
+                fillColor: '#4285F4',
+                fillOpacity: 0.1,
+                map: map,
+                center: location,
+                radius: 50
+            });
+            
+            map.setCenter(location);
+            map.setZoom(14);
+        }
+        
+        function searchNearbyLocations() {
+            if (!userMarker) {
+                showNotification('Please enter your location or use current location first.', 'warning');
+                return;
+            }
+            
+            const userPos = userMarker.getPosition();
+            const radius = parseFloat(document.querySelector('input[name="radius"]:checked').value);
+            
+            console.log('Searching within', radius, 'km of', userPos.lat(), userPos.lng());
+            
+            // Draw search circle
+            drawSearchCircle(userPos, radius);
+            
+            // Filter locations within radius
+            const nearbyLocations = allLocations.filter(location => {
+                const distance = calculateDistance(
+                    userPos.lat(), userPos.lng(),
+                    parseFloat(location.lat), parseFloat(location.lng)
+                );
+                location.distance = distance;
+                return distance <= radius;
+            });
+            
+            // Sort by distance
+            nearbyLocations.sort((a, b) => a.distance - b.distance);
+            
+            console.log('Found', nearbyLocations.length, 'nearby locations');
+            
+            // Display results
+            displayLocationCards(nearbyLocations);
+            highlightNearbyMarkers(nearbyLocations);
+            
+            showNotification(`Found ${nearbyLocations.length} location(s) within ${radius}km`, 
+                nearbyLocations.length > 0 ? 'success' : 'warning');
+        }
+        
+        function drawSearchCircle(center, radius) {
+            if (searchCircle) {
+                searchCircle.setMap(null);
+            }
+            
+            searchCircle = new google.maps.Circle({
+                strokeColor: '#4a7c59',
+                strokeOpacity: 0.8,
+                strokeWeight: 2,
+                fillColor: '#e8f5e9',
+                fillOpacity: 0.2,
+                map: map,
+                center: center,
+                radius: radius * 1000,
+                clickable: false
+            });
+            
+            // Fit map to circle bounds
+            map.fitBounds(searchCircle.getBounds());
+        }
+        
+        function highlightNearbyMarkers(nearbyLocations) {
+            const nearbyIds = nearbyLocations.map(loc => loc.id);
+            
+            markers.forEach((marker, index) => {
+                if (allLocations[index]) {
+                    const isNearby = nearbyIds.includes(allLocations[index].id);
+                    if (isNearby) {
+                        marker.setAnimation(google.maps.Animation.BOUNCE);
+                        setTimeout(() => marker.setAnimation(null), 2000);
+                    }
+                }
+            });
+        }
+        
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371;
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+        
+        function showAllLocations() {
+            console.log('Showing all locations');
+            
+            // Clear search circle if exists
+            if (searchCircle) {
+                searchCircle.setMap(null);
+                searchCircle = null;
+            }
+            
+            // Reset distance property for all locations
+            allLocations.forEach(location => {
+                delete location.distance;
+            });
+            
+            // Display all locations
+            displayLocationCards(allLocations);
+            displayMarkers(allLocations);
+            
+            showNotification(`Showing all ${allLocations.length} locations`, 'info');
+        }
+        
+        function centerOnLocation(lat, lng) {
+            lat = parseFloat(lat);
+            lng = parseFloat(lng);
+            map.setCenter({ lat: lat, lng: lng });
+            map.setZoom(16);
+            
+            // Find and animate the marker
+            markers.forEach(marker => {
+                const pos = marker.getPosition();
+                if (Math.abs(pos.lat() - lat) < 0.0001 && Math.abs(pos.lng() - lng) < 0.0001) {
+                    marker.setAnimation(google.maps.Animation.BOUNCE);
+                    setTimeout(() => marker.setAnimation(null), 2000);
+                    
+                    // Open info window for this marker
+                    const location = allLocations.find(loc => 
+                        Math.abs(parseFloat(loc.lat) - lat) < 0.0001 && 
+                        Math.abs(parseFloat(loc.lng) - lng) < 0.0001
+                    );
+                    if (location) {
+                        showMarkerInfo(location, marker);
+                    }
+                }
+            });
+        }
+        
+        function showLocationDetails(locationId) {
+            const location = allLocations.find(loc => loc.id === locationId);
+            if (!location) {
+                showNotification('Location not found', 'error');
+                return;
+            }
+            
+            selectedLocation = location;
+            const modalContent = document.getElementById('modal-content');
+            modalContent.innerHTML = `
+                <h3 style="color: #2c6f4f;">${location.name || 'Food Pickup Point'}</h3>
+                <div style="margin: 20px 0;">
+                    <p><strong>📍 Full Address:</strong></p>
+                    <p style="font-size: 1.2rem; background: #e8f5e9; padding: 15px; border-radius: 10px;">
+                        ${location.address || 'Address not specified'}
+                    </p>
+                </div>
+                <div style="margin: 20px 0;">
+                    <p><strong>📐 Coordinates:</strong></p>
+                    <p>Latitude: ${parseFloat(location.lat).toFixed(6)}, Longitude: ${parseFloat(location.lng).toFixed(6)}</p>
+                </div>
+                ${location.distance !== undefined ? `
+                    <div style="margin: 20px 0;">
+                        <p><strong>📏 Distance from you:</strong></p>
+                        <p style="font-size: 1.3rem; color: #4a7c59;">${location.distance.toFixed(1)} km</p>
+                    </div>
+                ` : ''}
+                <div style="margin: 20px 0;">
+                    <p><strong>ℹ️ Additional Information:</strong></p>
+                    <p>This location is part of our community food sharing network. 
+                    Please check with the location directly for current availability and hours.</p>
+                </div>
+            `;
+            
+            document.getElementById('locationModal').classList.add('show');
+        }
+        
+        function closeModal() {
+            document.getElementById('locationModal').classList.remove('show');
+        }
+        
+        function getDirections() {
+            if (selectedLocation) {
+                getDirectionsToLocation(selectedLocation.lat, selectedLocation.lng);
+            }
+        }
+        
+        function getDirectionsToLocation(lat, lng) {
+            const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+            window.open(url, '_blank');
+        }
+        
+        function showNotification(message, type = 'info') {
+            // Remove any existing notifications
+            const existingNotifications = document.querySelectorAll('.notification');
+            existingNotifications.forEach(notif => notif.remove());
+            
+            const notification = document.createElement('div');
+            notification.className = `notification alert-${type}`;
+            notification.innerHTML = message;
+            
+            document.body.appendChild(notification);
+            
+            // Auto remove after 3 seconds
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+        
+        // Admin functions
+        function addLocationFromSearch() {
+            if (!isAdmin) {
+                showNotification('Admin access required', 'error');
+                return;
+            }
+            
+            const nameInput = document.getElementById('location-name');
+            const addressInput = document.getElementById('location-address');
+            
+            if (!selectedPlace) {
+                showNotification('Please search and select a location first.', 'warning');
+                return;
+            }
+            
+            if (!nameInput.value.trim()) {
+                showNotification('Please provide a name for this location.', 'warning');
+                nameInput.focus();
+                return;
+            }
+            
+            const newLocation = {
+                id: allLocations.length + 1,
+                lat: selectedPlace.geometry.location.lat(),
+                lng: selectedPlace.geometry.location.lng(),
+                name: nameInput.value.trim(),
+                address: addressInput.value || selectedPlace.formatted_address
+            };
+            
+            // Add to local array
+            allLocations.push(newLocation);
+            updateLocationCount(allLocations.length);
+            displayMarkers(allLocations);
+            displayLocationCards(allLocations);
+            
+            // Remove temporary marker
+            if (tempMarker) {
+                tempMarker.setMap(null);
+                tempMarker = null;
+            }
+            
+            showNotification('Location added successfully!', 'success');
+            clearAdminForm();
+            
+            // In production, you would make an API call here:
+            /*
+            fetch('/foodmap/save_location', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(newLocation)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    showNotification('Location added successfully!', 'success');
+                    clearAdminForm();
+                    loadLocations();
+                } else {
+                    showNotification('Failed to add location: ' + (data.message || 'Unknown error'), 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Failed to add location.', 'error');
+            });
+            */
+        }
+        
+        function clearAdminForm() {
+            const adminSearchBox = document.getElementById('admin-search-box');
+            const nameInput = document.getElementById('location-name');
+            const addressInput = document.getElementById('location-address');
+            
+            if (adminSearchBox) adminSearchBox.value = '';
+            if (nameInput) nameInput.value = '';
+            if (addressInput) addressInput.value = '';
+            
+            selectedPlace = null;
+            
+            // Remove temporary marker
+            if (tempMarker) {
+                tempMarker.setMap(null);
+                tempMarker = null;
+            }
+        }
+        
+        function deleteCurrentLocation() {
+            if (!isAdmin || !selectedLocation) {
+                showNotification('Admin access required', 'error');
+                return;
+            }
+            
+            if (confirm(`Are you sure you want to delete "${selectedLocation.name || 'this location'}"?`)) {
+                // Remove from local array
+                const index = allLocations.findIndex(loc => loc.id === selectedLocation.id);
+                if (index > -1) {
+                    allLocations.splice(index, 1);
+                    updateLocationCount(allLocations.length);
+                    displayMarkers(allLocations);
+                    displayLocationCards(allLocations);
+                    closeModal();
+                    showNotification('Location deleted successfully!', 'success');
+                }
+                
+                // In production, make API call:
+                /*
+                fetch(`/foodmap/delete_location/${selectedLocation.id}`, {
+                    method: 'DELETE'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        showNotification('Location deleted successfully!', 'success');
+                        closeModal();
+                        loadLocations();
+                    } else {
+                        showNotification('Failed to delete location: ' + (data.message || 'Unknown error'), 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showNotification('Failed to delete location.', 'error');
+                });
+                */
+            }
+        }
+        
+        // Toggle admin mode for testing
+        function toggleAdminMode() {
+            isAdmin = !isAdmin;
+            const adminPanel = document.getElementById('admin-panel');
+            const deleteBtn = document.getElementById('delete-btn');
+            
+            if (isAdmin) {
+                adminPanel.style.display = 'block';
+                deleteBtn.style.display = 'inline-block';
+                showNotification('Admin mode enabled', 'success');
+                
+                // Re-initialize autocomplete for admin if needed
+                if (!adminAutocomplete) {
+                    setupAutocomplete();
+                }
+            } else {
+                adminPanel.style.display = 'none';
+                deleteBtn.style.display = 'none';
+                showNotification('Admin mode disabled', 'info');
+            }
+        }
+        
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('locationModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Press ESC to close modal
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+            
+            // Ctrl+Shift+A to toggle admin mode
+            if (e.ctrlKey && e.shiftKey && e.key === 'A') {
+                toggleAdminMode();
+            }
+        });
+        
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, waiting for Google Maps...');
+        });
+        
+        // Error handler for Google Maps
+        window.gm_authFailure = function() {
+            console.error('Google Maps authentication failed');
+            showNotification('Google Maps failed to load. Please check the API key.', 'error');
+            
+            // Show error message in map container
+            const mapDiv = document.getElementById('map');
+            if (mapDiv) {
+                mapDiv.innerHTML = `
+                    <div style="display: flex; align-items: center; justify-content: center; height: 100%; background: #f5f5f5;">
+                        <div style="text-align: center; padding: 20px;">
+                            <h3 style="color: #dc3545;">⚠️ Map Loading Error</h3>
+                            <p>Google Maps could not be loaded. Please check the API key configuration.</p>
+                        </div>
+                    </div>
+                `;
+            }
+        };
+    </script>
+
+    <!-- Load Google Maps API with Places library -->
+    <script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCUKJIAmALGcpZrebh-4YqFZY6Ns8pZJxM&libraries=places&callback=initMap">
+    </script>
+</body>
+</html>

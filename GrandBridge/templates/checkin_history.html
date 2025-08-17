@@ -1,0 +1,237 @@
+{% extends "layout.html" %}
+{% block content %}
+<style>
+    .history-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .trend-card {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 25px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .trend-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .trend-item {
+        text-align: center;
+        padding: 20px;
+        background: linear-gradient(135deg, #f5f5f5, #e0e0e0);
+        border-radius: 15px;
+    }
+    
+    .trend-value {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #2c6f4f;
+    }
+    
+    .trend-label {
+        font-size: 1rem;
+        color: #666;
+        margin-top: 10px;
+    }
+    
+    .history-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+    
+    .history-table th {
+        background: #4a7c59;
+        color: white;
+        padding: 15px;
+        text-align: left;
+        font-size: 1.1rem;
+    }
+    
+    .history-table td {
+        padding: 15px;
+        border-bottom: 1px solid #e0e0e0;
+        font-size: 1rem;
+    }
+    
+    .history-table tr:hover {
+        background: #f5f5f5;
+    }
+    
+    .mood-indicator {
+        display: inline-block;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        text-align: center;
+        line-height: 30px;
+        font-size: 1.2rem;
+    }
+    
+    .chart-container {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 25px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+</style>
+
+<div class="history-container">
+    <h1 style="text-align: center; color: #2c6f4f; margin-bottom: 30px;">
+        📈 Your Check-In History
+    </h1>
+    
+    <!-- 30-Day Averages -->
+    <div class="trend-card">
+        <h3 style="color: #2c6f4f; margin-bottom: 20px;">30-Day Averages</h3>
+        <div class="trend-grid">
+            <div class="trend-item">
+                <div class="trend-value">{{ "%.1f"|format(avg_mood) }}</div>
+                <div class="trend-label">Avg Mood</div>
+            </div>
+            <div class="trend-item">
+                <div class="trend-value">{{ "%.1f"|format(avg_energy) }}</div>
+                <div class="trend-label">Avg Energy</div>
+            </div>
+            <div class="trend-item">
+                <div class="trend-value">{{ "%.1f"|format(avg_stress) }}</div>
+                <div class="trend-label">Avg Stress</div>
+            </div>
+            <div class="trend-item">
+                <div class="trend-value">{{ "%.1f"|format(avg_sleep) }}</div>
+                <div class="trend-label">Avg Sleep</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Mood Trend Chart (Simple) -->
+    <div class="chart-container">
+        <h3 style="color: #2c6f4f;">Mood Trend</h3>
+        <div style="display: flex; align-items: flex-end; height: 200px; justify-content: space-around;">
+            {% for checkin in checkins[:7]|reverse %}
+            <div style="display: flex; flex-direction: column; align-items: center;">
+                <div style="background: #4a7c59; width: 40px; 
+                            height: {{ (checkin.mood_rating * 40) }}px;
+                            margin-bottom: 10px; border-radius: 5px 5px 0 0;">
+                </div>
+                <small>{{ checkin.check_in_date.strftime('%m/%d') }}</small>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <!-- Recent Check-Ins Table -->
+    <div class="trend-card">
+        <h3 style="color: #2c6f4f; margin-bottom: 20px;">Recent Check-Ins</h3>
+        <div style="overflow-x: auto;">
+            <table class="history-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Mood</th>
+                        <th>Energy</th>
+                        <th>Stress</th>
+                        <th>Sleep</th>
+                        <th>Self-Care</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for checkin in checkins %}
+                    <tr>
+                        <td>{{ checkin.check_in_date.strftime('%a %m/%d') }}</td>
+                        <td>
+                            <span class="mood-indicator">
+                                {% if checkin.mood_rating == 1 %}😔
+                                {% elif checkin.mood_rating == 2 %}😟
+                                {% elif checkin.mood_rating == 3 %}😐
+                                {% elif checkin.mood_rating == 4 %}🙂
+                                {% else %}😊{% endif %}
+                            </span>
+                        </td>
+                        <td>{{ checkin.energy_level }}/5</td>
+                        <td>{{ checkin.stress_level }}/5</td>
+                        <td>{{ checkin.sleep_quality }}/5</td>
+                        <td>
+                            {% set care_count = 0 %}
+                            {% if checkin.took_breaks %}{% set care_count = care_count + 1 %}{% endif %}
+                            {% if checkin.ate_well %}{% set care_count = care_count + 1 %}{% endif %}
+                            {% if checkin.connected_with_others %}{% set care_count = care_count + 1 %}{% endif %}
+                            {% if checkin.did_something_enjoyable %}{% set care_count = care_count + 1 %}{% endif %}
+                            {{ care_count }}/4
+                        </td>
+                        <td>
+                            <a href="{{ url_for('planting.view_checkin', checkin_id=checkin.id) }}"
+                               class="btn btn-sm btn-outline-primary">
+                                View
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 40px;">
+                            No check-ins yet. Start tracking your wellbeing today!
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Insights Based on History -->
+    {% if checkins|length >= 7 %}
+    <div class="trend-card">
+        <h3 style="color: #2c6f4f; margin-bottom: 20px;">📊 Weekly Insights</h3>
+        
+        {% if avg_mood < 3 %}
+        <div class="alert alert-warning">
+            Your mood has been lower than usual this week. Consider reaching out to your support network or trying some mood-boosting activities.
+        </div>
+        {% endif %}
+        
+        {% if avg_stress > 3.5 %}
+        <div class="alert alert-info">
+            Stress levels have been elevated. Remember to use your breathing exercises and take regular breaks.
+        </div>
+        {% endif %}
+        
+        {% if avg_sleep < 3 %}
+        <div class="alert alert-warning">
+            Sleep quality needs attention. Try establishing a calming bedtime routine 30 minutes before sleep.
+        </div>
+        {% endif %}
+        
+        {% if avg_energy < 2.5 %}
+        <div class="alert alert-info">
+            Low energy patterns detected. Make sure you're taking breaks and not overextending yourself.
+        </div>
+        {% endif %}
+        
+        {% if avg_mood >= 4 %}
+        <div class="alert alert-success">
+            Great job maintaining positive mood! Keep up whatever you're doing - it's working!
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+    
+    <!-- Action Buttons -->
+    <div style="text-align: center; margin-top: 40px;">
+        <a href="{{ url_for('planting.daily_checkin') }}" class="btn btn-success btn-lg">
+            📝 Today's Check-In
+        </a>
+        <a href="{{ url_for('planting.wellness_dashboard') }}" class="btn btn-primary btn-lg">
+            📊 Dashboard
+        </a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+{% block content %}
+<h2>🌿 Unlock New Vegetables</h2>
+<p>You have {{ current_user.coins }} coins.</p>
+<p>Each unlock costs <strong>{{ cost }} coins</strong>.</p>
+
+<div class="row">
+  {% for veg in locked %}
+    <div class="col-md-3 text-center mb-4">
+      <div class="card shadow">
+        <img src="{{ url_for('static', filename=veg.image) }}" class="card-img-top" alt="{{ veg.name }}">
+        <div class="card-body">
+          <h5 class="card-title">{{ veg.name }}</h5>
+          <form method="POST">
+            <input type="hidden" name="vegetable" value="{{ veg.key }}">
+            <button type="submit" class="btn btn-success btn-sm" {% if current_user.coins < cost %}disabled{% endif %}>
+              Unlock
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
+<a href="{{ url_for('planting.plant') }}" class="btn btn-outline-secondary mt-3">← Back to Planting</a>
+{% endblock %}

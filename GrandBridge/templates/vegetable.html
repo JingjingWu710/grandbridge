@@ -1,0 +1,98 @@
+{% extends "layout_with_music.html" %}
+
+{% block content %}
+  <h2 style="font-size: 2.5rem; margin-bottom: 0.5em;">{{ veg.name }} ({{ veg.type }})</h2>
+  <p style="font-size: 1.25rem; margin-bottom: 1em;">Planted at: {{ veg.plant_time }}</p>
+
+  <img id="veg-image"
+       src="{% if veg.stage == 'seed' %}{{ url_for('static', filename=veg.seed_image) }}{% elif veg.stage == 'sprout' %}{{ url_for('static', filename=veg.sprout_image) }}{% else %}{{ url_for('static', filename=veg.harvest_image) }}{% endif %}"
+       alt="{{ veg.stage }}"
+       data-seed="{{ url_for('static', filename=veg.seed_image) }}"
+       data-sprout="{{ url_for('static', filename=veg.sprout_image) }}"
+       data-harvest="{{ url_for('static', filename=veg.harvest_image) }}"
+       style="max-width: 100%; height: auto; margin-bottom: 1em; border: 2px solid #4a7c59; border-radius: 8px;">
+
+  <div id="message" style="font-size: 1.25rem; margin-bottom: 1em; color: #333;"></div>
+
+  {% if not veg.harvested %}
+    <button id="grow-btn" class="btn btn-success" 
+            style="font-size: 1.5rem; padding: 15px 30px; border-radius: 10px; cursor: pointer;">
+      Click to Grow
+    </button>
+  {% endif %}
+
+  <div style="margin-top: 2em; font-size: 1.25rem;">
+    <a href="{{ url_for('planting.all_vegetables', id=id) }}" 
+       style="margin-right: 2em; color: #2c6f4f; text-decoration: underline; font-weight: 600;">
+      View All Harvested Vegetables
+    </a>
+    <a href="{{ url_for('planting.plant') }}" 
+       style="color: #2c6f4f; text-decoration: underline; font-weight: 600;">
+      Plant another vegetable!
+    </a>
+  </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const growBtn = document.getElementById('grow-btn');
+    if (!growBtn) return;
+
+    growBtn.addEventListener('click', function (event) {
+        event.preventDefault();
+
+        fetch('{{ url_for("planting.click_vegetable", veg_id=veg.id) }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({})
+        })
+        .then(response => response.json())
+        .then(data => {
+            const image = document.getElementById('veg-image');
+            const message = document.getElementById('message');
+            
+            // Update image based on stage
+            if (data.stage === 'sprout') {
+                image.src = image.dataset.sprout;
+                image.alt = 'Sprout';
+                message.innerHTML = '<p style="color: #4a7c59; font-size: 1.3rem;">🌱 ' + data.message + '</p>';
+            } else if (data.stage === 'ready_to_harvest') {
+                image.src = image.dataset.harvest;
+                image.alt = 'Ready to Harvest';
+                message.innerHTML = `
+                    <div style="background: #fff3e0; padding: 20px; border-radius: 15px; margin: 20px 0;">
+                        <p style="font-size: 1.4rem; color: #2c6f4f; font-weight: bold;">
+                            🌾 Ready for Mindful Harvest!
+                        </p>
+                        <p style="font-size: 1.2rem; margin: 15px 0;">
+                            ${data.message}
+                        </p>
+                        <a href="{{ url_for('planting.mindful_harvest', veg_id=veg.id) }}" 
+                           class="btn btn-success btn-lg" style="margin-top: 15px;">
+                            🧘 Begin Mindful Harvest
+                        </a>
+                    </div>
+                `;
+                growBtn.style.display = 'none';
+            } else if (data.stage === 'harvest') {
+                image.src = image.dataset.harvest;
+                image.alt = 'Harvested';
+                growBtn.style.display = 'none';
+                message.innerHTML = `
+                    <p style="font-weight: bold; font-size: 1.5rem; color: #2c6f4f;">
+                        🎉 Harvested Mindfully!
+                    </p>
+                `;
+            }
+            
+            // Handle the next action
+            if (data.next_action === 'breathe_to_harvest') {
+                // Already handled above
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    });
+});
+</script>
+{% endblock %}

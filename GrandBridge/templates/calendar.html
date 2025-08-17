@@ -1,0 +1,160 @@
+{% extends "layout.html" %}
+{% block content %}
+<h2 style="font-size: 2.5rem; margin-bottom: 0.5em;">Calendar - {{ month }}/{{ year }}</h2>
+<p style="font-size: 1.3rem; margin-bottom: 1.5em; color: #333;">Check if there will be any events recently.</p>
+
+{% if current_user.is_admin %}
+  <a href="{{ url_for('calendar.new_event') }}" class="btn btn-primary" 
+     style="font-size: 1.3rem; padding: 12px 25px; border-radius: 8px; margin-bottom: 1em; display: inline-block;">
+    Add New Event
+  </a>
+{% endif %}
+
+<!-- Subscribe Button -->
+<button type="button" class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#subscribeModal"
+  style="font-size: 1.3rem; padding: 12px 25px; border-radius: 8px;">
+  Subscribe to External Calendar
+</button>
+
+<!-- Modal -->
+<div class="modal fade" id="subscribeModal" tabindex="-1" aria-labelledby="subscribeModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form action="{{ url_for('calendar.subscribe_calendar') }}" method="get" class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="subscribeModalLabel" style="font-size: 1.5rem;">Subscribe to Calendar</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <label for="ics-url" class="form-label" style="font-size: 1.2rem;">Paste .ics URL:</label>
+        <input type="url" class="form-control" id="ics-url" name="url" 
+               placeholder="https://example.com/calendar.ics" required
+               style="font-size: 1.2rem; padding: 10px;">
+      </div>
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-primary" style="font-size: 1.3rem; padding: 8px 20px;">Subscribe</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="font-size: 1.3rem; padding: 8px 20px;">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Google Sync -->
+<a href="{{ url_for('calendar.google_login') }}" class="btn btn-success mb-3" 
+   style="font-size: 1.3rem; padding: 12px 25px; border-radius: 8px; display: inline-block;">
+  Sync Google Calendar
+</a>
+
+<form method="get" class="mb-3" style="font-size: 1.2rem; display: flex; align-items: center; gap: 10px;">
+    <input type="hidden" name="month" value="{{ month }}">
+    <input type="hidden" name="year" value="{{ year }}">
+    <label for="filter-source" style="min-width: 50px;">Filter:</label>
+    <select name="source" id="filter-source" onchange="this.form.submit()" 
+            style="font-size: 1.2rem; padding: 6px 10px; border-radius: 6px;">
+        <option value="">All</option>
+        <option value="internal" {% if request.args.get('source') == 'internal' %}selected{% endif %}>Internal</option>
+        <option value="external" {% if request.args.get('source') == 'external' %}selected{% endif %}>External</option>
+        <option value="google" {% if request.args.get('source') == 'google' %}selected{% endif %}>Google</option>
+    </select>
+</form>
+
+{% set prev_month = month - 1 %}
+{% set prev_year = year if prev_month >= 1 else year - 1 %}
+{% set prev_month = 12 if prev_month == 0 else prev_month %}
+
+{% set next_month = month + 1 %}
+{% set next_year = year if next_month <= 12 else year + 1 %}
+{% set next_month = 1 if next_month == 13 else next_month %}
+
+<form method="get" action="{{ url_for('calendar.calendar_view') }}" 
+      class="d-flex justify-content-between align-items-center mb-3" style="font-size: 1.2rem; gap: 10px; flex-wrap: wrap;">
+
+    <!-- Previous button -->
+    <a href="{{ url_for('calendar.calendar_view', year=prev_year, month=prev_month) }}"
+       class="btn btn-outline-primary" style="padding: 10px 20px; font-size: 1.3rem; border-radius: 8px;">
+       ← Previous
+    </a>
+
+    <!-- Dropdown for month/year -->
+    <div class="d-flex align-items-center" style="gap: 10px;">
+        <select name="month" class="form-select me-2" onchange="this.form.submit()"
+                style="font-size: 1.2rem; padding: 6px 12px; border-radius: 6px;">
+            {% for m in range(1, 13) %}
+                <option value="{{ m }}" {% if m == month %}selected{% endif %}>
+                    {{ m|month_name }}
+                </option>
+            {% endfor %}
+        </select>
+        <select name="year" class="form-select me-2" onchange="this.form.submit()"
+                style="font-size: 1.2rem; padding: 6px 12px; border-radius: 6px;">
+            {% for y in range(year - 5, year + 6) %}
+                <option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }}</option>
+            {% endfor %}
+        </select>
+        <noscript>
+          <button type="submit" class="btn btn-primary" style="font-size: 1.3rem; padding: 8px 20px; border-radius: 8px;">
+            Go
+          </button>
+        </noscript>
+    </div>
+
+    <!-- Next button -->
+    <a href="{{ url_for('calendar.calendar_view', year=next_year, month=next_month) }}"
+       class="btn btn-outline-primary" style="padding: 10px 20px; font-size: 1.3rem; border-radius: 8px;">
+       Next →
+    </a>
+</form>
+
+<!-- Go to today -->
+<div class="text-center mb-3">
+    <a href="{{ url_for('calendar.calendar_view') }}" class="btn btn-secondary"
+       style="font-size: 1.3rem; padding: 12px 25px; border-radius: 8px;">Go to Today</a>
+</div>
+
+<p style="font-size: 1.3rem;">
+    <span>🏛️ Community</span> &nbsp;&nbsp;
+    <span>🌐 Subscribed</span> &nbsp;&nbsp;
+    <span>📅 Google</span>
+</p>
+
+<table class="table table-bordered text-center" style="font-size: 1.2rem; min-width: 100%; border-radius: 10px;">
+    <thead>
+        <tr>
+            <th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th>
+            <th>Thu</th><th>Fri</th><th>Sat</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for week in month_days %}
+        <tr>
+        {% for day in week %}
+            <td class="{% if day.month != month %}text-muted{% endif %}" 
+                style="vertical-align: top; padding: 10px; height: 120px; width:14.28%;">
+
+                <strong style="font-size: 1.3rem;">{{ day.day }}</strong>
+                <ul style="list-style:none; padding-left: 0; margin-top: 0.3em; max-height: 80px; overflow-y: auto;">
+                {% for event in events_by_date.get(day, []) %}
+                    <li style="margin-bottom: 4px; word-wrap: break-word;">
+                      {% if event.source == "internal" %}
+                          <a href="{{ url_for('calendar.event', id=event.id) }}" 
+                             style="font-size: 1.1rem; color: #2c6f4f; text-decoration: underline;">
+                             🏛️ {{ event.title }}
+                          </a>
+                      {% elif event.source == "external" %}
+                          <small style="font-size: 1.1rem;">🌐 {{ event.title }}</small>
+                      {% elif event.source == "google" %}
+                          <a href="{{ url_for('calendar.google_event', event_id=event.event_id) }}"
+                             style="font-size: 1.1rem; color: #2c6f4f; text-decoration: underline;">
+                            📅 {{ event.title }}
+                          </a>
+                      {% endif %}
+                    </li>
+                {% endfor %}
+                </ul>
+            </td>
+        {% endfor %}
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

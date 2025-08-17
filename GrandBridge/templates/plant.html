@@ -1,0 +1,203 @@
+<!--reference-->
+{% extends "layout.html" %}
+{% block content %}
+<style>
+    /* Make everything more elder-friendly */
+    .form-control, .form-select {
+        font-size: 1.2rem;
+        padding: 12px;
+        border: 2px solid #e8f5e9;
+    }
+    
+    .radio-card {
+        border: 2px solid #e8f5e9;
+        border-radius: 10px;
+        padding: 15px;
+        margin: 10px 0;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    
+    .radio-card:hover {
+        background-color: #e8f5e9;
+        transform: scale(1.02);
+    }
+    
+    .radio-card input[type="radio"]:checked + label {
+        font-weight: bold;
+    }
+    
+    .affirmation-box {
+        background: linear-gradient(135deg, #e8f5e9, #fff3e0);
+        border-left: 4px solid #4a7c59;
+        padding: 20px;
+        margin: 20px 0;
+        border-radius: 10px;
+        font-style: italic;
+        font-size: 1.1rem;
+    }
+    
+    .prompt-box {
+        background: #fff3e0;
+        padding: 15px;
+        border-radius: 10px;
+        margin: 15px 0;
+        font-size: 1.1rem;
+        text-align: center;
+    }
+</style>
+
+<h2>🌱 Plant Your Effort</h2>
+
+<!-- Daily Affirmation -->
+{% if affirmation %}
+<div class="affirmation-box">
+    "{{ affirmation }}"
+</div>
+{% endif %}
+
+<!-- Reflection Prompt -->
+{% if prompt %}
+<div class="prompt-box">
+    <strong>Today's Reflection:</strong> {{ prompt }}
+</div>
+{% endif %}
+
+<form method="POST" action="">
+    {{ form.hidden_tag() }}
+
+    <!-- Name Field - Make it more meaningful -->
+    <div class="form-group mb-3">
+        <label style="font-size: 1.2rem; font-weight: bold; color: #2c6f4f;">
+            What are you celebrating? ✨
+        </label>
+        {{ form.name(class="form-control", 
+                    placeholder="e.g., Made breakfast, Called daughter, Took medication, Went for walk") }}
+        <small class="form-text text-muted">Every effort counts, no matter how small</small>
+    </div>
+
+    <!-- Vegetable Type -->
+    <div class="form-group mb-3">
+        <label style="font-size: 1.2rem; font-weight: bold; color: #2c6f4f;">
+            Choose Your Plant 🌿
+        </label>
+        {{ form.type(class="form-control form-select") }}
+    </div>
+
+    <!-- NEW: Intention Selection -->
+    <div class="form-group mb-3">
+        <label style="font-size: 1.2rem; font-weight: bold; color: #2c6f4f;">
+            What does this represent? (Optional)
+        </label>
+        <div>
+            {% for value, label in form.intention.choices %}
+            <div class="radio-card">
+                <input type="radio" 
+                       name="intention" 
+                       id="intention_{{ value }}" 
+                       value="{{ value }}"
+                       style="width: 20px; height: 20px; margin-right: 10px;">
+                <label for="intention_{{ value }}" style="font-size: 1.1rem; cursor: pointer;">
+                    {{ label }}
+                </label>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- NEW: Mood Check -->
+    <div class="form-group mb-3">
+        <label style="font-size: 1.2rem; font-weight: bold; color: #2c6f4f;">
+            How are you feeling? (Optional)
+        </label>
+        <div class="d-flex justify-content-between">
+            {% for value, label in form.mood.choices %}
+            <div class="text-center">
+                <input type="radio" 
+                       name="mood" 
+                       id="mood_{{ value }}" 
+                       value="{{ value }}"
+                       style="display: none;">
+                <label for="mood_{{ value }}" 
+                       style="font-size: 2rem; cursor: pointer; padding: 10px;">
+                    {{ label.split()[0] }}<br>
+                    <small style="font-size: 0.9rem;">{{ label.split()[1] }}</small>
+                </label>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Note Field -->
+    <div class="form-group mb-3">
+        <label style="font-size: 1.2rem; font-weight: bold; color: #2c6f4f;">
+            Add a Note (Optional)
+        </label>
+        {{ form.note(class="form-control", rows=3, 
+                    placeholder="Any thoughts you'd like to remember...") }}
+    </div>
+
+    <!-- Submit and Navigation -->
+    <div class="form-group">
+        {{ form.submit(class="btn btn-success btn-lg", style="font-size: 1.3rem; padding: 15px 30px;") }}
+    </div>
+</form>
+
+<!-- Quick Links -->
+<div class="mt-4">
+    <div class="row">
+        <div class="col-md-4">
+            <a href="{{ url_for('planting.wellness_dashboard') }}" class="btn btn-outline-info w-100">
+                📊 View Dashboard
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a href="{{ url_for('planting.all_vegetables', id=current_user.id) }}" class="btn btn-outline-success w-100">
+                🌾 Your Garden
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a href="{{ url_for('planting.glory_hall') }}" class="btn btn-outline-warning w-100">
+                🏆 Achievements
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Make mood selection more interactive
+    document.querySelectorAll('input[name="mood"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            // Reset all
+            document.querySelectorAll('label[for^="mood_"]').forEach(label => {
+                label.style.transform = 'scale(1)';
+                label.style.opacity = '0.7';
+            });
+            // Highlight selected
+            if (this.checked) {
+                const label = document.querySelector(`label[for="${this.id}"]`);
+                label.style.transform = 'scale(1.2)';
+                label.style.opacity = '1';
+            }
+        });
+    });
+
+    // Make intention cards interactive
+    document.querySelectorAll('.radio-card').forEach(card => {
+        card.addEventListener('click', function() {
+            const radio = this.querySelector('input[type="radio"]');
+            radio.checked = true;
+            
+            // Reset all cards
+            document.querySelectorAll('.radio-card').forEach(c => {
+                c.style.backgroundColor = 'white';
+                c.style.borderColor = '#e8f5e9';
+            });
+            
+            // Highlight selected
+            this.style.backgroundColor = '#e8f5e9';
+            this.style.borderColor = '#4a7c59';
+        });
+    });
+</script>
+{% endblock %}

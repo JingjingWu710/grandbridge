@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+{% block content %}
+<h1>Event</h1>
+<form action="{{ url_for('calendar.delete_google_event', event_id=event_id) }}" method="post" style="display: inline;">
+    <button type="submit" class="btn btn-danger mb-3" onclick="return confirm('Are you sure you want to delete this event?');">
+        Delete the Event
+    </button>
+</form>
+<a href="{{ url_for('calendar.edit_google_event', event_id=event_id) }}" class="btn btn-primary">Edit the Event</a>
+
+<ul>
+  <li>
+    <strong>{{ title }}</strong>
+    <p>{{ date }}</p>
+    ({{ start_time }} - {{
+    end_time }})<br />
+    Location: {{ location }}<br />
+    {{ meet_link }}
+  </li>
+</ul>
+
+{% endblock %}

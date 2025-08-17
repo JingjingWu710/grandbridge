@@ -1,0 +1,229 @@
+{% extends "layout.html" %}
+{% block content %}
+<style>
+    .garden-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .garden-header {
+        text-align: center;
+        background: linear-gradient(135deg, #4a7c59, #2c6f4f);
+        color: white;
+        padding: 40px;
+        border-radius: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .garden-stats {
+        display: flex;
+        justify-content: center;
+        gap: 40px;
+        margin-top: 20px;
+    }
+    
+    .stat {
+        text-align: center;
+    }
+    
+    .stat-number {
+        font-size: 2rem;
+        font-weight: bold;
+    }
+    
+    .stat-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+    
+    .vegetables-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 25px;
+        margin: 30px 0;
+    }
+    
+    .veg-card {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        transition: transform 0.3s, box-shadow 0.3s;
+        cursor: pointer;
+        text-align: center;
+    }
+    
+    .veg-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+    }
+    
+    .veg-card.growing {
+        background: linear-gradient(135deg, #fff3e0, #ffecb3);
+        border: 2px solid #ffa726;
+    }
+    
+    .veg-card.harvested {
+        background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+        border: 2px solid #4caf50;
+    }
+    
+    .veg-image {
+        width: 100px;
+        height: 100px;
+        object-fit: contain;
+        margin: 0 auto 15px;
+    }
+    
+    .veg-name {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #2c6f4f;
+        margin-bottom: 5px;
+    }
+    
+    .veg-type {
+        color: #666;
+        margin-bottom: 10px;
+    }
+    
+    .veg-status {
+        display: inline-block;
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: bold;
+        margin-top: 10px;
+    }
+    
+    .status-growing {
+        background: #fff3e0;
+        color: #f57c00;
+    }
+    
+    .status-harvested {
+        background: #e8f5e9;
+        color: #2e7d32;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        background: #f5f5f5;
+        border-radius: 20px;
+        margin: 40px 0;
+    }
+    
+    .empty-icon {
+        font-size: 4rem;
+        margin-bottom: 20px;
+    }
+</style>
+
+<div class="garden-container">
+    <div class="garden-header">
+        <h1 style="font-size: 2.5rem; margin-bottom: 10px;">
+            🌻 Your Garden
+        </h1>
+        <p style="font-size: 1.2rem; opacity: 0.9;">
+            Every plant represents a moment of mindfulness
+        </p>
+        
+        <div class="garden-stats">
+            <div class="stat">
+                <div class="stat-number">{{ veg|length }}</div>
+                <div class="stat-label">Total Plants</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">{{ veg|selectattr('harvested')|list|length }}</div>
+                <div class="stat-label">Harvested</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">{{ veg|rejectattr('harvested')|list|length }}</div>
+                <div class="stat-label">Growing</div>
+            </div>
+        </div>
+    </div>
+    
+    {% if veg %}
+    <div class="vegetables-grid">
+        {% for vegetable in veg|sort(attribute='plant_time', reverse=True) %}
+<div class="veg-card {{ 'harvested' if vegetable.harvested else 'growing' }}"
+     onclick="window.location.href='{{ url_for('planting.view_vegetable', veg_id=vegetable.id) }}'">
+    
+    <img src="{{ url_for('static', filename=vegetable.harvest_image if vegetable.harvested else (vegetable.sprout_image if vegetable.stage == 'sprout' else vegetable.seed_image)) }}" 
+         alt="{{ vegetable.type }}"
+         class="veg-image">
+    
+    <div class="veg-name">{{ vegetable.name }}</div>
+    <div class="veg-type">{{ vegetable.type|capitalize }}</div>
+    
+    <div style="font-size: 0.9rem; color: #999; margin: 10px 0;">
+        Planted {{ vegetable.plant_time.strftime('%b %d, %Y') }}
+    </div>
+    
+    <!-- Add Mood Display -->
+    {% if vegetable.mood_before or vegetable.mood_after %}
+    <div style="margin: 10px 0; padding: 10px; background: #f5f5f5; border-radius: 10px;">
+        {% set mood_emojis = {1: '😔', 2: '😟', 3: '😐', 4: '🙂', 5: '😊'} %}
+        {% if vegetable.mood_before and vegetable.mood_after %}
+            <div style="font-size: 1.2rem;">
+                {{ mood_emojis[vegetable.mood_before] }} → {{ mood_emojis[vegetable.mood_after] }}
+            </div>
+            {% if vegetable.mood_after > vegetable.mood_before %}
+                <small style="color: #4caf50;">Mood improved!</small>
+            {% elif vegetable.mood_after == vegetable.mood_before %}
+                <small style="color: #666;">Steady mood</small>
+            {% else %}
+                <small style="color: #ff9800;">Challenging day</small>
+            {% endif %}
+        {% elif vegetable.mood_before %}
+            <div style="font-size: 1.2rem;">
+                Mood: {{ mood_emojis[vegetable.mood_before] }}
+            </div>
+        {% endif %}
+    </div>
+    {% endif %}
+    
+    {% if vegetable.harvested %}
+        <div class="veg-status status-harvested">
+            🌾 Harvested
+        </div>
+    {% else %}
+        <div class="veg-status status-growing">
+            🌱 Growing - Click to Continue
+        </div>
+    {% endif %}
+    
+    {% if vegetable.note %}
+    <div style="margin-top: 10px; font-style: italic; color: #666; font-size: 0.9rem;">
+        "{{ vegetable.note[:50] }}{% if vegetable.note|length > 50 %}...{% endif %}"
+    </div>
+    {% endif %}
+</div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">🌱</div>
+        <h2 style="color: #2c6f4f; margin-bottom: 10px;">Your Garden is Empty</h2>
+        <p style="font-size: 1.2rem; color: #666; margin-bottom: 20px;">
+            Start your mindfulness journey by planting your first seed
+        </p>
+        <a href="{{ url_for('planting.plant') }}" class="btn btn-success btn-lg">
+            🌱 Plant Your First Seed
+        </a>
+    </div>
+    {% endif %}
+    
+    <div style="text-align: center; margin-top: 40px;">
+        <a href="{{ url_for('planting.plant') }}" class="btn btn-success btn-lg">
+            🌱 Plant New Seed
+        </a>
+        <a href="{{ url_for('planting.wellness_dashboard') }}" class="btn btn-info btn-lg">
+            📊 Wellness Dashboard
+        </a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,28 @@
+{% extends "layout.html" %} 
+{% block content %}
+<h2>🏆 Glory Hall</h2>
+<div class="row">
+  {% if achievements %}
+  {% for a in achievements %}
+    <div class="col-md-4 mb-4">
+      <div class="card h-100">
+        <div class="card-body">
+          <img
+            src="{{ url_for('static', filename='pics/medal.png') }}"
+            class="img-fluid icon"
+            alt="{{ a.name }}"
+          />
+          <h5 class="card-title"><strong>{{ a.name }}</strong></h5>
+          <h6 class="card-subtitle mb-2 text-muted">
+            ({{ a.date_earned.date() }})
+          </h6>
+          <p class="card-text">{{ a.description }}</p>
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+  {% else %}
+  <p>You don't have any achievements yet. Plant more vegetables to get achievements!</p>
+  {% endif %}
+</div>
+{% endblock %}

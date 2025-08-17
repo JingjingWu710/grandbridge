@@ -1,0 +1,334 @@
+{% extends "layout.html" %} 
+{% block content %}
+
+<style>
+  /* Elder-friendly styling */
+  .btn {
+    font-size: 1.1rem;
+    padding: 10px 20px;
+    transition: all 0.3s;
+  }
+  
+  .btn:hover {
+    transform: scale(1.05);
+  }
+  
+  .card {
+    border-radius: 15px;
+    transition: all 0.3s;
+  }
+  
+  .card:hover {
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+  }
+  
+  .card-header {
+    border-radius: 15px 15px 0 0 !important;
+    padding: 15px 20px;
+  }
+  
+  .card-title {
+    font-size: 1.3rem;
+  }
+  
+  h1 {
+    font-size: 2.5rem;
+    color: #2c6f4f;
+  }
+  
+  h6 {
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+  }
+  
+  p {
+    font-size: 1.1rem;
+    line-height: 1.6;
+  }
+  
+  .participant-badge {
+    padding: 8px 12px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #e8f5e9, #f1f8e9);
+    transition: all 0.3s;
+  }
+  
+  .participant-badge:hover {
+    background: linear-gradient(135deg, #c8e6c9, #dcedc8);
+    transform: translateY(-2px);
+  }
+  
+  .info-icon {
+    color: #4a7c59;
+    margin-right: 8px;
+  }
+  
+  .action-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: flex-end;
+  }
+  
+  @media (max-width: 768px) {
+    .action-buttons {
+      justify-content: center;
+    }
+    
+    h1 {
+      font-size: 2rem;
+    }
+  }
+</style>
+
+<div class="container mt-4">
+  <!-- Event Header -->
+  <div class="row mb-4">
+    <div class="col-md-8">
+      <h1 class="mb-2">
+        <i class="fas fa-calendar-check info-icon"></i>{{ event.title }}
+      </h1>
+      <p class="text-muted lead">Event Details</p>
+    </div>
+    <div class="col-md-4">
+      <div class="action-buttons">
+        <!-- Participation Button (for eligible users) -->
+        {% if current_user.is_authenticated and event.can_participate(current_user) %}
+          <form action="{{ url_for('chatroom.toggle_participation', id=event.id) }}" method="POST" class="d-inline">
+            {% if event.is_participant(current_user) %}
+              <button type="submit" class="btn btn-warning">
+                <i class="fas fa-user-minus"></i> Leave Event
+              </button>
+            {% else %}
+              <button type="submit" class="btn btn-success">
+                <i class="fas fa-user-plus"></i> Participate
+              </button>
+            {% endif %}
+          </form>
+          
+          {% if event.is_participant(current_user) %}
+            <a href="{{ url_for('chatroom.event_chat', id=event.id) }}" class="btn btn-info">
+              <i class="fas fa-comments"></i> Chat Room
+            </a>
+          {% endif %}
+        {% endif %}
+        
+        {% if current_user.is_admin %}
+          <div class="btn-group" role="group">
+            <a href="{{ url_for('calendar.new_event') }}" class="btn btn-outline-success">
+              <i class="fas fa-plus"></i> New
+            </a>
+            <a href="{{ url_for('calendar.edit_event', id=event.id) }}" class="btn btn-outline-primary">
+              <i class="fas fa-edit"></i> Edit
+            </a>
+            <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+              <i class="fas fa-trash"></i> Delete
+            </button>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Event Information Cards -->
+  <div class="row">
+    <!-- Main Event Details -->
+    <div class="col-lg-8 mb-4">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+          <h5 class="card-title mb-0">
+            <i class="fas fa-info-circle"></i> Event Information
+          </h5>
+        </div>
+        <div class="card-body">
+          <div class="row mb-3">
+            <div class="col-sm-6">
+              <div class="p-3 bg-light rounded">
+                <h6 class="text-primary">
+                  <i class="fas fa-play-circle info-icon"></i>Start Time
+                </h6>
+                <p class="mb-0 fw-bold">{{ event.start.strftime('%B %d, %Y') }}</p>
+                <p class="mb-0">{{ event.start.strftime('%I:%M %p') }}</p>
+              </div>
+            </div>
+            <div class="col-sm-6">
+              <div class="p-3 bg-light rounded">
+                <h6 class="text-danger">
+                  <i class="fas fa-stop-circle info-icon"></i>End Time
+                </h6>
+                <p class="mb-0 fw-bold">{{ event.end.strftime('%B %d, %Y') }}</p>
+                <p class="mb-0">{{ event.end.strftime('%I:%M %p') }}</p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="p-3 bg-light rounded mb-3">
+            <h6 class="text-info">
+              <i class="fas fa-map-marker-alt info-icon"></i>Location
+            </h6>
+            <p class="mb-0 fw-bold">{{ event.location }}</p>
+          </div>
+          
+          {% if event.description %}
+          <div class="p-3 bg-light rounded mb-3">
+            <h6 class="text-info">
+              <i class="fas fa-align-left info-icon"></i>Description
+            </h6>
+            <p class="mb-0">{{ event.description }}</p>
+          </div>
+          {% endif %}
+          
+          <!-- Duration Calculation -->
+          <div class="p-3 bg-warning bg-opacity-10 rounded">
+            <h6 class="text-warning">
+              <i class="fas fa-hourglass-half info-icon"></i>Duration
+            </h6>
+            <p class="mb-0 fw-bold">
+              {% set duration = event.end - event.start %}
+              {% if duration.days > 0 %}
+                {{ duration.days }} day(s) and {{ (duration.seconds // 3600) }} hour(s)
+              {% else %}
+                {% if (duration.seconds // 3600) > 0 %}
+                  {{ (duration.seconds // 3600) }} hour(s) and {{ ((duration.seconds % 3600) // 60) }} minute(s)
+                {% else %}
+                  {{ ((duration.seconds % 3600) // 60) }} minute(s)
+                {% endif %}
+              {% endif %}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Participants Card -->
+      <div class="card shadow-sm mt-3">
+        <div class="card-header bg-success text-white">
+          <h5 class="card-title mb-0">
+            <i class="fas fa-users"></i> Participants ({{ event.participants.count() }})
+          </h5>
+        </div>
+        <div class="card-body">
+          {% if event.participants.count() > 0 %}
+            <div class="row">
+              {% for participant in event.participants.limit(12).all() %}
+              <div class="col-md-4 col-sm-6 mb-3">
+                <div class="participant-badge">
+                  <i class="fas fa-user-circle text-success me-2"></i>
+                  <span class="fw-bold">{{ participant.username }}</span>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+            {% if event.participants.count() > 12 %}
+              <div class="text-center mt-3">
+                <a href="{{ url_for('chatroom.event_participants', id=event.id) }}" class="btn btn-outline-success">
+                  <i class="fas fa-arrow-right"></i> View All {{ event.participants.count() }} Participants
+                </a>
+              </div>
+            {% endif %}
+          {% else %}
+            <div class="text-center py-4">
+              <i class="fas fa-user-friends fa-3x text-muted mb-3"></i>
+              <h5 class="text-muted">No participants yet</h5>
+              <p class="text-muted">Be the first to join this event!</p>
+              {% if current_user.is_authenticated and event.can_participate(current_user) and not event.is_participant(current_user) %}
+                <form action="{{ url_for('chatroom.toggle_participation', id=event.id) }}" method="POST" class="mt-3">
+                  <button type="submit" class="btn btn-success btn-lg">
+                    <i class="fas fa-user-plus"></i> Join Now
+                  </button>
+                </form>
+              {% endif %}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Family Information (Admin Only) -->
+    {% if current_user.is_admin %}
+    <div class="col-lg-4 mb-4">
+      <div class="card shadow-sm">
+        <div class="card-header bg-info text-white">
+          <h5 class="card-title mb-0">
+            <i class="fas fa-home"></i> Visible to Families
+          </h5>
+        </div>
+        <div class="card-body">
+          {% if event_families %}
+            {% for family in event_families %}
+            <div class="d-flex justify-content-between align-items-center mb-3 p-3 bg-light rounded">
+              <div>
+                <strong class="d-block mb-1" style="font-size: 1.1rem;">{{ family.name }}</strong>
+                <small class="text-muted">Family ID: {{ family.id }}</small>
+              </div>
+              <span class="badge bg-primary" style="font-size: 1rem; padding: 8px 12px;">
+                {{ family.members|length }} member(s)
+              </span>
+            </div>
+            {% endfor %}
+          {% else %}
+            <div class="text-center py-4">
+              <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+              <p class="mb-0 fw-bold">No families assigned</p>
+              <small class="text-muted">Add families to make this event visible</small>
+            </div>
+          {% endif %}
+        </div>
+        
+        {% if event_families %}
+        <div class="card-footer bg-light">
+          <small class="text-muted">
+            <i class="fas fa-info-circle"></i> 
+            Total families: <strong>{{ event_families|length }}</strong>
+          </small>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Back to Calendar Button -->
+  <div class="row mt-4">
+    <div class="col-12">
+      <a href="{{ url_for('calendar.calendar_view') }}" class="btn btn-outline-secondary btn-lg">
+        <i class="fas fa-arrow-left"></i> Back to Calendar
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title" id="deleteModalLabel">
+          <i class="fas fa-exclamation-triangle"></i> Delete Event
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="text-center mb-3">
+          <i class="fas fa-trash-alt fa-4x text-danger mb-3"></i>
+          <h5>Are you sure you want to delete this event?</h5>
+          <p class="text-muted mb-0">
+            "<strong>{{ event.title }}</strong>" will be permanently removed.
+            <br><span class="text-danger fw-bold">This action cannot be undone.</span>
+          </p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-lg" data-bs-dismiss="modal">
+          <i class="fas fa-times"></i> Cancel
+        </button>
+        <form action="{{ url_for('calendar.delete_event', id=event.id) }}" method="POST" class="d-inline">
+          <button type="submit" class="btn btn-danger btn-lg">
+            <i class="fas fa-trash"></i> Delete Event
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,412 @@
+{% extends "layout.html" %}
+{% block content %}
+<style>
+    .checkin-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .rating-group {
+        background: #f8f9fa;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 25px;
+        border: 2px solid #e8f5e9;
+    }
+    
+    .rating-label {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #2c6f4f;
+        margin-bottom: 15px;
+        display: block;
+    }
+    
+    .emoji-rating {
+        display: flex;
+        justify-content: space-between;
+        margin: 15px 0;
+    }
+    
+    .emoji-option {
+        text-align: center;
+        cursor: pointer;
+        padding: 10px;
+        border-radius: 10px;
+        transition: all 0.3s;
+        flex: 1;
+        margin: 0 5px;
+    }
+    
+    .emoji-option:hover {
+        background: #e8f5e9;
+        transform: scale(1.1);
+    }
+    
+    .emoji-option input[type="radio"] {
+        display: none;
+    }
+    
+    .emoji-option input[type="radio"]:checked + label {
+        background: #c8e6c9;
+        border-radius: 10px;
+        padding: 10px;
+    }
+    
+    .emoji-option label {
+        display: block;
+        font-size: 2.5rem;
+        cursor: pointer;
+        margin: 0;
+    }
+    
+    .emoji-option .emoji-text {
+        font-size: 0.9rem;
+        margin-top: 5px;
+        color: #666;
+    }
+    
+    .checkbox-group {
+        background: #fff3e0;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 25px;
+    }
+    
+    .checkbox-item {
+        display: flex;
+        align-items: center;
+        padding: 12px;
+        margin: 8px 0;
+        background: white;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-size: 1.1rem;
+    }
+    
+    .checkbox-item:hover {
+        transform: translateX(5px);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .checkbox-item input[type="checkbox"] {
+        width: 25px;
+        height: 25px;
+        margin-right: 15px;
+        cursor: pointer;
+    }
+    
+    .reflection-group {
+        background: #e3f2fd;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 25px;
+    }
+    
+    .reflection-input {
+        width: 100%;
+        padding: 15px;
+        font-size: 1.1rem;
+        border: 2px solid #bbdefb;
+        border-radius: 10px;
+        margin-top: 10px;
+    }
+    
+    .submit-section {
+        text-align: center;
+        margin-top: 30px;
+    }
+    
+    .progress-indicator {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 30px;
+    }
+    
+    .progress-step {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #e0e0e0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 10px;
+        font-weight: bold;
+        color: white;
+    }
+    
+    .progress-step.active {
+        background: #4a7c59;
+    }
+</style>
+
+<div class="checkin-container">
+    <h1 style="text-align: center; color: #2c6f4f; margin-bottom: 10px;">
+        🌅 Daily Check-In
+    </h1>
+    <p style="text-align: center; font-size: 1.2rem; color: #666; margin-bottom: 30px;">
+        Take 2 minutes to reflect on your day
+    </p>
+    
+    <!-- Progress Indicator -->
+    <div class="progress-indicator">
+        <div class="progress-step active">1</div>
+        <div class="progress-step active">2</div>
+        <div class="progress-step active">3</div>
+        <div class="progress-step active">4</div>
+    </div>
+    
+    <form method="POST" action="{{ url_for('planting.daily_checkin') }}">
+        
+        <!-- Energy Level -->
+        <div class="rating-group">
+            <label class="rating-label">⚡ How's your energy today?</label>
+            <div class="emoji-rating">
+                <div class="emoji-option">
+                    <input type="radio" name="energy_level" value="1" id="energy1" required>
+                    <label for="energy1">
+                        😴
+                        <div class="emoji-text">Exhausted</div>
+                    </label>
+                </div>
+                <div class="emoji-option">
+                    <input type="radio" name="energy_level" value="2" id="energy2">
+                    <label for="energy2">
+                        😓
+                        <div class="emoji-text">Tired</div>
+                    </label>
+                </div>
+                <div class="emoji-option">
+                    <input type="radio" name="energy_level" value="3" id="energy3" checked>
+                    <label for="energy3">
+                        😐
+                        <div class="emoji-text">Okay</div>
+                    </label>
+                </div>
+                <div class="emoji-option">
+                    <input type="radio" name="energy_level" value="4" id="energy4">
+                    <label for="energy4">
+                        🙂
+                        <div class="emoji-text">Good</div>
+                    </label>
+                </div>
+                <div class="emoji-option">
+                    <input type="radio" name="energy_level" value="5" id="energy5">
+                    <label for="energy5">
+                        💪
+                        <div class="emoji-text">Energized</div>
+                    </label>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mood -->
+        <div class="rating-group">
+            <label class="rating-label">💭 Overall mood?</label>
+            <div class="emoji-rating">
+                <div class="emoji-option">
+                    <input type="radio" name="mood_rating" value="1" id="mood1" required>
+                    <label for="mood1">
+                        😔
+                        <div class="emoji-text">Low</div>
+                    </label>
+                </div>
+                <div class="emoji-option">
+                    <input type="radio" name="mood_rating" value="2" id="mood2">
+                    <label for="mood2">
+                        😟
+                        <div class="emoji-text">Down</div>
+                    </label>
+                </div>
+                <div class="emoji-option">
+                    <input type="radio" name="mood_rating" value="3" id="mood3" checked>
+                    <label for="mood3">
+                        😐
+                        <div class="emoji-text">Neutral</div>
+                    </label>
+                </div>
+                <div class="emoji-option">
+                    <input type="radio" name="mood_rating" value="4" id="mood4">
+                    <label for="mood4">
+                        🙂
+                        <div class="emoji-text">Good</div>
+                    </label>
+                </div>
+                <div class="emoji-option">
+                    <input type="radio" name="mood_rating" value="5" id="mood5">
+                    <label for="mood5">
+                        😊
+                        <div class="emoji-text">Great</div>
+                    </label>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Stress Level -->
+        <div class="rating-group">
+            <label class="rating-label">😰 Stress level?</label>
+            <div class="emoji-rating">
+                <div class="emoji-option">
+                    <input type="radio" name="stress_level" value="1" id="stress1" required>
+                    <label for="stress1">
+                        😌
+                        <div class="emoji-text">Very Low</div>
+                    </label>
+                </div>
+                <div class="emoji-option">
+                    <input type="radio" name="stress_level" value="2" id="stress2">
+                    <label for="stress2">
+                        🙂
+                        <div class="emoji-text">Low</div>
+                    </label>
+                </div>
+                <div class="emoji-option">
+                    <input type="radio" name="stress_level" value="3" id="stress3" checked>
+                    <label for="stress3">
+                        😐
+                        <div class="emoji-text">Moderate</div>
+                    </label>
+                </div>
+                <div class="emoji-option">
+                    <input type="radio" name="stress_level" value="4" id="stress4">
+                    <label for="stress4">
+                        😟
+                        <div class="emoji-text">High</div>
+                    </label>
+                </div>
+                <div class="emoji-option">
+                    <input type="radio" name="stress_level" value="5" id="stress5">
+                    <label for="stress5">
+                        😰
+                        <div class="emoji-text">Very High</div>
+                    </label>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sleep Quality -->
+        <div class="rating-group">
+            <label class="rating-label">😴 How did you sleep last night?</label>
+            <div class="emoji-rating">
+                <div class="emoji-option">
+                    <input type="radio" name="sleep_quality" value="1" id="sleep1" required>
+                    <label for="sleep1">
+                        😫
+                        <div class="emoji-text">Terrible</div>
+                    </label>
+                </div>
+                <div class="emoji-option">
+                    <input type="radio" name="sleep_quality" value="2" id="sleep2">
+                    <label for="sleep2">
+                        😣
+                        <div class="emoji-text">Poor</div>
+                    </label>
+                </div>
+                <div class="emoji-option">
+                    <input type="radio" name="sleep_quality" value="3" id="sleep3" checked>
+                    <label for="sleep3">
+                        😐
+                        <div class="emoji-text">Okay</div>
+                    </label>
+                </div>
+                <div class="emoji-option">
+                    <input type="radio" name="sleep_quality" value="4" id="sleep4">
+                    <label for="sleep4">
+                        😊
+                        <div class="emoji-text">Good</div>
+                    </label>
+                </div>
+                <div class="emoji-option">
+                    <input type="radio" name="sleep_quality" value="5" id="sleep5">
+                    <label for="sleep5">
+                        🤗
+                        <div class="emoji-text">Excellent</div>
+                    </label>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Self-Care Actions -->
+        <div class="checkbox-group">
+            <label class="rating-label">✅ What did you do for yourself today?</label>
+            
+            <div class="checkbox-item">
+                <input type="checkbox" name="took_breaks" id="took_breaks" value="1">
+                <label for="took_breaks">⏸️ Took regular breaks</label>
+            </div>
+            
+            <div class="checkbox-item">
+                <input type="checkbox" name="ate_well" id="ate_well" value="1">
+                <label for="ate_well">🥗 Ate nutritious meals</label>
+            </div>
+            
+            <div class="checkbox-item">
+                <input type="checkbox" name="connected_with_others" id="connected" value="1">
+                <label for="connected">👥 Connected with someone</label>
+            </div>
+            
+            <div class="checkbox-item">
+                <input type="checkbox" name="did_something_enjoyable" id="enjoyable" value="1">
+                <label for="enjoyable">🎈 Did something enjoyable</label>
+            </div>
+        </div>
+        
+        <!-- Reflection Questions -->
+        <div class="reflection-group">
+            <label class="rating-label">💚 One thing you're grateful for (optional)</label>
+            <input type="text" 
+                   name="grateful_for" 
+                   class="reflection-input"
+                   placeholder="What brought you joy or comfort today?"
+                   maxlength="255">
+            
+            <label class="rating-label" style="margin-top: 20px;">
+                🎯 Biggest challenge today (optional)
+            </label>
+            <input type="text" 
+                   name="biggest_challenge" 
+                   class="reflection-input"
+                   placeholder="What was difficult? It's okay to acknowledge struggles."
+                   maxlength="255">
+        </div>
+        
+        <!-- Submit -->
+        <div class="submit-section">
+            <button type="submit" class="btn btn-success btn-lg" 
+                    style="font-size: 1.3rem; padding: 15px 40px;">
+                Complete Check-In & Earn 3 Coins
+            </button>
+            <p style="margin-top: 15px; color: #666;">
+                This takes less than 2 minutes and helps track your wellbeing
+            </p>
+        </div>
+    </form>
+</div>
+
+<script>
+    // Make the form more interactive
+    document.querySelectorAll('.emoji-option input').forEach(input => {
+        input.addEventListener('change', function() {
+            // Add visual feedback
+            this.closest('.emoji-rating').querySelectorAll('.emoji-option').forEach(opt => {
+                opt.style.transform = 'scale(1)';
+            });
+            this.closest('.emoji-option').style.transform = 'scale(1.1)';
+        });
+    });
+    
+    // Checkbox feedback
+    document.querySelectorAll('.checkbox-item input').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            if (this.checked) {
+                this.closest('.checkbox-item').style.background = '#c8e6c9';
+            } else {
+                this.closest('.checkbox-item').style.background = 'white';
+            }
+        });
+    });
+</script>
+{% endblock %}

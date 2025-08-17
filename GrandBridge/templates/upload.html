@@ -1,0 +1,9 @@
+{% extends "layout.html" %}
+{% block content %}
+<h2>Upload Your Memories</h2>
+<form method="POST" enctype="multipart/form-data">
+  <input type="file" name="file[]" multiple><br><br>
+  <textarea name="text" placeholder="Write a journal entry..."></textarea><br><br>
+  <button type="submit" class="btn btn-primary">Upload</button>
+</form>
+{% endblock %}

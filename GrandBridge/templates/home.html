@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 intro">
+        <p>Here, you can lighten your parenting burden...</p>
+    </div>
+    <div class="col-lg-4 button">
+        <span>Do you wanna have a try?</span>
+        <a class="btn btn-light create" href="{{ url_for('users.register') }}">Create An Account</a>
+    </div>
+    <div>
+                <img class="ts_icon icon" src="../static/pics/timetable.png">
+                <p class="title">Calendar</p>
+                <p class="content">Check your community events and allowance date.</p>
+            </div>
+            <div>
+                <img class="wd_icon icon" src="../static/pics/plant.png">
+                <p class="title">Plant</p>
+                <p class="content">Plant your vegetables and relax.</p>
+            </div>
+            <div>
+                <img class="e_icon icon" src="../static/pics/diet.png">
+                <p class="title">Free Food</p>
+                <p class="content">Hightlight the free food picking places.
+                </p>
+            </div>
+</div>
+{% endblock %}

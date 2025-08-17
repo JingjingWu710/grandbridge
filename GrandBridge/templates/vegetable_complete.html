@@ -1,0 +1,120 @@
+{% extends "layout.html" %}
+{% block content %}
+<style>
+    .complete-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 40px 20px;
+        text-align: center;
+    }
+    
+    .harvest-card {
+        background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        margin: 30px 0;
+    }
+    
+    .plant-image {
+        width: 200px;
+        height: 200px;
+        object-fit: contain;
+        margin: 20px auto;
+        border: 3px solid #4a7c59;
+        border-radius: 15px;
+        padding: 20px;
+        background: white;
+    }
+    
+    .harvest-info {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        margin: 20px 0;
+    }
+    
+    .stat-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid #e0e0e0;
+    }
+    
+    .stat-row:last-child {
+        border-bottom: none;
+    }
+</style>
+
+<div class="complete-container">
+    <div class="harvest-card">
+        <h1 style="color: #2c6f4f; font-size: 2.5rem;">
+            🌾 {{ veg.name }}
+        </h1>
+        <p style="font-size: 1.3rem; color: #666;">
+            {{ veg.type|capitalize }} - Harvested
+        </p>
+        
+        <img src="{{ url_for('static', filename=veg.harvest_image) }}" 
+             alt="{{ veg.type }}" 
+             class="plant-image">
+        
+<div class="harvest-info">
+    <div class="stat-row">
+        <span><strong>Planted:</strong></span>
+        <span>{{ veg.plant_time.strftime('%B %d, %Y at %I:%M %p') }}</span>
+    </div>
+    <div class="stat-row">
+        <span><strong>Harvested:</strong></span>
+        <span>{{ veg.harvest_completed_at.strftime('%B %d, %Y at %I:%M %p') if veg.harvest_completed_at else 'Unknown' }}</span>
+    </div>
+
+    
+    <!-- Add Mood Journey -->
+    {% if veg.mood_before or veg.mood_after %}
+    <div class="stat-row">
+        <span><strong>Mood Journey:</strong></span>
+        <span>
+            {% set mood_emojis = {1: '😔', 2: '😟', 3: '😐', 4: '🙂', 5: '😊'} %}
+            {% if veg.mood_before %}{{ mood_emojis[veg.mood_before] }}{% else %}?{% endif %}
+            →
+            {% if veg.mood_after %}{{ mood_emojis[veg.mood_after] }}{% else %}?{% endif %}
+            {% if veg.mood_before and veg.mood_after %}
+                {% if veg.mood_after > veg.mood_before %}
+                    <span style="color: #4caf50;">(+{{ veg.mood_after - veg.mood_before }})</span>
+                {% elif veg.mood_after < veg.mood_before %}
+                    <span style="color: #ff9800;">({{ veg.mood_after - veg.mood_before }})</span>
+                {% endif %}
+            {% endif %}
+        </span>
+    </div>
+    {% endif %}
+    
+    {% if veg.note %}
+    <div class="stat-row">
+        <span><strong>Note:</strong></span>
+        <span>{{ veg.note }}</span>
+    </div>
+    {% endif %}
+    {% if veg.intention %}
+    <div class="stat-row">
+        <span><strong>Intention:</strong></span>
+        <span>{{ veg.intention }}</span>
+    </div>
+    {% endif %}
+</div>
+        
+        <div style="margin-top: 30px;">
+            <a href="{{ url_for('planting.plant') }}" class="btn btn-success btn-lg">
+                🌱 Plant Another
+            </a>
+            <a href="{{ url_for('planting.all_vegetables', id=current_user.id) }}" class="btn btn-primary btn-lg">
+                🌾 View Garden
+            </a>
+            <a href="{{ url_for('planting.wellness_dashboard') }}" class="btn btn-info btn-lg">
+                📊 Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
