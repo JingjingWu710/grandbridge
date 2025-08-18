@@ -1,14 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Community Food Sharing Map</title>
+{% extends "layout.html" %}
+{% block content %}
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 0;
-            padding: 20px;
             background: linear-gradient(135deg, #e8f5e9, #fff3e0);
         }
         
@@ -311,7 +306,8 @@
             🍽️ Community Food Sharing Map
         </h2>
         
-        <!-- Admin Panel -->
+        <!-- Admin Panel - Only visible to admins -->
+        {% if current_user.is_admin %}
         <div class="admin-panel" id="admin-panel" style="display: none;">
             <h3 style="color: #f57c00;">📍 Admin Controls</h3>
             <p style="font-size: 1.1rem;">Add new food pickup locations for the community</p>
@@ -350,6 +346,7 @@
                 🔄 Clear Form
             </button>
         </div>
+        {% endif %}
         
         <!-- User Search Section -->
         <div class="search-section">
@@ -435,9 +432,11 @@
                     <button type="button" class="btn-custom btn-primary-custom" onclick="getDirections()">
                         🧭 Get Directions
                     </button>
-                    <button type="button" id="delete-btn" class="btn-custom btn-danger-custom" onclick="deleteCurrentLocation()" style="display: none;">
+                    {% if current_user.is_admin %}
+                    <button type="button" id="delete-btn" class="btn-custom btn-danger-custom" onclick="deleteCurrentLocation()">
                         🗑️ Delete Location
                     </button>
+                    {% endif %}
                     <button type="button" class="btn-custom btn-secondary-custom" onclick="closeModal()">
                         Close
                     </button>
@@ -445,17 +444,19 @@
             </div>
         </div>
     </div>
-
-    <!-- Toggle Admin Button -->
+    
+    {% if current_user.is_admin %}
+    <!-- Toggle Admin Button - Only visible to admins -->
     <div style="position: fixed; bottom: 20px; right: 20px; z-index: 1000;">
         <button onclick="toggleAdminMode()" class="btn-custom btn-secondary-custom">
             🔧 Toggle Admin Mode
         </button>
     </div>
+    {% endif %}
 
     <script>
         // Global variables
-        let isAdmin = false;
+        let adminModeActive = false;
         let map;
         let markers = [];
         let userMarker = null;
@@ -467,31 +468,6 @@
         let adminAutocomplete = null;
         let userAutocomplete = null;
         let tempMarker = null;
-        
-        // Mock data for testing
-        const mockLocations = [
-            {
-                id: 1,
-                lat: 51.4816,
-                lng: -3.1791,
-                name: "Cardiff Central Food Hub",
-                address: "Cardiff Central, Cardiff CF10 1EP, UK"
-            },
-            {
-                id: 2,
-                lat: 51.4889,
-                lng: -3.1828,
-                name: "Cathays Community Center",
-                address: "Cathays Park, Cardiff CF10 3NQ, UK"
-            },
-            {
-                id: 3,
-                lat: 51.4769,
-                lng: -3.1681,
-                name: "Cardiff Bay Food Point",
-                address: "Cardiff Bay, Cardiff CF10 5AL, UK"
-            }
-        ];
         
         function initMap() {
             console.log('Initializing map...');
@@ -522,49 +498,45 @@
             // Initialize autocomplete after map is ready
             setupAutocomplete();
             
-            // Show admin panel if user is admin
-            if (isAdmin) {
-                document.getElementById('admin-panel').style.display = 'block';
-                document.getElementById('delete-btn').style.display = 'inline-block';
-            }
-            
-            // Load existing locations
+            // Load existing locations from database
             loadLocations();
         }
         
         function setupAutocomplete() {
             console.log('Setting up autocomplete...');
             
-            // Setup admin autocomplete
-            const adminSearchBox = document.getElementById('admin-search-box');
-            if (adminSearchBox) {
-                adminAutocomplete = new google.maps.places.Autocomplete(adminSearchBox, {
-                    types: ['establishment', 'geocode'],
-                    componentRestrictions: { country: 'gb' },
-                    fields: ['name', 'geometry', 'formatted_address', 'place_id']
-                });
-                
-                adminAutocomplete.addListener('place_changed', function() {
-                    const place = adminAutocomplete.getPlace();
-                    console.log('Admin place selected:', place);
+            // Setup admin autocomplete only if user is admin
+            if (isAdmin) {
+                const adminSearchBox = document.getElementById('admin-search-box');
+                if (adminSearchBox) {
+                    adminAutocomplete = new google.maps.places.Autocomplete(adminSearchBox, {
+                        types: ['establishment', 'geocode'],
+                        componentRestrictions: { country: 'gb' },
+                        fields: ['name', 'geometry', 'formatted_address', 'place_id']
+                    });
                     
-                    if (place.geometry) {
-                        selectedPlace = place;
+                    adminAutocomplete.addListener('place_changed', function() {
+                        const place = adminAutocomplete.getPlace();
+                        console.log('Admin place selected:', place);
                         
-                        // Center map on selected place
-                        map.setCenter(place.geometry.location);
-                        map.setZoom(15);
-                        
-                        // Auto-fill address field
-                        const addressField = document.getElementById('location-address');
-                        if (addressField) {
-                            addressField.value = place.formatted_address || '';
+                        if (place.geometry) {
+                            selectedPlace = place;
+                            
+                            // Center map on selected place
+                            map.setCenter(place.geometry.location);
+                            map.setZoom(15);
+                            
+                            // Auto-fill address field
+                            const addressField = document.getElementById('location-address');
+                            if (addressField) {
+                                addressField.value = place.formatted_address || '';
+                            }
+                            
+                            // Add temporary marker
+                            addTemporaryMarker(place.geometry.location);
                         }
-                        
-                        // Add temporary marker
-                        addTemporaryMarker(place.geometry.location);
-                    }
-                });
+                    });
+                }
             }
             
             // Setup user autocomplete
@@ -614,15 +586,26 @@
         }
         
         function loadLocations() {
-            console.log('Loading locations...');
+            console.log('Loading locations from database...');
             
-            // Simulate API response with mock data
-            setTimeout(() => {
-                allLocations = mockLocations;
-                updateLocationCount(allLocations.length);
-                displayMarkers(allLocations);
-                displayLocationCards(allLocations);
-            }, 100);
+            // Fetch locations from the actual database
+            fetch('/foodmap/get_locations')
+                .then(response => response.json())
+                .then(data => {
+                    if (Array.isArray(data)) {
+                        allLocations = data;
+                        updateLocationCount(allLocations.length);
+                        displayMarkers(allLocations);
+                        displayLocationCards(allLocations);
+                    } else {
+                        console.error('Invalid response format:', data);
+                        showNotification('Failed to load locations', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading locations:', error);
+                    showNotification('Failed to load locations', 'error');
+                });
         }
         
         function displayMarkers(locations) {
@@ -1070,30 +1053,16 @@
             }
             
             const newLocation = {
-                id: allLocations.length + 1,
                 lat: selectedPlace.geometry.location.lat(),
                 lng: selectedPlace.geometry.location.lng(),
                 name: nameInput.value.trim(),
                 address: addressInput.value || selectedPlace.formatted_address
             };
             
-            // Add to local array
-            allLocations.push(newLocation);
-            updateLocationCount(allLocations.length);
-            displayMarkers(allLocations);
-            displayLocationCards(allLocations);
+            // Show loading
+            showNotification('Adding location...', 'info');
             
-            // Remove temporary marker
-            if (tempMarker) {
-                tempMarker.setMap(null);
-                tempMarker = null;
-            }
-            
-            showNotification('Location added successfully!', 'success');
-            clearAdminForm();
-            
-            // In production, you would make an API call here:
-            /*
+            // Save to database via API
             fetch('/foodmap/save_location', {
                 method: 'POST',
                 headers: {
@@ -1106,6 +1075,14 @@
                 if (data.status === 'success') {
                     showNotification('Location added successfully!', 'success');
                     clearAdminForm();
+                    
+                    // Remove temporary marker
+                    if (tempMarker) {
+                        tempMarker.setMap(null);
+                        tempMarker = null;
+                    }
+                    
+                    // Reload locations to show the new one
                     loadLocations();
                 } else {
                     showNotification('Failed to add location: ' + (data.message || 'Unknown error'), 'error');
@@ -1113,9 +1090,8 @@
             })
             .catch(error => {
                 console.error('Error:', error);
-                showNotification('Failed to add location.', 'error');
+                showNotification('Failed to add location. Please try again.', 'error');
             });
-            */
         }
         
         function clearAdminForm() {
@@ -1143,19 +1119,10 @@
             }
             
             if (confirm(`Are you sure you want to delete "${selectedLocation.name || 'this location'}"?`)) {
-                // Remove from local array
-                const index = allLocations.findIndex(loc => loc.id === selectedLocation.id);
-                if (index > -1) {
-                    allLocations.splice(index, 1);
-                    updateLocationCount(allLocations.length);
-                    displayMarkers(allLocations);
-                    displayLocationCards(allLocations);
-                    closeModal();
-                    showNotification('Location deleted successfully!', 'success');
-                }
+                // Show loading
+                showNotification('Deleting location...', 'info');
                 
-                // In production, make API call:
-                /*
+                // Delete from database via API
                 fetch(`/foodmap/delete_location/${selectedLocation.id}`, {
                     method: 'DELETE'
                 })
@@ -1164,6 +1131,7 @@
                     if (data.status === 'success') {
                         showNotification('Location deleted successfully!', 'success');
                         closeModal();
+                        // Reload locations to reflect the deletion
                         loadLocations();
                     } else {
                         showNotification('Failed to delete location: ' + (data.message || 'Unknown error'), 'error');
@@ -1171,21 +1139,23 @@
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    showNotification('Failed to delete location.', 'error');
+                    showNotification('Failed to delete location. Please try again.', 'error');
                 });
-                */
             }
         }
         
-        // Toggle admin mode for testing
+        // Toggle admin mode - only available to admins
         function toggleAdminMode() {
-            isAdmin = !isAdmin;
-            const adminPanel = document.getElementById('admin-panel');
-            const deleteBtn = document.getElementById('delete-btn');
+            if (!isAdmin) {
+                showNotification('Admin access required', 'error');
+                return;
+            }
             
-            if (isAdmin) {
+            adminModeActive = !adminModeActive;
+            const adminPanel = document.getElementById('admin-panel');
+            
+            if (adminModeActive) {
                 adminPanel.style.display = 'block';
-                deleteBtn.style.display = 'inline-block';
                 showNotification('Admin mode enabled', 'success');
                 
                 // Re-initialize autocomplete for admin if needed
@@ -1194,8 +1164,10 @@
                 }
             } else {
                 adminPanel.style.display = 'none';
-                deleteBtn.style.display = 'none';
                 showNotification('Admin mode disabled', 'info');
+                
+                // Clear admin form when disabling admin mode
+                clearAdminForm();
             }
         }
         
@@ -1214,8 +1186,8 @@
                 closeModal();
             }
             
-            // Ctrl+Shift+A to toggle admin mode
-            if (e.ctrlKey && e.shiftKey && e.key === 'A') {
+            // Ctrl+Shift+A to toggle admin mode (only for admins)
+            if (e.ctrlKey && e.shiftKey && e.key === 'A' && isAdmin) {
                 toggleAdminMode();
             }
         });
@@ -1245,9 +1217,5 @@
         };
     </script>
 
-    <!-- Load Google Maps API with Places library -->
-    <script async defer
-        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCUKJIAmALGcpZrebh-4YqFZY6Ns8pZJxM&libraries=places&callback=initMap">
-    </script>
 </body>
-</html>
+{% endblock %}

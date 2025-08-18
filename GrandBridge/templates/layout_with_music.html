@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>GrandBridge - Connecting Generations</title>
     
+     <script>
+    // Set global isAdmin variable for the map.js to use
+        let isAdmin = {{ 'true' if current_user.is_admin else 'false' }};
+    </script>
+    <script src="{{ config.GOOGLE_MAPS_API }}" async defer></script>
+
     <!-- Font Awesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -480,7 +486,7 @@
       player.src = tracks[currentTrack];
       player.play();
     });
-    
+
     async function loadPage(url) {
       try {
         const response = await fetch(url, {
