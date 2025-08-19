@@ -1,9 +1,646 @@
 {% extends "layout.html" %}
 {% block content %}
-<h2>Upload Your Memories</h2>
-<form method="POST" enctype="multipart/form-data">
-  <input type="file" name="file[]" multiple><br><br>
-  <textarea name="text" placeholder="Write a journal entry..."></textarea><br><br>
-  <button type="submit" class="btn btn-primary">Upload</button>
-</form>
+<style>
+    /* Upload Page Styling */
+    .upload-header {
+        background: linear-gradient(135deg, #fff3e0, #fce4ec, #e8f5e9);
+        padding: 40px;
+        border-radius: 20px;
+        margin-bottom: 30px;
+        text-align: center;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .upload-header::before {
+        content: '✨';
+        position: absolute;
+        font-size: 100px;
+        opacity: 0.1;
+        top: -20px;
+        left: 20px;
+        animation: float 6s ease-in-out infinite;
+    }
+    
+    .upload-header::after {
+        content: '📸';
+        position: absolute;
+        font-size: 100px;
+        opacity: 0.1;
+        bottom: -20px;
+        right: 20px;
+        animation: float 6s ease-in-out infinite reverse;
+    }
+    
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-20px); }
+    }
+    
+    .upload-title {
+        font-size: 2.8rem;
+        color: #2c6f4f;
+        margin: 0;
+        font-family: 'Georgia', serif;
+        font-weight: 600;
+    }
+    
+    .upload-subtitle {
+        font-size: 1.4rem;
+        color: #666;
+        margin-top: 10px;
+        font-style: italic;
+    }
+    
+    /* Breadcrumb */
+    .breadcrumb {
+        font-size: 1.2rem;
+        margin-bottom: 20px;
+        padding: 15px;
+        background: white;
+        border-radius: 10px;
+    }
+    
+    .breadcrumb a {
+        color: #4a7c59;
+        text-decoration: none;
+        font-weight: 500;
+    }
+    
+    .breadcrumb a:hover {
+        text-decoration: underline;
+    }
+    
+    /* Upload Form Container */
+    .upload-container {
+        background: white;
+        padding: 40px;
+        border-radius: 20px;
+        box-shadow: 0 6px 30px rgba(0,0,0,0.08);
+        max-width: 900px;
+        margin: 0 auto;
+    }
+    
+    /* File Upload Area */
+    .file-upload-area {
+        background: linear-gradient(135deg, #f8fffe, #f0f9ff);
+        border: 3px dashed #4a7c59;
+        border-radius: 20px;
+        padding: 60px 30px;
+        text-align: center;
+        margin-bottom: 30px;
+        position: relative;
+        transition: all 0.3s;
+        cursor: pointer;
+    }
+    
+    .file-upload-area:hover {
+        background: linear-gradient(135deg, #e8f5e9, #f0f9ff);
+        border-color: #2c6f4f;
+        transform: scale(1.02);
+    }
+    
+    .file-upload-area.dragover {
+        background: linear-gradient(135deg, #c8e6c9, #e1f5fe);
+        border-color: #2c6f4f;
+        border-width: 4px;
+    }
+    
+    .upload-icon {
+        font-size: 4rem;
+        margin-bottom: 20px;
+        animation: bounce 2s infinite;
+    }
+    
+    @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+    
+    .upload-main-text {
+        font-size: 1.8rem;
+        color: #2c6f4f;
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+    
+    .upload-sub-text {
+        font-size: 1.3rem;
+        color: #666;
+        margin-bottom: 20px;
+    }
+    
+    .file-input {
+        display: none;
+    }
+    
+    .upload-button {
+        background: linear-gradient(135deg, #4a7c59, #5a8d69);
+        color: white;
+        padding: 15px 35px;
+        border-radius: 50px;
+        font-size: 1.3rem;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .upload-button:hover {
+        background: linear-gradient(135deg, #5a8d69, #4a7c59);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(74, 124, 89, 0.3);
+    }
+    
+    /* File Preview Area */
+    .file-preview-container {
+        display: none;
+        margin-top: 30px;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 15px;
+    }
+    
+    .file-preview-title {
+        font-size: 1.5rem;
+        color: #2c6f4f;
+        margin-bottom: 20px;
+        font-weight: 600;
+    }
+    
+    .file-preview-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 20px;
+    }
+    
+    .file-preview-item {
+        position: relative;
+        background: white;
+        border-radius: 10px;
+        padding: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        transition: all 0.3s;
+    }
+    
+    .file-preview-item:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    }
+    
+    .file-preview-image {
+        width: 100%;
+        height: 120px;
+        object-fit: cover;
+        border-radius: 8px;
+        margin-bottom: 10px;
+    }
+    
+    .file-preview-name {
+        font-size: 0.9rem;
+        color: #333;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+    }
+    
+    .file-preview-size {
+        font-size: 0.8rem;
+        color: #999;
+    }
+    
+    .file-remove-btn {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        background: rgba(220, 53, 69, 0.9);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 25px;
+        height: 25px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    
+    .file-remove-btn:hover {
+        background: #dc3545;
+        transform: scale(1.1);
+    }
+    
+    /* Text Area Section */
+    .journal-section {
+        margin-top: 40px;
+    }
+    
+    .journal-label {
+        font-size: 1.6rem;
+        color: #2c6f4f;
+        font-weight: 600;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .journal-textarea {
+        width: 100%;
+        min-height: 250px;
+        padding: 20px;
+        font-size: 1.3rem;
+        line-height: 1.8;
+        border: 2px solid #e8f5e9;
+        border-radius: 15px;
+        resize: vertical;
+        font-family: 'Georgia', serif;
+        transition: all 0.3s;
+        background: #fafafa;
+    }
+    
+    .journal-textarea:focus {
+        outline: none;
+        border-color: #4a7c59;
+        background: white;
+        box-shadow: 0 0 0 3px rgba(74, 124, 89, 0.1);
+    }
+    
+    .journal-textarea::placeholder {
+        color: #999;
+        font-style: italic;
+    }
+    
+    /* Writing Prompts */
+    .writing-prompts {
+        margin-top: 15px;
+        padding: 20px;
+        background: linear-gradient(135deg, #fff3e0, #fff);
+        border-radius: 15px;
+        border-left: 4px solid #ffa726;
+    }
+    
+    .prompts-title {
+        font-size: 1.3rem;
+        color: #f57c00;
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+    
+    .prompt-item {
+        font-size: 1.1rem;
+        color: #666;
+        margin: 8px 0;
+        cursor: pointer;
+        transition: all 0.3s;
+        padding: 5px;
+    }
+    
+    .prompt-item:hover {
+        color: #f57c00;
+        transform: translateX(5px);
+    }
+    
+    /* Submit Section */
+    .submit-section {
+        margin-top: 40px;
+        text-align: center;
+        padding-top: 30px;
+        border-top: 2px solid #e8f5e9;
+    }
+    
+    .submit-btn {
+        background: linear-gradient(135deg, #4a7c59, #5a8d69);
+        color: white;
+        padding: 20px 50px;
+        border-radius: 50px;
+        font-size: 1.5rem;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: inline-flex;
+        align-items: center;
+        gap: 15px;
+        box-shadow: 0 4px 20px rgba(74, 124, 89, 0.3);
+    }
+    
+    .submit-btn:hover {
+        background: linear-gradient(135deg, #5a8d69, #4a7c59);
+        transform: translateY(-3px);
+        box-shadow: 0 6px 30px rgba(74, 124, 89, 0.4);
+    }
+    
+    .submit-btn:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+        transform: none;
+    }
+    
+    .cancel-link {
+        display: inline-block;
+        margin-left: 20px;
+        color: #666;
+        font-size: 1.2rem;
+        text-decoration: none;
+        padding: 20px 30px;
+        transition: all 0.3s;
+    }
+    
+    .cancel-link:hover {
+        color: #dc3545;
+        transform: translateX(-5px);
+    }
+    
+    /* Info Cards */
+    .info-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin: 30px 0;
+    }
+    
+    .info-card {
+        background: white;
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: 0 3px 15px rgba(0,0,0,0.05);
+        text-align: center;
+    }
+    
+    .info-card-icon {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+    }
+    
+    .info-card-title {
+        font-size: 1.3rem;
+        color: #2c6f4f;
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
+    
+    .info-card-text {
+        font-size: 1.1rem;
+        color: #666;
+    }
+    
+    /* Character counter */
+    .char-counter {
+        text-align: right;
+        margin-top: 10px;
+        font-size: 1.1rem;
+        color: #999;
+    }
+    
+    .char-counter.warning {
+        color: #f57c00;
+    }
+    
+    .char-counter.danger {
+        color: #dc3545;
+    }
+</style>
+
+<!-- Breadcrumb Navigation -->
+<div class="breadcrumb">
+    <a href="{{ url_for('memory.memories') }}">📚 Memory Wall</a> 
+    <span style="margin: 0 10px;">›</span>
+    <span style="color: #666;">Add New Memory</span>
+</div>
+
+<!-- Header -->
+<div class="upload-header">
+    <h1 class="upload-title">Create a New Memory</h1>
+    <p class="upload-subtitle">Capture moments that matter to you</p>
+</div>
+
+<!-- Info Cards -->
+<div class="info-cards">
+    <div class="info-card">
+        <div class="info-card-icon">📸</div>
+        <div class="info-card-title">Photos</div>
+        <div class="info-card-text">JPG, PNG, GIF up to 10MB</div>
+    </div>
+    <div class="info-card">
+        <div class="info-card-icon">🎥</div>
+        <div class="info-card-title">Videos</div>
+        <div class="info-card-text">MP4, MOV up to 50MB</div>
+    </div>
+    <div class="info-card">
+        <div class="info-card-icon">🎵</div>
+        <div class="info-card-title">Audio</div>
+        <div class="info-card-text">MP3, WAV up to 20MB</div>
+    </div>
+</div>
+
+<!-- Upload Form -->
+<div class="upload-container">
+    <form method="POST" enctype="multipart/form-data" id="uploadForm">
+        <!-- File Upload Area -->
+        <div class="file-upload-area" id="fileUploadArea">
+            <div class="upload-icon">📁</div>
+            <div class="upload-main-text">Drop your files here</div>
+            <div class="upload-sub-text">or click to browse</div>
+            <input type="file" name="file[]" multiple class="file-input" id="fileInput" 
+                   accept="image/*,video/*,audio/*">
+            <button type="button" class="upload-button" onclick="document.getElementById('fileInput').click()">
+                <span>📂</span> Choose Files
+            </button>
+            <div style="margin-top: 15px; font-size: 1.1rem; color: #999;">
+                You can select multiple files at once
+            </div>
+        </div>
+        
+        <!-- File Preview -->
+        <div class="file-preview-container" id="filePreviewContainer">
+            <div class="file-preview-title">
+                <span id="fileCount">0</span> file(s) selected
+            </div>
+            <div class="file-preview-grid" id="filePreviewGrid"></div>
+        </div>
+        
+        <!-- Journal Entry Section -->
+        <div class="journal-section">
+            <label class="journal-label">
+                <span>✍️</span> Write Your Story
+            </label>
+            <textarea name="text" 
+                      class="journal-textarea" 
+                      id="journalText"
+                      placeholder="What made this moment special? How did you feel? Who was with you? What do you want to remember about today?"></textarea>
+            <div class="char-counter" id="charCounter">0 / 5000 characters</div>
+            
+            <!-- Writing Prompts -->
+            <div class="writing-prompts">
+                <div class="prompts-title">💡 Need inspiration? Try these prompts:</div>
+                <div class="prompt-item" onclick="addPrompt('Today I am grateful for...')">
+                    • Today I am grateful for...
+                </div>
+                <div class="prompt-item" onclick="addPrompt('The best part of my day was...')">
+                    • The best part of my day was...
+                </div>
+                <div class="prompt-item" onclick="addPrompt('I want to remember this moment because...')">
+                    • I want to remember this moment because...
+                </div>
+                <div class="prompt-item" onclick="addPrompt('Something that made me smile today...')">
+                    • Something that made me smile today...
+                </div>
+            </div>
+        </div>
+        
+        <!-- Submit Section -->
+        <div class="submit-section">
+            <button type="submit" class="submit-btn" id="submitBtn">
+                <span style="font-size: 1.8rem;">💫</span> Save Memory
+            </button>
+            <a href="{{ url_for('memory.memories') }}" class="cancel-link">
+                Cancel
+            </a>
+        </div>
+    </form>
+</div>
+
+<script>
+    // File upload handling
+    const fileInput = document.getElementById('fileInput');
+    const fileUploadArea = document.getElementById('fileUploadArea');
+    const filePreviewContainer = document.getElementById('filePreviewContainer');
+    const filePreviewGrid = document.getElementById('filePreviewGrid');
+    const fileCount = document.getElementById('fileCount');
+    let selectedFiles = [];
+    
+    // Drag and drop
+    fileUploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        fileUploadArea.classList.add('dragover');
+    });
+    
+    fileUploadArea.addEventListener('dragleave', () => {
+        fileUploadArea.classList.remove('dragover');
+    });
+    
+    fileUploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        fileUploadArea.classList.remove('dragover');
+        handleFiles(e.dataTransfer.files);
+    });
+    
+    fileInput.addEventListener('change', (e) => {
+        handleFiles(e.target.files);
+    });
+    
+    function handleFiles(files) {
+        selectedFiles = Array.from(files);
+        displayFiles();
+    }
+    
+    function displayFiles() {
+        if (selectedFiles.length === 0) {
+            filePreviewContainer.style.display = 'none';
+            return;
+        }
+        
+        filePreviewContainer.style.display = 'block';
+        fileCount.textContent = selectedFiles.length;
+        filePreviewGrid.innerHTML = '';
+        
+        selectedFiles.forEach((file, index) => {
+            const item = document.createElement('div');
+            item.className = 'file-preview-item';
+            
+            // Create preview based on file type
+            let preview = '';
+            if (file.type.startsWith('image/')) {
+                const url = URL.createObjectURL(file);
+                preview = `<img src="${url}" class="file-preview-image" alt="${file.name}">`;
+            } else if (file.type.startsWith('video/')) {
+                preview = `<div class="file-preview-image" style="display: flex; align-items: center; justify-content: center; background: #f0f0f0;">
+                    <span style="font-size: 3rem;">🎥</span>
+                </div>`;
+            } else if (file.type.startsWith('audio/')) {
+                preview = `<div class="file-preview-image" style="display: flex; align-items: center; justify-content: center; background: #f0f0f0;">
+                    <span style="font-size: 3rem;">🎵</span>
+                </div>`;
+            }
+            
+            item.innerHTML = `
+                ${preview}
+                <div class="file-preview-name" title="${file.name}">${file.name}</div>
+                <div class="file-preview-size">${formatFileSize(file.size)}</div>
+                <button type="button" class="file-remove-btn" onclick="removeFile(${index})">×</button>
+            `;
+            
+            filePreviewGrid.appendChild(item);
+        });
+    }
+    
+    function removeFile(index) {
+        selectedFiles.splice(index, 1);
+        
+        // Update file input
+        const dt = new DataTransfer();
+        selectedFiles.forEach(file => dt.items.add(file));
+        fileInput.files = dt.files;
+        
+        displayFiles();
+    }
+    
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+    }
+    
+    // Journal text handling
+    const journalText = document.getElementById('journalText');
+    const charCounter = document.getElementById('charCounter');
+    const maxChars = 5000;
+    
+    journalText.addEventListener('input', () => {
+        const length = journalText.value.length;
+        charCounter.textContent = `${length} / ${maxChars} characters`;
+        
+        if (length > maxChars * 0.9) {
+            charCounter.classList.add('danger');
+            charCounter.classList.remove('warning');
+        } else if (length > maxChars * 0.75) {
+            charCounter.classList.add('warning');
+            charCounter.classList.remove('danger');
+        } else {
+            charCounter.classList.remove('warning', 'danger');
+        }
+        
+        if (length > maxChars) {
+            journalText.value = journalText.value.substring(0, maxChars);
+        }
+    });
+    
+    // Add writing prompt to textarea
+    function addPrompt(prompt) {
+        if (journalText.value) {
+            journalText.value += '\n\n' + prompt + ' ';
+        } else {
+            journalText.value = prompt + ' ';
+        }
+        journalText.focus();
+        journalText.setSelectionRange(journalText.value.length, journalText.value.length);
+        
+        // Trigger input event to update counter
+        journalText.dispatchEvent(new Event('input'));
+    }
+    
+    // Form submission
+    document.getElementById('uploadForm').addEventListener('submit', (e) => {
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span style="font-size: 1.8rem;">⏳</span> Saving...';
+    });
+</script>
+
 {% endblock %}

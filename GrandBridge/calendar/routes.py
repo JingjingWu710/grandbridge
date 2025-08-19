@@ -35,24 +35,36 @@ from datetime import date
 @calendar.route("/events")
 @login_required
 def events():
+    # Get today's date range (start and end of day)
+    today = date.today()
+    today_start = datetime.combine(today, datetime.min.time())
+    today_end = datetime.combine(today, datetime.max.time())
+    
     if current_user.is_admin:
-        # Admin sees events for families they manage
+        # Admin sees today's events for families they manage
         managed_family_ids = [family.id for family in current_user.admin_families]
-        # Get all events where any managed family is in the family_ids list
+        # Get all events for today where any managed family is in the family_ids list
         events = []
-        for event in Event.query.order_by(Event.start).all():
+        for event in Event.query.filter(
+            Event.start >= today_start,
+            Event.start <= today_end
+        ).order_by(Event.start).all():
             if any(fid in event.family_ids for fid in managed_family_ids):
                 events.append(event)
     else:
-        # Regular user sees events for their family
+        # Regular user sees today's events for their family
         if current_user.family_id:
-            # Get all events and filter in Python
-            all_events = Event.query.order_by(Event.start).all()
-            events = [e for e in all_events if current_user.family_id in e.family_ids]
+            # Get today's events and filter in Python
+            todays_events = Event.query.filter(
+                Event.start >= today_start,
+                Event.start <= today_end
+            ).order_by(Event.start).all()
+            events = [e for e in todays_events if current_user.family_id in e.family_ids]
         else:
             events = []
     
-    return render_template('events.html', events=events)
+    return render_template('events.html', 
+                         events=events)
 
 
 @calendar.route("/event/<int:id>", methods=['GET'])
@@ -150,7 +162,7 @@ def get_month_calendar(year, month):
 
 @calendar.route("/calendar")
 @login_required
-def calendar_view():
+def calendar_view():  
     # External .ics calendar
     external_events = []
     ics_url = session.get('subscribed_url')
@@ -162,6 +174,8 @@ def calendar_view():
     month = request.args.get("month", type=int)
 
     today = datetime.today()
+    today_date = today.date()  # Store today's date for comparison
+    
     if not year or not month:
         year, month = today.year, today.month
 
@@ -198,6 +212,15 @@ def calendar_view():
         # Regular user can only see events from their own family
         if current_user.family_id:
             internal_events = [e for e in all_events if e.is_visible_to_family(current_user.family_id)]
+    
+    # Calculate week range for week_count
+    start_of_week = today_date - timedelta(days=today_date.weekday())  # Monday
+    end_of_week = start_of_week + timedelta(days=6)  # Sunday
+    
+    # Initialize counters
+    events_count = 0
+    today_count = 0
+    week_count = 0
     
     # Map: date -> list of events
     events_by_date = {}
@@ -236,12 +259,27 @@ def calendar_view():
             ])
 
         events_by_date[day] = day_events
+        
+        # Count events
+        day_event_count = len(day_events)
+        events_count += day_event_count
+        
+        # Count today's events
+        if day == today_date:
+            today_count = day_event_count
+        
+        # Count this week's events
+        if start_of_week <= day <= end_of_week:
+            week_count += day_event_count
 
     return render_template("calendar.html",
                            month_days=month_days,
                            year=year,
                            month=month,
-                           events_by_date=events_by_date)
+                           events_by_date=events_by_date,
+                           events_count=events_count,
+                           today_count=today_count,
+                           week_count=week_count)
 
 
 @calendar.route("/calendar/subscribe")

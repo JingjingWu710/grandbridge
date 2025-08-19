@@ -1,48 +1,347 @@
 {% extends "layout.html" %}
 {% block content %}
-<h2 style="font-size: 2.5rem; margin-bottom: 0.5em;">🛠 You may ask them for any supports</h2>
-<p style="font-size: 1.3rem; margin-bottom: 1.5em; color: #333;">
-  They are the community staffs, social workers, or nurses.
-</p>
+<style>
+    /* Simple elderly-friendly styling */
+    .staff-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .staff-header {
+        background: #f0f7f4;
+        padding: 30px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        border-left: 5px solid #4a7c59;
+    }
+    
+    .staff-card {
+        border: 3px solid #4a7c59;
+        margin-bottom: 30px;
+        padding: 25px;
+        border-radius: 15px;
+        background-color: #ffffff;
+        transition: all 0.3s;
+    }
+    
+    .staff-card:hover {
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        transform: translateY(-2px);
+    }
+    
+    .staff-name {
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: #2c6f4f;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .staff-role {
+        font-size: 1.4rem;
+        color: #666;
+        margin-bottom: 20px;
+        padding: 8px 15px;
+        background: #f0f7f4;
+        border-radius: 8px;
+        display: inline-block;
+    }
+    
+    .contact-section {
+        background: #f8fafb;
+        padding: 20px;
+        border-radius: 10px;
+        margin: 20px 0;
+    }
+    
+    .contact-item {
+        font-size: 1.3rem;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 10px;
+        background: white;
+        border-radius: 8px;
+    }
+    
+    .contact-icon {
+        font-size: 1.6rem;
+        min-width: 35px;
+        text-align: center;
+    }
+    
+    .contact-label {
+        font-weight: 600;
+        color: #555;
+        min-width: 150px;
+    }
+    
+    .contact-value {
+        color: #333;
+    }
+    
+    .contact-value a {
+        color: #2c6f4f;
+        text-decoration: none;
+        font-weight: 600;
+        padding: 5px 10px;
+        border-radius: 5px;
+        transition: all 0.3s;
+    }
+    
+    .contact-value a:hover {
+        background: #e8f5e9;
+        text-decoration: underline;
+    }
+    
+    .intro-section {
+        font-size: 1.25rem;
+        line-height: 1.8;
+        color: #444;
+        padding: 20px;
+        background: #fffef7;
+        border-radius: 10px;
+        margin-top: 20px;
+        border-left: 3px solid #ffa726;
+    }
+    
+    .btn-primary {
+        font-size: 1.4rem;
+        padding: 15px 30px;
+        border-radius: 10px;
+        background: #4a7c59;
+        color: white;
+        text-decoration: none;
+        display: inline-block;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s;
+        margin-bottom: 30px;
+    }
+    
+    .btn-primary:hover {
+        background: #3a6c49;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        background: #f8f9fa;
+        border-radius: 15px;
+        margin-top: 30px;
+    }
+    
+    .empty-state-icon {
+        font-size: 4rem;
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+    
+    .empty-state-text {
+        font-size: 1.5rem;
+        color: #666;
+    }
+    
+    /* Quick contact buttons */
+    .quick-actions {
+        display: flex;
+        gap: 15px;
+        margin-top: 20px;
+        flex-wrap: wrap;
+    }
+    
+    .quick-btn {
+        padding: 12px 25px;
+        border-radius: 8px;
+        font-size: 1.2rem;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s;
+        border: 2px solid;
+    }
+    
+    .quick-btn-call {
+        background: #e8f5e9;
+        color: #2c6f4f;
+        border-color: #4a7c59;
+    }
+    
+    .quick-btn-call:hover {
+        background: #4a7c59;
+        color: white;
+    }
+    
+    .quick-btn-email {
+        background: #e3f2fd;
+        color: #1976d2;
+        border-color: #2196f3;
+    }
+    
+    .quick-btn-email:hover {
+        background: #2196f3;
+        color: white;
+    }
+    
+    /* Helper badges */
+    .badge {
+        display: inline-block;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 1rem;
+        font-weight: 600;
+        margin-left: 10px;
+    }
+    
+    .badge-available {
+        background: #c8e6c9;
+        color: #2e7d32;
+    }
+    
+    .badge-busy {
+        background: #fff9c4;
+        color: #f57f17;
+    }
+</style>
 
-{% if user.is_admin %}
-  <a href="{{ url_for('community.add_staff') }}" 
-     class="btn btn-primary"
-     style="font-size: 1.3rem; padding: 12px 25px; border-radius: 8px; margin-bottom: 1.5em; display: inline-block;">
-    Add Staff
-  </a>
-{% endif %}
-
-{% if staffs %}
-  {% for staff in staffs %}
-    <div style="border: 2px solid #4a7c59; margin-bottom: 25px; padding: 15px; border-radius: 10px; background-color: #f9f9f9;">
-      <p style="font-size: 1.5rem; font-weight: bold; margin-bottom: 0.3em;">{{ staff.name }}</p>
-      <p style="font-size: 1.2rem; margin-bottom: 1em;">
-        <strong>Organisation:</strong> {{ staff.organisation }}
-      </p>
-
-      <h4 style="font-size: 1.4rem; margin-bottom: 0.6em; color: #2c6f4f;">Contact Info</h4>
-      <ul style="font-size: 1.2rem; padding-left: 1.2em; margin-bottom: 1em; color: #333;">
-        <li style="margin-bottom: 0.5em;">
-          Telephone number: {{ staff.tel }}
-        </li>
-        <li>
-          Email address: 
-          <a href="mailto:{{ staff.email }}" 
-             style="color: #2c6f4f; text-decoration: underline; font-weight: 600;">
-            {{ staff.email }}
-          </a>
-        </li>
-      </ul>
-
-      {% if staff.intro %}
-        <p style="font-size: 1.15rem; line-height: 1.5; color: #555;">
-          <strong>Introduction: </strong> {{ staff.intro }}
+<div class="staff-container">
+    <!-- Header Section -->
+    <div class="staff-header">
+        <h2 style="font-size: 2.8rem; margin-bottom: 0.5em; color: #2c6f4f;">
+            🛠 Support Staff & Helpers
+        </h2>
+        <p style="font-size: 1.5rem; color: #555; margin: 0;">
+            Community staff, social workers, and nurses ready to help you
         </p>
-      {% endif %}
     </div>
-  {% endfor %}
-{% else %}
-  <p style="font-size: 1.3rem; color: #666;">No staffs found.</p>
-{% endif %}
+
+    {% if user.is_admin %}
+        <a href="{{ url_for('community.add_staff') }}" class="btn-primary">
+            ➕ Add New Staff Member
+        </a>
+    {% endif %}
+
+    {% if staffs %}
+        {% for staff in staffs %}
+            <div class="staff-card">
+                <!-- Staff Name and Badge -->
+                <div class="staff-name">
+                    <span>👤</span>
+                    {{ staff.name }}
+                    {% if staff.available %}
+                        <span class="badge badge-available">Available</span>
+                    {% endif %}
+                </div>
+                
+                <!-- Organisation/Role -->
+                <div class="staff-role">
+                    🏢 {{ staff.organisation }}
+                </div>
+
+                <!-- Contact Information -->
+                <div class="contact-section">
+                    <h4 style="font-size: 1.5rem; margin-bottom: 20px; color: #2c6f4f;">
+                        📞 Contact Information
+                    </h4>
+                    
+                    <div class="contact-item">
+                        <span class="contact-icon">📱</span>
+                        <span class="contact-label">Phone:</span>
+                        <span class="contact-value">
+                            <strong>{{ staff.tel }}</strong>
+                        </span>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <span class="contact-icon">✉️</span>
+                        <span class="contact-label">Email:</span>
+                        <span class="contact-value">
+                            <a href="mailto:{{ staff.email }}">{{ staff.email }}</a>
+                        </span>
+                    </div>
+
+                    <!-- Quick Action Buttons -->
+                    <div class="quick-actions">
+                        <a href="tel:{{ staff.tel }}" class="quick-btn quick-btn-call">
+                            📞 Call Now
+                        </a>
+                        <a href="mailto:{{ staff.email }}" class="quick-btn quick-btn-email">
+                            ✉️ Send Email
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Introduction/Bio -->
+                {% if staff.intro %}
+                    <div class="intro-section">
+                        <h4 style="font-size: 1.4rem; margin-bottom: 10px; color: #555;">
+                            💬 About {{ staff.name.split()[0] }}
+                        </h4>
+                        {{ staff.intro }}
+                    </div>
+                {% endif %}
+
+                <!-- Additional Information (if needed) -->
+                {% if staff.specialties %}
+                    <div style="margin-top: 20px; padding: 15px; background: #f5f5f5; border-radius: 10px;">
+                        <strong style="font-size: 1.3rem; color: #555;">Specialties:</strong>
+                        <div style="margin-top: 10px; font-size: 1.2rem;">
+                            {{ staff.specialties }}
+                        </div>
+                    </div>
+                {% endif %}
+
+                {% if staff.office_hours %}
+                    <div style="margin-top: 15px; padding: 15px; background: #fff3e0; border-radius: 10px;">
+                        <strong style="font-size: 1.3rem; color: #555;">⏰ Office Hours:</strong>
+                        <div style="margin-top: 10px; font-size: 1.2rem;">
+                            {{ staff.office_hours }}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+        
+        <!-- Help Section -->
+        <div style="background: #e3f2fd; padding: 25px; border-radius: 15px; margin-top: 40px; text-align: center;">
+            <h3 style="font-size: 1.8rem; color: #1976d2; margin-bottom: 15px;">
+                💡 Need Help Contacting Staff?
+            </h3>
+            <p style="font-size: 1.3rem; color: #555; margin-bottom: 20px;">
+                If you have trouble reaching anyone, you can also:
+            </p>
+            <div style="font-size: 1.25rem; text-align: left; max-width: 600px; margin: 0 auto;">
+                <div style="margin-bottom: 15px;">
+                    📞 Call the main office: <strong>0800-123-4567</strong>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    🏢 Visit in person: Community Center, Room 101
+                </div>
+                <div>
+                    🆘 For emergencies: Call <strong>999</strong>
+                </div>
+            </div>
+        </div>
+        
+    {% else %}
+        <!-- Empty State -->
+        <div class="empty-state">
+            <div class="empty-state-icon">👥</div>
+            <p class="empty-state-text">No staff members listed yet.</p>
+            {% if user.is_admin %}
+                <p style="font-size: 1.3rem; color: #666; margin-top: 20px;">
+                    Click "Add New Staff Member" to get started.
+                </p>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+
 {% endblock %}

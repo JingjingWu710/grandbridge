@@ -1,62 +1,329 @@
 {% extends "layout.html" %}
 {% block content %}
-<h2 style="font-size: 2.5rem; margin-bottom: 0.5em;">Calendar - {{ month }}/{{ year }}</h2>
-<p style="font-size: 1.3rem; margin-bottom: 1.5em; color: #333;">Check if there will be any events recently.</p>
+<style>
+    /* Elder-friendly styling */
+    .form-control, .form-select {
+        font-size: 1.3rem;
+        padding: 12px;
+        border: 2px solid #e8f5e9;
+        border-radius: 8px;
+    }
+    
+    .btn {
+        font-size: 1.3rem;
+        padding: 12px 25px;
+        border-radius: 10px;
+        margin: 5px;
+        transition: all 0.3s;
+        font-weight: 500;
+    }
+    
+    .btn:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #4a7c59, #5a8d69);
+        border: none;
+    }
+    
+    .btn-success {
+        background: linear-gradient(135deg, #2c6f4f, #3c7f5f);
+        border: none;
+    }
+    
+    .btn-info {
+        background: linear-gradient(135deg, #5bc0de, #6bd0ee);
+        border: none;
+        color: white;
+    }
+    
+    .calendar-header {
+        background: linear-gradient(135deg, #e8f5e9, #fff3e0);
+        padding: 30px;
+        border-radius: 15px;
+        margin-bottom: 25px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    .calendar-controls {
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    
+    .filter-section {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        border-left: 4px solid #4a7c59;
+    }
+    
+    .legend-item {
+        display: inline-block;
+        margin: 0 15px;
+        font-size: 1.3rem;
+        padding: 8px 15px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .calendar-table {
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+    
+    .calendar-table th {
+        background: linear-gradient(135deg, #4a7c59, #5a8d69);
+        color: white;
+        font-size: 1.3rem;
+        padding: 15px;
+        font-weight: 600;
+        border: none;
+    }
+    
+    .calendar-table td {
+        vertical-align: top;
+        padding: 12px;
+        height: 140px;
+        width: 14.28%;
+        border: 1px solid #e8f5e9;
+        transition: all 0.2s;
+        position: relative;
+    }
+    
+    .calendar-table td:hover {
+        background-color: #f5fdf7;
+        transform: scale(1.02);
+        z-index: 1;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    .day-number {
+        font-size: 1.4rem;
+        font-weight: bold;
+        color: #2c6f4f;
+        margin-bottom: 8px;
+    }
+    
+    .today {
+        background: linear-gradient(135deg, #fff3e0, #ffeb3b20);
+        border: 2px solid #ffc107;
+    }
+    
+    .today .day-number {
+        color: #ff6b35;
+    }
+    
+    .event-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        max-height: 90px;
+        overflow-y: auto;
+    }
+    
+    .event-list::-webkit-scrollbar {
+        width: 5px;
+    }
+    
+    .event-list::-webkit-scrollbar-thumb {
+        background: #ddd;
+        border-radius: 5px;
+    }
+    
+    .event-item {
+        margin-bottom: 5px;
+        padding: 3px 6px;
+        border-radius: 5px;
+        transition: all 0.2s;
+        font-size: 1.1rem;
+    }
+    
+    .event-item:hover {
+        background: #e8f5e9;
+        transform: translateX(2px);
+    }
+    
+    .event-item a {
+        text-decoration: none;
+        color: #2c6f4f;
+        font-weight: 500;
+    }
+    
+    .event-item a:hover {
+        text-decoration: underline;
+    }
+    
+    .modal-content {
+        border-radius: 15px;
+        border: none;
+    }
+    
+    .modal-header {
+        background: linear-gradient(135deg, #e8f5e9, #fff3e0);
+        border-radius: 15px 15px 0 0;
+        border-bottom: 2px solid #4a7c59;
+    }
+    
+    .action-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+        margin-bottom: 20px;
+    }
+    
+    .navigation-controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .month-year-selector {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    /* Today's Events Button Highlight */
+    .btn-today-events {
+        background: linear-gradient(135deg, #ff6b35, #ff8555);
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .btn-today-events::before {
+        content: '';
+        position: absolute;
+        top: -2px;
+        left: -2px;
+        right: -2px;
+        bottom: -2px;
+        background: linear-gradient(45deg, #ffc107, #ff6b35, #ffc107);
+        border-radius: 10px;
+        opacity: 0;
+        z-index: -1;
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0%, 100% { opacity: 0; transform: scale(1); }
+        50% { opacity: 0.3; transform: scale(1.05); }
+    }
+    
+    .quick-stats {
+        background: white;
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        display: flex;
+        justify-content: space-around;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    
+    .stat-item {
+        text-align: center;
+        padding: 10px;
+    }
+    
+    .stat-number {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #4a7c59;
+    }
+    
+    .stat-label {
+        font-size: 1.1rem;
+        color: #666;
+    }
+</style>
 
-{% if current_user.is_admin %}
-  <a href="{{ url_for('calendar.new_event') }}" class="btn btn-primary" 
-     style="font-size: 1.3rem; padding: 12px 25px; border-radius: 8px; margin-bottom: 1em; display: inline-block;">
-    Add New Event
-  </a>
-{% endif %}
-
-<!-- Subscribe Button -->
-<button type="button" class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#subscribeModal"
-  style="font-size: 1.3rem; padding: 12px 25px; border-radius: 8px;">
-  Subscribe to External Calendar
-</button>
-
-<!-- Modal -->
-<div class="modal fade" id="subscribeModal" tabindex="-1" aria-labelledby="subscribeModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <form action="{{ url_for('calendar.subscribe_calendar') }}" method="get" class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="subscribeModalLabel" style="font-size: 1.5rem;">Subscribe to Calendar</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <label for="ics-url" class="form-label" style="font-size: 1.2rem;">Paste .ics URL:</label>
-        <input type="url" class="form-control" id="ics-url" name="url" 
-               placeholder="https://example.com/calendar.ics" required
-               style="font-size: 1.2rem; padding: 10px;">
-      </div>
-      <div class="modal-footer">
-        <button type="submit" class="btn btn-primary" style="font-size: 1.3rem; padding: 8px 20px;">Subscribe</button>
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="font-size: 1.3rem; padding: 8px 20px;">Cancel</button>
-      </div>
-    </form>
-  </div>
+<div class="calendar-header">
+    <h2 style="font-size: 2.8rem; margin-bottom: 0.3em; color: #2c6f4f;">
+        📅 Calendar - {{ month }}/{{ year }}
+    </h2>
+    <p style="font-size: 1.4rem; color: #555; margin: 0;">
+        Check if there will be any events recently.
+    </p>
 </div>
 
-<!-- Google Sync -->
-<a href="{{ url_for('calendar.google_login') }}" class="btn btn-success mb-3" 
-   style="font-size: 1.3rem; padding: 12px 25px; border-radius: 8px; display: inline-block;">
-  Sync Google Calendar
-</a>
+<!-- Quick Stats Bar -->
+<div class="quick-stats">
+    <div class="stat-item">
+        <div class="stat-number">{{ events_count|default(0) }}</div>
+        <div class="stat-label">Total Events</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-number">{{ today_count|default(0) }}</div>
+        <div class="stat-label">Today's Events</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-number">{{ week_count|default(0) }}</div>
+        <div class="stat-label">This Week</div>
+    </div>
+</div>
 
-<form method="get" class="mb-3" style="font-size: 1.2rem; display: flex; align-items: center; gap: 10px;">
-    <input type="hidden" name="month" value="{{ month }}">
-    <input type="hidden" name="year" value="{{ year }}">
-    <label for="filter-source" style="min-width: 50px;">Filter:</label>
-    <select name="source" id="filter-source" onchange="this.form.submit()" 
-            style="font-size: 1.2rem; padding: 6px 10px; border-radius: 6px;">
-        <option value="">All</option>
-        <option value="internal" {% if request.args.get('source') == 'internal' %}selected{% endif %}>Internal</option>
-        <option value="external" {% if request.args.get('source') == 'external' %}selected{% endif %}>External</option>
-        <option value="google" {% if request.args.get('source') == 'google' %}selected{% endif %}>Google</option>
-    </select>
-</form>
+<!-- Action Buttons -->
+<div class="calendar-controls">
+    <div class="action-buttons">
+        <a href="{{ url_for('calendar.events') }}" class="btn btn-today-events">
+            <span style="font-size: 1.5rem;">📍</span> Today's Events
+        </a>
+        
+        {% if current_user.is_admin %}
+        <a href="{{ url_for('calendar.new_event') }}" class="btn btn-primary">
+            <span style="font-size: 1.4rem;">➕</span> Add New Event
+        </a>
+        {% endif %}
+        
+        <!-- Subscribe Button -->
+        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#subscribeModal">
+            <span style="font-size: 1.4rem;">📥</span> Subscribe Calendar
+        </button>
+        
+        <!-- Google Sync -->
+        <a href="{{ url_for('calendar.google_login') }}" class="btn btn-info">
+            <span style="font-size: 1.4rem;">🔄</span> Sync Google
+        </a>
+    </div>
+</div>
 
+<!-- Filter Section -->
+<div class="filter-section">
+    <form method="get" style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+        <input type="hidden" name="month" value="{{ month }}">
+        <input type="hidden" name="year" value="{{ year }}">
+        <label for="filter-source" style="font-size: 1.3rem; font-weight: 600; color: #2c6f4f;">
+            Filter Events:
+        </label>
+        <select name="source" id="filter-source" onchange="this.form.submit()" class="form-select" style="width: auto;">
+            <option value="">🌟 All Events</option>
+            <option value="internal" {% if request.args.get('source') == 'internal' %}selected{% endif %}>
+                🏛️ Community
+            </option>
+            <option value="external" {% if request.args.get('source') == 'external' %}selected{% endif %}>
+                🌐 External
+            </option>
+            <option value="google" {% if request.args.get('source') == 'google' %}selected{% endif %}>
+                📅 Google
+            </option>
+        </select>
+    </form>
+</div>
+
+<!-- Navigation Controls -->
 {% set prev_month = month - 1 %}
 {% set prev_year = year if prev_month >= 1 else year - 1 %}
 {% set prev_month = 12 if prev_month == 0 else prev_month %}
@@ -65,88 +332,79 @@
 {% set next_year = year if next_month <= 12 else year + 1 %}
 {% set next_month = 1 if next_month == 13 else next_month %}
 
-<form method="get" action="{{ url_for('calendar.calendar_view') }}" 
-      class="d-flex justify-content-between align-items-center mb-3" style="font-size: 1.2rem; gap: 10px; flex-wrap: wrap;">
-
+<div class="navigation-controls">
     <!-- Previous button -->
     <a href="{{ url_for('calendar.calendar_view', year=prev_year, month=prev_month) }}"
-       class="btn btn-outline-primary" style="padding: 10px 20px; font-size: 1.3rem; border-radius: 8px;">
+       class="btn btn-outline-primary" style="min-width: 120px;">
        ← Previous
     </a>
 
-    <!-- Dropdown for month/year -->
-    <div class="d-flex align-items-center" style="gap: 10px;">
-        <select name="month" class="form-select me-2" onchange="this.form.submit()"
-                style="font-size: 1.2rem; padding: 6px 12px; border-radius: 6px;">
+    <!-- Month/Year Selector -->
+    <form method="get" action="{{ url_for('calendar.calendar_view') }}" class="month-year-selector">
+        <select name="month" class="form-select" onchange="this.form.submit()" style="width: auto;">
             {% for m in range(1, 13) %}
                 <option value="{{ m }}" {% if m == month %}selected{% endif %}>
                     {{ m|month_name }}
                 </option>
             {% endfor %}
         </select>
-        <select name="year" class="form-select me-2" onchange="this.form.submit()"
-                style="font-size: 1.2rem; padding: 6px 12px; border-radius: 6px;">
+        <select name="year" class="form-select" onchange="this.form.submit()" style="width: auto;">
             {% for y in range(year - 5, year + 6) %}
                 <option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }}</option>
             {% endfor %}
         </select>
-        <noscript>
-          <button type="submit" class="btn btn-primary" style="font-size: 1.3rem; padding: 8px 20px; border-radius: 8px;">
-            Go
-          </button>
-        </noscript>
-    </div>
+        <a href="{{ url_for('calendar.calendar_view') }}" class="btn btn-secondary">
+            Today
+        </a>
+    </form>
 
     <!-- Next button -->
     <a href="{{ url_for('calendar.calendar_view', year=next_year, month=next_month) }}"
-       class="btn btn-outline-primary" style="padding: 10px 20px; font-size: 1.3rem; border-radius: 8px;">
+       class="btn btn-outline-primary" style="min-width: 120px;">
        Next →
     </a>
-</form>
-
-<!-- Go to today -->
-<div class="text-center mb-3">
-    <a href="{{ url_for('calendar.calendar_view') }}" class="btn btn-secondary"
-       style="font-size: 1.3rem; padding: 12px 25px; border-radius: 8px;">Go to Today</a>
 </div>
 
-<p style="font-size: 1.3rem;">
-    <span>🏛️ Community</span> &nbsp;&nbsp;
-    <span>🌐 Subscribed</span> &nbsp;&nbsp;
-    <span>📅 Google</span>
-</p>
+<!-- Legend -->
+<div style="text-align: center; margin-bottom: 20px;">
+    <span class="legend-item">🏛️ Community</span>
+    <span class="legend-item">🌐 Subscribed</span>
+    <span class="legend-item">📅 Google</span>
+</div>
 
-<table class="table table-bordered text-center" style="font-size: 1.2rem; min-width: 100%; border-radius: 10px;">
+<!-- Calendar Table -->
+<table class="table calendar-table">
     <thead>
         <tr>
-            <th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th>
-            <th>Thu</th><th>Fri</th><th>Sat</th>
+            <th>Sunday</th>
+            <th>Monday</th>
+            <th>Tuesday</th>
+            <th>Wednesday</th>
+            <th>Thursday</th>
+            <th>Friday</th>
+            <th>Saturday</th>
         </tr>
     </thead>
     <tbody>
     {% for week in month_days %}
         <tr>
         {% for day in week %}
-            <td class="{% if day.month != month %}text-muted{% endif %}" 
-                style="vertical-align: top; padding: 10px; height: 120px; width:14.28%;">
-
-                <strong style="font-size: 1.3rem;">{{ day.day }}</strong>
-                <ul style="list-style:none; padding-left: 0; margin-top: 0.3em; max-height: 80px; overflow-y: auto;">
+            <td class="{% if day.month != month %}text-muted{% endif %} {% if day == today %}today{% endif %}">
+                <div class="day-number">{{ day.day }}</div>
+                <ul class="event-list">
                 {% for event in events_by_date.get(day, []) %}
-                    <li style="margin-bottom: 4px; word-wrap: break-word;">
-                      {% if event.source == "internal" %}
-                          <a href="{{ url_for('calendar.event', id=event.id) }}" 
-                             style="font-size: 1.1rem; color: #2c6f4f; text-decoration: underline;">
-                             🏛️ {{ event.title }}
-                          </a>
-                      {% elif event.source == "external" %}
-                          <small style="font-size: 1.1rem;">🌐 {{ event.title }}</small>
-                      {% elif event.source == "google" %}
-                          <a href="{{ url_for('calendar.google_event', event_id=event.event_id) }}"
-                             style="font-size: 1.1rem; color: #2c6f4f; text-decoration: underline;">
-                            📅 {{ event.title }}
-                          </a>
-                      {% endif %}
+                    <li class="event-item">
+                        {% if event.source == "internal" %}
+                            <a href="{{ url_for('calendar.event', id=event.id) }}">
+                                🏛️ {{ event.title }}
+                            </a>
+                        {% elif event.source == "external" %}
+                            <span>🌐 {{ event.title }}</span>
+                        {% elif event.source == "google" %}
+                            <a href="{{ url_for('calendar.google_event', event_id=event.event_id) }}">
+                                📅 {{ event.title }}
+                            </a>
+                        {% endif %}
                     </li>
                 {% endfor %}
                 </ul>
@@ -156,5 +414,82 @@
     {% endfor %}
     </tbody>
 </table>
+
+<!-- Subscribe Modal -->
+<div class="modal fade" id="subscribeModal" tabindex="-1" aria-labelledby="subscribeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form action="{{ url_for('calendar.subscribe_calendar') }}" method="get" class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="subscribeModalLabel" style="font-size: 1.6rem; color: #2c6f4f;">
+                    📥 Subscribe to Calendar
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <label for="ics-url" class="form-label" style="font-size: 1.3rem; font-weight: 600; color: #2c6f4f;">
+                    Paste .ics URL:
+                </label>
+                <input type="url" class="form-control" id="ics-url" name="url" 
+                       placeholder="https://example.com/calendar.ics" required>
+                <small class="form-text text-muted" style="font-size: 1.1rem;">
+                    Enter the URL of the calendar you want to subscribe to
+                </small>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-primary">Subscribe</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Highlight today's date
+    document.addEventListener('DOMContentLoaded', function() {
+        const today = new Date();
+        const cells = document.querySelectorAll('.calendar-table td');
+        
+        cells.forEach(cell => {
+            const dayNum = parseInt(cell.querySelector('.day-number')?.textContent);
+            if (dayNum === today.getDate() && !cell.classList.contains('text-muted')) {
+                // Check if we're in the current month
+                const currentMonth = {{ month }};
+                const currentYear = {{ year }};
+                if (today.getMonth() + 1 === currentMonth && today.getFullYear() === currentYear) {
+                    cell.classList.add('today');
+                }
+            }
+        });
+    });
+
+    // Add keyboard navigation
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'ArrowLeft' && e.ctrlKey) {
+            // Go to previous month
+            window.location.href = "{{ url_for('calendar.calendar_view', year=prev_year, month=prev_month) }}";
+        } else if (e.key === 'ArrowRight' && e.ctrlKey) {
+            // Go to next month
+            window.location.href = "{{ url_for('calendar.calendar_view', year=next_year, month=next_month) }}";
+        } else if (e.key === 't' && e.ctrlKey) {
+            // Go to today
+            window.location.href = "{{ url_for('calendar.calendar_view') }}";
+        }
+    });
+
+    // Tooltip for keyboard shortcuts
+    const shortcutTooltip = document.createElement('div');
+    shortcutTooltip.innerHTML = `
+        <div style="position: fixed; bottom: 20px; right: 20px; background: #333; color: white; 
+                    padding: 10px 15px; border-radius: 8px; font-size: 0.9rem; opacity: 0.8; z-index: 1000;">
+            Keyboard shortcuts: Ctrl+← Previous | Ctrl+→ Next | Ctrl+T Today
+        </div>
+    `;
+    document.body.appendChild(shortcutTooltip);
+    
+    // Hide tooltip after 5 seconds
+    setTimeout(() => {
+        shortcutTooltip.style.display = 'none';
+    }, 5000);
+</script>
 
 {% endblock %}

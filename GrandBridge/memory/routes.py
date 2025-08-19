@@ -11,11 +11,11 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'mp4', 'mov', 'mp3', 'wav'}
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-@memory.route('/memories_wall/<int:id>')
+@memory.route('/memory')
 @login_required
-def memories(id):
-    memories = Memory.query.filter_by(userid=id).order_by(Memory.created_at.desc()).all()
-    return render_template('memories.html', memories=memories)
+def memories():
+    memories = Memory.query.filter_by(userid=current_user.id).order_by(Memory.created_at.desc()).all()
+    return render_template('memory.html', memories=memories)
 
 @memory.route('/memories_wall/upload', methods=['GET', 'POST'])
 @login_required

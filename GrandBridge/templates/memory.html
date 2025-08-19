@@ -1,0 +1,552 @@
+{% extends "layout.html" %}
+{% block content %}
+<style>
+    /* Memory Wall Styling */
+    .memory-header {
+        background: linear-gradient(135deg, #fff3e0, #fce4ec, #e8f5e9);
+        padding: 40px;
+        border-radius: 20px;
+        margin-bottom: 30px;
+        text-align: center;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .memory-header::before {
+        content: '✨';
+        position: absolute;
+        font-size: 100px;
+        opacity: 0.1;
+        top: -20px;
+        left: 20px;
+        animation: float 6s ease-in-out infinite;
+    }
+    
+    .memory-header::after {
+        content: '📖';
+        position: absolute;
+        font-size: 100px;
+        opacity: 0.1;
+        bottom: -20px;
+        right: 20px;
+        animation: float 6s ease-in-out infinite reverse;
+    }
+    
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-20px); }
+    }
+    
+    .memory-title {
+        font-size: 3rem;
+        color: #2c6f4f;
+        margin: 0;
+        font-family: 'Georgia', serif;
+        font-weight: 600;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.05);
+    }
+    
+    .memory-subtitle {
+        font-size: 1.4rem;
+        color: #666;
+        margin-top: 10px;
+        font-style: italic;
+    }
+    
+    .add-memory-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        background: linear-gradient(135deg, #4a7c59, #5a8d69);
+        color: white;
+        padding: 18px 35px;
+        border-radius: 50px;
+        font-size: 1.4rem;
+        font-weight: 600;
+        text-decoration: none;
+        margin: 20px 0;
+        transition: all 0.3s;
+        box-shadow: 0 4px 15px rgba(74, 124, 89, 0.3);
+    }
+    
+    .add-memory-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 25px rgba(74, 124, 89, 0.4);
+        background: linear-gradient(135deg, #5a8d69, #4a7c59);
+    }
+    
+    .add-memory-btn span {
+        font-size: 1.8rem;
+    }
+    
+    /* Memory Grid */
+    .memories-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+        gap: 30px;
+        padding: 20px 0;
+    }
+    
+    /* Individual Memory Card */
+    .memory-card {
+        background: white;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 6px 25px rgba(0,0,0,0.08);
+        transition: all 0.4s;
+        position: relative;
+    }
+    
+    .memory-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 35px rgba(0,0,0,0.12);
+    }
+    
+    .memory-date {
+        background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+        padding: 15px 20px;
+        font-size: 1.2rem;
+        color: #2c6f4f;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border-bottom: 2px solid #a5d6a7;
+    }
+    
+    .memory-date-icon {
+        font-size: 1.5rem;
+    }
+    
+    .memory-content {
+        padding: 20px;
+    }
+    
+    .memory-media {
+        width: 100%;
+        border-radius: 15px;
+        overflow: hidden;
+        margin-bottom: 20px;
+        background: #f5f5f5;
+        position: relative;
+    }
+    
+    .memory-media img {
+        width: 100%;
+        height: auto;
+        display: block;
+        transition: transform 0.3s;
+    }
+    
+    .memory-media:hover img {
+        transform: scale(1.05);
+    }
+    
+    .memory-media video {
+        width: 100%;
+        border-radius: 15px;
+    }
+    
+    .memory-media audio {
+        width: 100%;
+        margin: 20px 0;
+    }
+    
+    .memory-text {
+        font-size: 1.3rem;
+        line-height: 1.8;
+        color: #333;
+        padding: 15px;
+        background: #fafafa;
+        border-radius: 12px;
+        border-left: 4px solid #a5d6a7;
+        font-family: 'Georgia', serif;
+        position: relative;
+    }
+    
+    .memory-text::before {
+        content: '"';
+        font-size: 3rem;
+        color: #c8e6c9;
+        position: absolute;
+        top: -10px;
+        left: 10px;
+        font-family: 'Georgia', serif;
+    }
+    
+    /* Media type badges */
+    .media-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: rgba(255, 255, 255, 0.95);
+        padding: 8px 15px;
+        border-radius: 20px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .media-badge.photo {
+        color: #ff6b35;
+    }
+    
+    .media-badge.video {
+        color: #e91e63;
+    }
+    
+    .media-badge.audio {
+        color: #3f51b5;
+    }
+    
+    /* Empty state */
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    }
+    
+    .empty-state-icon {
+        font-size: 5rem;
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+    
+    .empty-state-title {
+        font-size: 2rem;
+        color: #666;
+        margin-bottom: 15px;
+    }
+    
+    .empty-state-text {
+        font-size: 1.4rem;
+        color: #999;
+        margin-bottom: 30px;
+    }
+    
+    /* Statistics Bar */
+    .memory-stats {
+        background: white;
+        padding: 25px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        display: flex;
+        justify-content: space-around;
+        box-shadow: 0 3px 15px rgba(0,0,0,0.06);
+    }
+    
+    .stat-item {
+        text-align: center;
+    }
+    
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #4a7c59;
+    }
+    
+    .stat-label {
+        font-size: 1.2rem;
+        color: #666;
+        margin-top: 5px;
+    }
+    
+    /* Filter buttons */
+    .filter-buttons {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+    }
+    
+    .filter-btn {
+        padding: 12px 25px;
+        background: white;
+        border: 2px solid #e8f5e9;
+        border-radius: 25px;
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        color: #333;
+    }
+    
+    .filter-btn:hover,
+    .filter-btn.active {
+        background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+        border-color: #4a7c59;
+        transform: translateY(-2px);
+    }
+    
+    /* Decorative elements */
+    .decoration-leaf {
+        position: fixed;
+        opacity: 0.05;
+        z-index: -1;
+        font-size: 150px;
+    }
+    
+    .decoration-leaf.top-left {
+        top: 10%;
+        left: 5%;
+        transform: rotate(-15deg);
+    }
+    
+    .decoration-leaf.bottom-right {
+        bottom: 10%;
+        right: 5%;
+        transform: rotate(15deg);
+    }
+    
+    /* Loading animation */
+    @keyframes shimmer {
+        0% { background-position: -1000px 0; }
+        100% { background-position: 1000px 0; }
+    }
+    
+    .loading {
+        background: linear-gradient(90deg, #f0f0f0 25%, #f8f8f8 50%, #f0f0f0 75%);
+        background-size: 1000px 100%;
+        animation: shimmer 2s infinite;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .memories-container {
+            grid-template-columns: 1fr;
+        }
+        
+        .memory-title {
+            font-size: 2.2rem;
+        }
+    }
+</style>
+
+<!-- Decorative Background Elements -->
+<div class="decoration-leaf top-left">🍃</div>
+<div class="decoration-leaf bottom-right">🌿</div>
+
+<!-- Header Section -->
+<div class="memory-header">
+    <h1 class="memory-title">📚 Your Memory Wall</h1>
+    <p class="memory-subtitle">Every moment tells a story worth remembering</p>
+</div>
+
+<!-- Statistics Bar -->
+{% if memories %}
+<div class="memory-stats">
+    <div class="stat-item">
+        <div class="stat-number">{{ memories|length }}</div>
+        <div class="stat-label">Total Memories</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-number">{{ memories|selectattr("filetype", "search", "image")|list|length }}</div>
+        <div class="stat-label">Photos</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-number">{{ memories|selectattr("filetype", "search", "video")|list|length }}</div>
+        <div class="stat-label">Videos</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-number">{{ memories|selectattr("filetype", "search", "audio")|list|length }}</div>
+        <div class="stat-label">Audio</div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Add Memory Button -->
+<div style="text-align: center;">
+    <a href="/memories_wall/upload" class="add-memory-btn">
+        <span>➕</span>
+        Add New Memory
+    </a>
+</div>
+
+<!-- Filter Buttons -->
+<div class="filter-buttons">
+    <button class="filter-btn active" onclick="filterMemories('all')">
+        🌟 All Memories
+    </button>
+    <button class="filter-btn" onclick="filterMemories('photo')">
+        📸 Photos
+    </button>
+    <button class="filter-btn" onclick="filterMemories('video')">
+        🎥 Videos
+    </button>
+    <button class="filter-btn" onclick="filterMemories('audio')">
+        🎵 Audio
+    </button>
+    <button class="filter-btn" onclick="filterMemories('text')">
+        ✍️ Text Only
+    </button>
+</div>
+
+<!-- Memories Grid -->
+{% if memories %}
+<div class="memories-container">
+    {% for memory in memories %}
+    <div class="memory-card" data-type="{% if 'image' in memory.filetype %}photo{% elif 'video' in memory.filetype %}video{% elif 'audio' in memory.filetype %}audio{% else %}text{% endif %}">
+        <!-- Date Header -->
+        <div class="memory-date">
+            <span class="memory-date-icon">📅</span>
+            <span>{{ memory.created_at.strftime("%B %d, %Y at %I:%M %p") }}</span>
+        </div>
+        
+        <!-- Memory Content -->
+        <div class="memory-content">
+            {% if 'image' in memory.filetype %}
+            <div class="memory-media">
+                <div class="media-badge photo">
+                    📸 Photo
+                </div>
+                <img src="{{ url_for('static', filename='uploads/' + memory.filename) }}" 
+                     alt="Memory photo"
+                     loading="lazy">
+            </div>
+            {% elif 'video' in memory.filetype %}
+            <div class="memory-media">
+                <div class="media-badge video">
+                    🎥 Video
+                </div>
+                <video controls>
+                    <source src="{{ url_for('static', filename='uploads/' + memory.filename) }}">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+            {% elif 'audio' in memory.filetype %}
+            <div class="memory-media">
+                <div class="media-badge audio">
+                    🎵 Audio
+                </div>
+                <audio controls>
+                    <source src="{{ url_for('static', filename='uploads/' + memory.filename) }}">
+                    Your browser does not support the audio tag.
+                </audio>
+            </div>
+            {% endif %}
+            
+            {% if memory.text %}
+            <div class="memory-text">
+                {{ memory.text }}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<!-- Empty State -->
+<div class="empty-state">
+    <div class="empty-state-icon">📚</div>
+    <h2 class="empty-state-title">Your story begins here</h2>
+    <p class="empty-state-text">Start capturing your precious memories today</p>
+    <a href="/memories_wall/upload" class="add-memory-btn">
+        <span>✨</span>
+        Create Your First Memory
+    </a>
+</div>
+{% endif %}
+
+<script>
+    // Filter memories by type
+    function filterMemories(type) {
+        const cards = document.querySelectorAll('.memory-card');
+        const buttons = document.querySelectorAll('.filter-btn');
+        
+        // Update active button
+        buttons.forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.textContent.toLowerCase().includes(type) || 
+                (type === 'all' && btn.textContent.includes('All'))) {
+                btn.classList.add('active');
+            }
+        });
+        
+        // Filter cards
+        cards.forEach(card => {
+            if (type === 'all') {
+                card.style.display = 'block';
+                setTimeout(() => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'scale(1)';
+                }, 100);
+            } else {
+                if (card.dataset.type === type) {
+                    card.style.display = 'block';
+                    setTimeout(() => {
+                        card.style.opacity = '1';
+                        card.style.transform = 'scale(1)';
+                    }, 100);
+                } else {
+                    card.style.opacity = '0';
+                    card.style.transform = 'scale(0.8)';
+                    setTimeout(() => {
+                        card.style.display = 'none';
+                    }, 300);
+                }
+            }
+        });
+    }
+    
+    // Lazy loading for images
+    document.addEventListener('DOMContentLoaded', function() {
+        const images = document.querySelectorAll('img[loading="lazy"]');
+        
+        if ('IntersectionObserver' in window) {
+            const imageObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const img = entry.target;
+                        img.classList.add('loading');
+                        img.onload = () => img.classList.remove('loading');
+                        observer.unobserve(img);
+                    }
+                });
+            });
+            
+            images.forEach(img => imageObserver.observe(img));
+        }
+    });
+    
+    // Add animation on scroll
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+    
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, observerOptions);
+    
+    document.querySelectorAll('.memory-card').forEach(card => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        card.style.transition = 'all 0.6s ease-out';
+        observer.observe(card);
+    });
+    
+    // Format dates to be more readable
+    document.querySelectorAll('.memory-date span:last-child').forEach(dateEl => {
+        const text = dateEl.textContent;
+        // Add relative time if today
+        const date = new Date(text);
+        const today = new Date();
+        if (date.toDateString() === today.toDateString()) {
+            dateEl.innerHTML = text + ' <small style="color: #4a7c59;">(Today)</small>';
+        }
+    });
+</script>
+
+{% endblock %}
