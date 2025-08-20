@@ -1,28 +1,480 @@
 {% extends "layout.html" %} 
 {% block content %}
-<h2>🏆 Glory Hall</h2>
-<div class="row">
-  {% if achievements %}
-  {% for a in achievements %}
-    <div class="col-md-4 mb-4">
-      <div class="card h-100">
-        <div class="card-body">
-          <img
-            src="{{ url_for('static', filename='pics/medal.png') }}"
-            class="img-fluid icon"
-            alt="{{ a.name }}"
-          />
-          <h5 class="card-title"><strong>{{ a.name }}</strong></h5>
-          <h6 class="card-subtitle mb-2 text-muted">
-            ({{ a.date_earned.date() }})
-          </h6>
-          <p class="card-text">{{ a.description }}</p>
-        </div>
-      </div>
-    </div>
-  {% endfor %}
-  {% else %}
-  <p>You don't have any achievements yet. Plant more vegetables to get achievements!</p>
-  {% endif %}
+<style>
+    /* Page Header */
+    .glory-header {
+        background: linear-gradient(135deg, #ffd700, #ffb300);
+        color: white;
+        padding: 40px;
+        border-radius: 20px;
+        text-align: center;
+        margin-bottom: 40px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    .glory-title {
+        font-size: 3rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    }
+    
+    .glory-subtitle {
+        font-size: 1.3rem;
+        opacity: 0.95;
+    }
+    
+    /* Stats Bar */
+    .stats-bar {
+        background: white;
+        padding: 25px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    }
+    
+    .stat-item {
+        text-align: center;
+        padding: 10px;
+    }
+    
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #ffb300;
+        display: block;
+    }
+    
+    .stat-label {
+        font-size: 1.1rem;
+        color: #6c757d;
+        margin-top: 5px;
+    }
+    
+    /* Achievement Cards */
+    .achievement-card {
+        background: white;
+        border: none;
+        border-radius: 20px;
+        overflow: hidden;
+        transition: all 0.3s;
+        height: 100%;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        position: relative;
+    }
+    
+    .achievement-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 5px;
+        background: linear-gradient(90deg, #ffd700, #ffb300);
+    }
+    
+    .achievement-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    }
+    
+    .achievement-icon {
+        width: 100px;
+        height: 100px;
+        margin: 20px auto;
+        display: block;
+        animation: shine 3s infinite;
+    }
+    
+    @keyframes shine {
+        0%, 100% { transform: scale(1) rotate(0deg); }
+        50% { transform: scale(1.1) rotate(5deg); }
+    }
+    
+    .achievement-name {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #2c6f4f;
+        margin-bottom: 10px;
+        text-align: center;
+    }
+    
+    .achievement-date {
+        font-size: 1rem;
+        color: #6c757d;
+        text-align: center;
+        margin-bottom: 15px;
+    }
+    
+    .achievement-description {
+        font-size: 1.1rem;
+        color: #495057;
+        text-align: center;
+        padding: 0 20px 20px;
+        line-height: 1.6;
+    }
+    
+    .achievement-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: #ffd700;
+        color: white;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+    
+    .achievement-new {
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.7); }
+        70% { box-shadow: 0 0 0 20px rgba(255, 215, 0, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0); }
+    }
+    
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        background: linear-gradient(135deg, #f8f9fa, #e8f5e9);
+        border-radius: 20px;
+        margin: 40px auto;
+        max-width: 600px;
+    }
+    
+    .empty-icon {
+        font-size: 5rem;
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+    
+    .empty-title {
+        font-size: 1.8rem;
+        color: #2c6f4f;
+        margin-bottom: 15px;
+        font-weight: 600;
+    }
+    
+    .empty-text {
+        font-size: 1.2rem;
+        color: #6c757d;
+        margin-bottom: 30px;
+    }
+    
+    .empty-action {
+        display: inline-block;
+        padding: 15px 35px;
+        background: linear-gradient(135deg, #4a7c59, #2c6f4f);
+        color: white;
+        border-radius: 50px;
+        text-decoration: none;
+        font-size: 1.2rem;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+    
+    .empty-action:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        color: white;
+        text-decoration: none;
+    }
+    
+    /* Progress Bar */
+    .progress-section {
+        background: white;
+        padding: 25px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    }
+    
+    .progress-title {
+        font-size: 1.3rem;
+        color: #2c6f4f;
+        margin-bottom: 15px;
+        font-weight: 600;
+    }
+    
+    .achievement-progress {
+        height: 30px;
+        background: #e8f5e9;
+        border-radius: 15px;
+        overflow: hidden;
+        position: relative;
+    }
+    
+    .achievement-progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, #ffd700, #ffb300);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        font-size: 1.1rem;
+        transition: width 1s ease;
+        animation: progressAnimation 2s ease;
+    }
+    
+    @keyframes progressAnimation {
+        from { width: 0; }
+    }
+    
+    /* Category Filters */
+    .filter-tabs {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+    }
+    
+    .filter-tab {
+        padding: 10px 25px;
+        background: white;
+        border: 2px solid #e8f5e9;
+        border-radius: 25px;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        color: #2c6f4f;
+        font-weight: 500;
+    }
+    
+    .filter-tab:hover, .filter-tab.active {
+        background: linear-gradient(135deg, #ffd700, #ffb300);
+        color: white;
+        border-color: #ffd700;
+        transform: scale(1.05);
+    }
+    
+    /* Motivational Quote */
+    .motivation-box {
+        background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+        padding: 25px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        text-align: center;
+        border-left: 5px solid #ff9800;
+    }
+    
+    .motivation-quote {
+        font-size: 1.3rem;
+        font-style: italic;
+        color: #e65100;
+        margin-bottom: 10px;
+    }
+    
+    .motivation-author {
+        font-size: 1rem;
+        color: #6c757d;
+    }
+</style>
+
+<!-- Page Header -->
+<div class="glory-header">
+    <h1 class="glory-title">🏆 Glory Hall</h1>
+    <p class="glory-subtitle">Your Journey of Achievements</p>
 </div>
+
+{% if achievements %}
+    <!-- Stats Bar -->
+    <div class="stats-bar">
+        <div class="row">
+            <div class="col-md-3 col-6">
+                <div class="stat-item">
+                    <span class="stat-value">{{ achievements|length }}</span>
+                    <span class="stat-label">Total Achievements</span>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="stat-item">
+                    <span class="stat-value" id="weeklyCount">0</span>
+                    <span class="stat-label">This Week</span>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="stat-item">
+                    <span class="stat-value">🌟</span>
+                    <span class="stat-label">Level {{ (achievements|length // 5) + 1 }}</span>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="stat-item">
+                    <span class="stat-value">{{ ((achievements|length / 20) * 100)|round|int }}%</span>
+                    <span class="stat-label">Collection</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Progress Section -->
+    <div class="progress-section">
+        <div class="progress-title">
+            Progress to Next Level ({{ achievements|length }}/{{ ((achievements|length // 5) + 1) * 5 }})
+        </div>
+        <div class="achievement-progress">
+            <div class="achievement-progress-bar" style="width: {{ ((achievements|length % 5) / 5 * 100)|round|int }}%">
+                {{ ((achievements|length % 5) / 5 * 100)|round|int }}%
+            </div>
+        </div>
+    </div>
+    
+    <!-- Motivational Quote -->
+    <div class="motivation-box">
+        <div class="motivation-quote">
+            "Every achievement starts with the decision to try."
+        </div>
+        <div class="motivation-author">- Your journey matters</div>
+    </div>
+    
+    <!-- Filter Tabs -->
+    <div class="filter-tabs">
+        <button class="filter-tab active" onclick="filterAchievements('all')">All ({{ achievements|length }})</button>
+        <button class="filter-tab" onclick="filterAchievements('recent')">Recent</button>
+    </div>
+    
+    <!-- Achievement Cards -->
+    <div class="row" id="achievements-container">
+        {% for a in achievements %}
+            <div class="col-lg-4 col-md-6 mb-4 achievement-item" 
+                 data-date="{{ a.date_earned.isoformat() }}"
+                 data-category="all">
+                <div class="achievement-card" data-achievement-date="{{ a.date_earned.isoformat() }}">
+                    <span class="achievement-badge" style="display: none;">NEW!</span>
+                    <img src="{{ url_for('static', filename='pics/medal.png') }}" 
+                         class="achievement-icon" 
+                         alt="{{ a.name }}" />
+                    <h3 class="achievement-name">{{ a.name }}</h3>
+                    <p class="achievement-date">
+                        <i class="fas fa-calendar"></i> {{ a.date_earned.strftime('%B %d, %Y') }}
+                    </p>
+                    <p class="achievement-description">{{ a.description }}</p>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    
+{% else %}
+    <!-- Empty State -->
+    <div class="empty-state">
+        <div class="empty-icon">🏆</div>
+        <h2 class="empty-title">Your Glory Awaits!</h2>
+        <p class="empty-text">
+            Start your journey today. Every small step counts toward great achievements.
+            Plant your first vegetable and watch your glory grow!
+        </p>
+        <a href="{{ url_for('planting.plant') }}" class="empty-action">
+            <i class="fas fa-seedling"></i> Start Planting
+        </a>
+    </div>
+{% endif %}
+
+<!-- Quick Actions -->
+<div class="text-center mt-5">
+    <a href="{{ url_for('planting.plant') }}" class="btn btn-success btn-lg me-3" style="font-size: 1.2rem; padding: 12px 30px;">
+        <i class="fas fa-seedling"></i> Plant More
+    </a>
+    <a href="{{ url_for('planting.all_vegetables', id=current_user.id) }}" class="btn btn-outline-success btn-lg" style="font-size: 1.2rem; padding: 12px 30px;">
+        <i class="fas fa-leaf"></i> View Garden
+    </a>
+</div>
+
+<script>
+    // Calculate weekly achievements and set categories
+    document.addEventListener('DOMContentLoaded', function() {
+        const now = new Date();
+        const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        const threeDaysAgo = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000);
+        let weeklyCount = 0;
+        
+        // Process each achievement
+        document.querySelectorAll('.achievement-item').forEach(item => {
+            const dateStr = item.dataset.date;
+            const achievementDate = new Date(dateStr);
+            const card = item.querySelector('.achievement-card');
+            const badge = card.querySelector('.achievement-badge');
+            const name = item.querySelector('.achievement-name').textContent;
+            
+            // Count weekly achievements
+            if (achievementDate >= oneWeekAgo) {
+                weeklyCount++;
+                item.dataset.category += ' recent';
+            }
+            
+            // Add NEW badge for recent achievements
+            if (achievementDate >= threeDaysAgo) {
+                badge.style.display = 'block';
+                card.classList.add('achievement-new');
+            }
+            
+            // Categorize by type
+            if (name.includes('Special')) {
+                item.dataset.category += ' special';
+            }
+            if (name.includes('Milestone') || name.includes('10') || name.includes('25') || name.includes('50')) {
+                item.dataset.category += ' milestone';
+            }
+        });
+        
+        // Update weekly count
+        document.getElementById('weeklyCount').textContent = weeklyCount;
+        
+        // Animate on scroll
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.animation = 'fadeIn 0.6s ease forwards';
+                    observer.unobserve(entry.target);
+                }
+            });
+        });
+        
+        document.querySelectorAll('.achievement-card').forEach(card => {
+            observer.observe(card);
+        });
+    });
+    
+    // Filter achievements
+    function filterAchievements(category) {
+        const items = document.querySelectorAll('.achievement-item');
+        const tabs = document.querySelectorAll('.filter-tab');
+        
+        // Update active tab
+        tabs.forEach(tab => tab.classList.remove('active'));
+        event.target.classList.add('active');
+        
+        // Filter items
+        items.forEach(item => {
+            if (category === 'all') {
+                item.style.display = 'block';
+                item.style.animation = 'fadeIn 0.5s ease';
+            } else {
+                if (item.dataset.category.includes(category)) {
+                    item.style.display = 'block';
+                    item.style.animation = 'fadeIn 0.5s ease';
+                } else {
+                    item.style.display = 'none';
+                }
+            }
+        });
+    }
+    
+    // Add CSS animation
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    `;
+    document.head.appendChild(style);
+</script>
+
 {% endblock %}

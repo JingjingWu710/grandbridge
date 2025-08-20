@@ -483,29 +483,7 @@
       }
     });
     
-    // Check if no events are visible
-    const visibleEvents = document.querySelectorAll('.event-card:not(.hidden)');
-    const existingMsg = document.querySelector('.no-filtered-events');
-    
-    if (visibleEvents.length === 0) {
-      // Show a message if no events match the filter
-      if (!existingMsg) {
-        const noEventsMsg = document.createElement('div');
-        noEventsMsg.className = 'no-filtered-events alert alert-info text-center mt-3';
-        noEventsMsg.innerHTML = `
-          <i class="fas fa-info-circle"></i> 
-          No events match the selected filter. 
-          <button class="btn btn-sm btn-primary ms-2" onclick="filterEvents('all')">Show All</button>
-        `;
-        const container = document.querySelector('.container');
-        const navButtons = document.querySelector('.text-center.mt-5');
-        container.insertBefore(noEventsMsg, navButtons);
-      }
-    } else if (existingMsg) {
-      // Remove no events message if it exists
-      existingMsg.remove();
-    }
-  }
+
   
   // Delete confirmation
   function confirmDelete(eventId, eventTitle) {

@@ -1,27 +1,575 @@
 {% extends "layout.html" %}
 {% block content %}
-<h2>🌿 Unlock New Vegetables</h2>
-<p>You have {{ current_user.coins }} coins.</p>
-<p>Each unlock costs <strong>{{ cost }} coins</strong>.</p>
+<style>
+    /* Page Header */
+    .shop-header {
+        background: linear-gradient(135deg, #4a7c59, #2c6f4f);
+        color: white;
+        padding: 40px;
+        border-radius: 20px;
+        text-align: center;
+        margin-bottom: 40px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .shop-header::before {
+        content: '🌿';
+        position: absolute;
+        font-size: 150px;
+        opacity: 0.1;
+        right: -20px;
+        top: -20px;
+        animation: float 6s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-20px) rotate(10deg); }
+    }
+    
+    .shop-title {
+        font-size: 3rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .shop-subtitle {
+        font-size: 1.3rem;
+        opacity: 0.95;
+        position: relative;
+        z-index: 1;
+    }
+    
+    /* Coin Display */
+    .coin-display {
+        background: linear-gradient(135deg, #ffd700, #ffb300);
+        color: white;
+        padding: 30px;
+        border-radius: 20px;
+        text-align: center;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        position: relative;
+    }
+    
+    .coin-amount {
+        font-size: 3rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 15px;
+        margin-bottom: 10px;
+    }
+    
+    .coin-icon {
+        animation: spin 3s linear infinite;
+    }
+    
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    
+    .coin-label {
+        font-size: 1.2rem;
+        opacity: 0.95;
+    }
+    
+    .unlock-cost {
+        background: rgba(255,255,255,0.3);
+        padding: 10px 20px;
+        border-radius: 25px;
+        display: inline-block;
+        margin-top: 15px;
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+    
+    /* Vegetable Cards */
+    .vegetable-card {
+        background: white;
+        border: none;
+        border-radius: 20px;
+        overflow: hidden;
+        transition: all 0.3s;
+        height: 100%;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        position: relative;
+    }
+    
+    .vegetable-card:hover {
+        transform: translateY(-10px) scale(1.02);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    }
+    
+    .vegetable-card.locked {
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    }
+    
+    .vegetable-card.unlocked {
+        background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+        opacity: 0.7;
+    }
+    
+    .vegetable-image-container {
+        height: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #f1f8e9, #e8f5e9);
+        position: relative;
+    }
+    
+    .vegetable-image {
+        width: 120px;
+        height: 120px;
+        object-fit: contain;
+        transition: all 0.3s;
+    }
+    
+    .vegetable-card:hover .vegetable-image {
+        transform: scale(1.1) rotate(5deg);
+    }
+    
+    .new-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: #ff5722;
+        color: white;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0% { box-shadow: 0 0 0 0 rgba(255, 87, 34, 0.7); }
+        70% { box-shadow: 0 0 0 15px rgba(255, 87, 34, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(255, 87, 34, 0); }
+    }
+    
+    .vegetable-info {
+        padding: 20px;
+        text-align: center;
+    }
+    
+    .vegetable-name {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #2c6f4f;
+        margin-bottom: 10px;
+    }
+    
+    .vegetable-description {
+        font-size: 1rem;
+        color: #6c757d;
+        margin-bottom: 15px;
+        height: 40px;
+    }
+    
+    .vegetable-rarity {
+        display: inline-block;
+        padding: 5px 15px;
+        border-radius: 15px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-bottom: 15px;
+    }
+    
+    .rarity-common {
+        background: #e8f5e9;
+        color: #4caf50;
+    }
+    
+    .rarity-rare {
+        background: #e3f2fd;
+        color: #2196f3;
+    }
+    
+    .rarity-epic {
+        background: #f3e5f5;
+        color: #9c27b0;
+    }
+    
+    .rarity-legendary {
+        background: #fff3e0;
+        color: #ff9800;
+    }
+    
+    .unlock-button {
+        width: 100%;
+        padding: 12px;
+        font-size: 1.2rem;
+        font-weight: 600;
+        border: none;
+        border-radius: 10px;
+        transition: all 0.3s;
+        cursor: pointer;
+    }
+    
+    .unlock-button.can-afford {
+        background: linear-gradient(135deg, #4caf50, #45a049);
+        color: white;
+    }
+    
+    .unlock-button.can-afford:hover {
+        background: linear-gradient(135deg, #45a049, #4caf50);
+        transform: scale(1.05);
+    }
+    
+    .unlock-button.cannot-afford {
+        background: #e9ecef;
+        color: #6c757d;
+        cursor: not-allowed;
+    }
+    
+    .unlock-button.unlocked {
+        background: #e8f5e9;
+        color: #4caf50;
+        cursor: default;
+    }
+    
+    /* Category Tabs */
+    .category-tabs {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+    }
+    
+    .category-tab {
+        padding: 10px 25px;
+        background: white;
+        border: 2px solid #e8f5e9;
+        border-radius: 25px;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        color: #2c6f4f;
+        font-weight: 500;
+    }
+    
+    .category-tab:hover, .category-tab.active {
+        background: linear-gradient(135deg, #4a7c59, #2c6f4f);
+        color: white;
+        border-color: #4a7c59;
+        transform: scale(1.05);
+    }
+    
+    /* Empty State */
+    .all-unlocked {
+        text-align: center;
+        padding: 60px 20px;
+        background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+        border-radius: 20px;
+        margin: 40px auto;
+        max-width: 600px;
+    }
+    
+    .all-unlocked-icon {
+        font-size: 5rem;
+        margin-bottom: 20px;
+    }
+    
+    .all-unlocked-title {
+        font-size: 2rem;
+        color: #2c6f4f;
+        margin-bottom: 15px;
+        font-weight: 700;
+    }
+    
+    .all-unlocked-text {
+        font-size: 1.2rem;
+        color: #6c757d;
+        margin-bottom: 30px;
+    }
+    
+    /* Tips Section */
+    .tips-section {
+        background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+        padding: 25px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        border-left: 5px solid #ff9800;
+    }
+    
+    .tips-title {
+        font-size: 1.3rem;
+        color: #e65100;
+        margin-bottom: 15px;
+        font-weight: 600;
+    }
+    
+    .tips-list {
+        list-style: none;
+        padding: 0;
+    }
+    
+    .tips-list li {
+        font-size: 1.1rem;
+        color: #6c757d;
+        margin-bottom: 10px;
+        padding-left: 25px;
+        position: relative;
+    }
+    
+    .tips-list li:before {
+        content: '💡';
+        position: absolute;
+        left: 0;
+    }
+    
+    /* Progress Indicator */
+    .unlock-progress {
+        background: white;
+        padding: 25px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    }
+    
+    .progress-title {
+        font-size: 1.2rem;
+        color: #2c6f4f;
+        margin-bottom: 15px;
+        font-weight: 600;
+    }
+    
+    .progress-bar-container {
+        background: #e8f5e9;
+        height: 30px;
+        border-radius: 15px;
+        overflow: hidden;
+    }
+    
+    .progress-bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #4caf50, #45a049);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        transition: width 1s ease;
+    }
+    
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .vegetable-card {
+        animation: fadeIn 0.5s ease;
+    }
+</style>
 
-<div class="row">
-  {% for veg in locked %}
-    <div class="col-md-3 text-center mb-4">
-      <div class="card shadow">
-        <img src="{{ url_for('static', filename=veg.image) }}" class="card-img-top" alt="{{ veg.name }}">
-        <div class="card-body">
-          <h5 class="card-title">{{ veg.name }}</h5>
-          <form method="POST">
-            <input type="hidden" name="vegetable" value="{{ veg.key }}">
-            <button type="submit" class="btn btn-success btn-sm" {% if current_user.coins < cost %}disabled{% endif %}>
-              Unlock
-            </button>
-          </form>
-        </div>
-      </div>
-    </div>
-  {% endfor %}
+<!-- Shop Header -->
+<div class="shop-header">
+    <h1 class="shop-title">🌿 Vegetable Shop</h1>
+    <p class="shop-subtitle">Unlock new plants for your garden!</p>
 </div>
 
-<a href="{{ url_for('planting.plant') }}" class="btn btn-outline-secondary mt-3">← Back to Planting</a>
+<!-- Coin Display -->
+<div class="coin-display">
+    <div class="coin-amount">
+        <span class="coin-icon">💰</span>
+        <span>{{ current_user.coins }}</span>
+    </div>
+    <div class="coin-label">Your Coins</div>
+    <div class="unlock-cost">
+        Each unlock costs <strong>{{ cost }} coins</strong>
+    </div>
+</div>
+
+{% if locked %}
+    <!-- Progress Indicator -->
+    <div class="unlock-progress">
+        <div class="progress-title">
+            Collection Progress
+        </div>
+        <div class="progress-bar-container">
+            <div class="progress-bar-fill" id="progressBar" style="width: 0%">
+                <span id="progressText">Loading...</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Tips Section -->
+    <div class="tips-section">
+        <div class="tips-title">💡 How to Earn More Coins</div>
+        <ul class="tips-list">
+            <li>Plant vegetables daily to earn coins</li>
+            <li>Complete achievements for bonus rewards</li>
+            <li>Check in regularly for streak bonuses</li>
+            <li>Participate in community events</li>
+        </ul>
+    </div>
+    
+    <!-- Vegetable Grid -->
+    <div class="row" id="vegetables-container">
+        {% for veg in locked %}
+            <div class="col-lg-3 col-md-4 col-sm-6 mb-4 vegetable-item" 
+                 data-category="{% if current_user.coins >= cost %}affordable{% endif %} {% if loop.index <= 3 %}new{% endif %}">
+                <div class="vegetable-card locked">
+                    {% if loop.index <= 3 %}
+                        <span class="new-badge">NEW!</span>
+                    {% endif %}
+                    <div class="vegetable-image-container">
+                        <img src="{{ url_for('static', filename=veg.image) }}" 
+                             class="vegetable-image" 
+                             alt="{{ veg.name }}">
+                    </div>
+                    <div class="vegetable-info">
+                        <h3 class="vegetable-name">{{ veg.name }}</h3>
+                        <p class="vegetable-description">
+                            {% if veg.description %}
+                                {{ veg.description }}
+                            {% else %}
+                                A wonderful addition to your garden!
+                            {% endif %}
+                        </p>
+                        <div class="vegetable-rarity rarity-{{ veg.rarity|default('common') }}">
+                            {{ veg.rarity|default('Common')|title }}
+                        </div>
+                        <form method="POST" class="unlock-form">
+                            <input type="hidden" name="vegetable" value="{{ veg.key }}">
+                            <button type="submit" 
+                                    class="unlock-button {% if current_user.coins >= cost %}can-afford{% else %}cannot-afford{% endif %}"
+                                    {% if current_user.coins < cost %}disabled{% endif %}>
+                                {% if current_user.coins >= cost %}
+                                    <i class="fas fa-unlock"></i> Unlock ({{ cost }} 💰)
+                                {% else %}
+                                    <i class="fas fa-lock"></i> Need {{ cost - current_user.coins }} more coins
+                                {% endif %}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    
+{% else %}
+    <!-- All Unlocked State -->
+    <div class="all-unlocked">
+        <div class="all-unlocked-icon">🎉</div>
+        <h2 class="all-unlocked-title">Congratulations!</h2>
+        <p class="all-unlocked-text">
+            You've unlocked all available vegetables! 
+            Your garden collection is complete!
+        </p>
+        <a href="{{ url_for('planting.plant') }}" class="btn btn-success btn-lg" style="font-size: 1.2rem; padding: 15px 35px;">
+            <i class="fas fa-seedling"></i> Start Planting
+        </a>
+    </div>
+{% endif %}
+
+<!-- Quick Actions -->
+<div class="text-center mt-5">
+    <a href="{{ url_for('planting.plant') }}" class="btn btn-outline-success btn-lg me-3" style="font-size: 1.2rem; padding: 12px 30px;">
+        <i class="fas fa-arrow-left"></i> Back to Planting
+    </a>
+    <a href="{{ url_for('planting.all_vegetables', id=current_user.id) }}" class="btn btn-success btn-lg" style="font-size: 1.2rem; padding: 12px 30px;">
+        <i class="fas fa-leaf"></i> View Your Garden
+    </a>
+</div>
+
+<script>
+    // Calculate and display progress
+    document.addEventListener('DOMContentLoaded', function() {
+        // Calculate collection progress (assuming some vegetables are already unlocked)
+        const totalLocked = {{ locked|length }};
+        // Estimate total unlocked based on typical progression
+        const totalVegetables = totalLocked + 5; // Assume 5 vegetables are already unlocked
+        const totalUnlocked = totalVegetables - totalLocked;
+        const progressPercent = Math.round((totalUnlocked / totalVegetables) * 100);
+        
+        // Update progress bar
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
+        if (progressBar && progressText) {
+            progressBar.style.width = progressPercent + '%';
+            progressText.textContent = `${totalUnlocked} / ${totalVegetables}`;
+            
+            // Update title
+            const progressTitle = document.querySelector('.progress-title');
+            if (progressTitle) {
+                progressTitle.textContent = `Collection Progress (${progressPercent}% Complete)`;
+            }
+        }
+    });
+    
+    // Add unlock animation
+    document.querySelectorAll('.unlock-form').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            if (!this.querySelector('.cannot-afford')) {
+                const button = this.querySelector('.unlock-button');
+                button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Unlocking...';
+                
+                // Add success animation to card
+                const card = this.closest('.vegetable-card');
+                card.style.animation = 'unlockSuccess 0.5s ease';
+            }
+        });
+    });
+    
+    // Animation for successful unlock
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes unlockSuccess {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1) rotate(5deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+    `;
+    document.head.appendChild(style);
+    
+    // Coin animation on hover
+    document.querySelector('.coin-display').addEventListener('mouseenter', function() {
+        this.style.transform = 'scale(1.05)';
+    });
+    
+    document.querySelector('.coin-display').addEventListener('mouseleave', function() {
+        this.style.transform = 'scale(1)';
+    });
+    
+    // Add entrance animations
+    document.addEventListener('DOMContentLoaded', function() {
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.animation = 'fadeIn 0.6s ease forwards';
+                    observer.unobserve(entry.target);
+                }
+            });
+        });
+        
+        document.querySelectorAll('.vegetable-card').forEach((card, index) => {
+            card.style.opacity = '0';
+            card.style.animationDelay = `${index * 0.1}s`;
+            observer.observe(card);
+        });
+    });
+    
+    // Tooltip for locked items
+    document.querySelectorAll('.cannot-afford').forEach(button => {
+        button.addEventListener('mouseenter', function() {
+            this.style.transform = 'scale(0.95)';
+        });
+        button.addEventListener('mouseleave', function() {
+            this.style.transform = 'scale(1)';
+        });
+    });
+</script>
+
 {% endblock %}

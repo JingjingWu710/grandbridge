@@ -1,59 +1,468 @@
 {% extends "layout.html" %}
 {% block content %}
-<div class="container mt-4">
-    <h1 class="mb-4">All Families</h1>
-  <a href="{{ url_for('users.create_family') }}" class="btn btn-primary" 
-     style="font-size: 1.3rem; padding: 12px 25px; border-radius: 8px; margin-bottom: 1em; display: inline-block;">
-    Add New Family
-  </a>
+<style>
+    /* Elderly-friendly styling */
+    .families-container {
+        max-width: 1400px;
+        margin: 20px auto;
+        padding: 20px;
+    }
+    
+    .page-header {
+        background: linear-gradient(135deg, #e8f5e9, #f0f7f4);
+        padding: 30px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        border-left: 5px solid #4a7c59;
+    }
+    
+    .page-title {
+        font-size: 2.8rem;
+        color: #2c6f4f;
+        margin: 0;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    
+    .page-subtitle {
+        font-size: 1.4rem;
+        color: #666;
+        margin-top: 10px;
+    }
+    
+    .stats-bar {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+    }
+    
+    .stat-card {
+        background: white;
+        padding: 20px 30px;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        flex: 1;
+        min-width: 200px;
+        text-align: center;
+    }
+    
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #4a7c59;
+    }
+    
+    .stat-label {
+        font-size: 1.2rem;
+        color: #666;
+        margin-top: 5px;
+    }
+    
+    .btn-add-family {
+        background: linear-gradient(135deg, #4a7c59, #5a8d69);
+        color: white;
+        font-size: 1.4rem;
+        padding: 15px 30px;
+        border-radius: 10px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 30px;
+        transition: all 0.3s;
+        border: none;
+    }
+    
+    .btn-add-family:hover {
+        background: linear-gradient(135deg, #5a8d69, #4a7c59);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(74, 124, 89, 0.3);
+        color: white;
+        text-decoration: none;
+    }
+    
+    /* Family Cards Layout */
+    .families-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
+        gap: 25px;
+    }
+    
+    .family-card {
+        background: white;
+        border: 2px solid #e8f5e9;
+        border-radius: 15px;
+        padding: 25px;
+        transition: all 0.3s;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    .family-card:hover {
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        transform: translateY(-2px);
+        border-color: #4a7c59;
+    }
+    
+    .family-header {
+        border-bottom: 2px solid #e8f5e9;
+        padding-bottom: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .family-id {
+        display: inline-block;
+        background: #f0f7f4;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 1.1rem;
+        color: #4a7c59;
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+    
+    .family-name {
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: #2c6f4f;
+        margin: 10px 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .members-section {
+        margin-bottom: 20px;
+    }
+    
+    .members-title {
+        font-size: 1.3rem;
+        color: #555;
+        margin-bottom: 15px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .member-list {
+        background: #f8fafb;
+        border-radius: 10px;
+        padding: 15px;
+    }
+    
+    .member-item {
+        padding: 12px;
+        background: white;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        border-left: 3px solid #4a7c59;
+        font-size: 1.2rem;
+    }
+    
+    .member-item:last-child {
+        margin-bottom: 0;
+    }
+    
+    .member-name {
+        font-weight: 600;
+        color: #333;
+        font-size: 1.3rem;
+        margin-bottom: 5px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .member-details {
+        color: #666;
+        font-size: 1.15rem;
+        margin-left: 30px;
+        line-height: 1.6;
+    }
+    
+    .member-detail-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 5px 0;
+    }
+    
+    .no-members {
+        font-style: italic;
+        color: #999;
+        font-size: 1.2rem;
+        padding: 20px;
+        text-align: center;
+        background: #f5f5f5;
+        border-radius: 8px;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 15px;
+        padding-top: 20px;
+        border-top: 2px solid #f0f0f0;
+    }
+    
+    .btn-action {
+        padding: 12px 25px;
+        border-radius: 8px;
+        font-size: 1.2rem;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        flex: 1;
+        justify-content: center;
+    }
+    
+    .btn-edit {
+        background: #e3f2fd;
+        color: #1976d2;
+        border: 2px solid #2196f3;
+    }
+    
+    .btn-edit:hover {
+        background: #2196f3;
+        color: white;
+        transform: translateY(-2px);
+    }
+    
+    .btn-remove {
+        background: #ffebee;
+        color: #c62828;
+        border: 2px solid #f44336;
+    }
+    
+    .btn-remove:hover {
+        background: #f44336;
+        color: white;
+        transform: translateY(-2px);
+    }
+    
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    .empty-icon {
+        font-size: 5rem;
+        margin-bottom: 20px;
+        opacity: 0.3;
+    }
+    
+    .empty-title {
+        font-size: 2rem;
+        color: #666;
+        margin-bottom: 15px;
+    }
+    
+    .empty-text {
+        font-size: 1.4rem;
+        color: #999;
+        margin-bottom: 30px;
+    }
+    
+    /* Search/Filter Bar */
+    .filter-bar {
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        margin-bottom: 25px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    .search-input {
+        width: 100%;
+        padding: 15px;
+        font-size: 1.3rem;
+        border: 2px solid #ddd;
+        border-radius: 10px;
+        transition: all 0.3s;
+    }
+    
+    .search-input:focus {
+        outline: none;
+        border-color: #4a7c59;
+        box-shadow: 0 0 0 3px rgba(74, 124, 89, 0.1);
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .families-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .action-buttons {
+            flex-direction: column;
+        }
+    }
+</style>
+
+<div class="families-container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1 class="page-title">
+            <span>👨‍👩‍👧‍👦</span> All Families
+        </h1>
+        <p class="page-subtitle">Manage and view all family groups in the community</p>
+    </div>
+
+    <!-- Statistics Bar -->
     {% if families %}
-        <table class="table table-bordered table-hover">
-            <thead class="thead-dark">
-                <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>Members (Full Name / Address / Contact Info)</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for family in families %}
-                <tr>
-                    <td>{{ family.id }}</td>
-                    <td>{{ family.name }}</td>
-                    <td>
-                        {% if family.members %}
-                            <ul class="list-unstyled mb-0">
-                                {% for member in family.members %}
-                                <li>
-                                    <strong>{{ member.username }}</strong>
-                                    {% if member.address %} — {{ member.address }}{% endif %}
-                                    {% if member.contact_info %} — {{ member.contact_info }}{% endif %}
-                                </li>
-                                {% endfor %}
-                            </ul>
-                        {% else %}
-                            <em>No members</em>
-                        {% endif %}
-                    </td>
-                    <td>
-                        <a href="{{ url_for('users.edit_family', family_id=family.id) }}" 
-                           class="btn btn-sm btn-primary">Edit</a>
-                        <form action="{{ url_for('users.remove_admin', family_id=family.id) }}" 
-                              method="POST" style="display:inline;">
-                            <button type="submit" 
-                                    class="btn btn-sm btn-danger" 
-                                    onclick="return confirm('Remove this family?');">
-                                Remove
-                            </button>
-                        </form>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+
+        <div class="stat-card">
+            <div class="stat-number">{{ families|map(attribute='members')|map('length')|sum }}</div>
+            <div class="stat-label">Total Members</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ families|selectattr('members')|list|length }}</div>
+            <div class="stat-label">Active Families</div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Add Family Button -->
+    <a href="{{ url_for('users.create_family') }}" class="btn-add-family">
+        <span>➕</span> Add New Family
+    </a>
+
+    <!-- Search/Filter Bar -->
+    {% if families %}
+    <div class="filter-bar">
+        <input type="text" 
+               class="search-input" 
+               id="searchInput" 
+               placeholder="🔍 Search families by name or member..." 
+               onkeyup="filterFamilies()">
+    </div>
+    {% endif %}
+
+    <!-- Families Grid -->
+    {% if families %}
+    <div class="families-grid" id="familiesGrid">
+        {% for family in families %}
+        <div class="family-card" data-family-name="{{ family.name|lower }}" 
+             data-members="{{ family.members|map(attribute='username')|join(' ')|lower }}">
+            <!-- Family Header -->
+            <div class="family-header">
+                <span class="family-id">ID: {{ family.id }}</span>
+                <h2 class="family-name">
+                    <span>🏠</span> {{ family.name }}
+                </h2>
+            </div>
+
+            <!-- Members Section -->
+            <div class="members-section">
+                <h3 class="members-title">
+                    <span>👥</span> Family Members ({{ family.members|length }})
+                </h3>
+                
+                {% if family.members %}
+                <div class="member-list">
+                    {% for member in family.members %}
+                    <div class="member-item">
+                        <div class="member-name">
+                            <span>👤</span> {{ member.username }}
+                        </div>
+                        <div class="member-details">
+                            {% if member.address %}
+                            <div class="member-detail-item">
+                                <span>📍</span> {{ member.address }}
+                            </div>
+                            {% endif %}
+                            {% if member.contact_info %}
+                            <div class="member-detail-item">
+                                <span>📞</span> {{ member.contact_info }}
+                            </div>
+                            {% endif %}
+                            {% if not member.address and not member.contact_info %}
+                            <div class="member-detail-item" style="color: #999; font-style: italic;">
+                                No contact information available
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="no-members">
+                    No members in this family yet
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <a href="{{ url_for('users.edit_family', family_id=family.id) }}" 
+                   class="btn-action btn-edit">
+                    <span>✏️</span> Edit
+                </a>
+                <form action="{{ url_for('users.remove_admin', family_id=family.id) }}" 
+                      method="POST" 
+                      style="flex: 1;"
+                      onsubmit="return confirmRemove('{{ family.name }}');">
+                    <button type="submit" class="btn-action btn-remove" style="width: 100%;">
+                        <span>🗑️</span> Remove
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
     {% else %}
-        <p>You are not managing any families yet.</p>
+    <!-- Empty State -->
+    <div class="empty-state">
+        <div class="empty-icon">👨‍👩‍👧‍👦</div>
+        <h2 class="empty-title">No Families Yet</h2>
+        <p class="empty-text">You are not managing any families at the moment.</p>
+        <a href="{{ url_for('users.create_family') }}" class="btn-add-family">
+            <span>➕</span> Create Your First Family
+        </a>
+    </div>
     {% endif %}
 </div>
+
+<script>
+    // Search functionality
+    function filterFamilies() {
+        const input = document.getElementById('searchInput');
+        const filter = input.value.toLowerCase();
+        const cards = document.querySelectorAll('.family-card');
+        
+        cards.forEach(card => {
+            const familyName = card.dataset.familyName || '';
+            const members = card.dataset.members || '';
+            
+            if (familyName.includes(filter) || members.includes(filter)) {
+                card.style.display = 'block';
+                card.style.animation = 'fadeIn 0.3s';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+    
+    // Confirm removal
+    function confirmRemove(familyName) {
+        return confirm(`Are you sure you want to remove "${familyName}" from your managed families?\n\nThis action cannot be undone.`);
+    }
+    
+    // Animation
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</script>
+
 {% endblock %}

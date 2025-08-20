@@ -557,11 +557,6 @@ class FoodMapManager {
                     <p style="font-size: 1.3rem; color: #4a7c59;">${location.distance.toFixed(1)} km</p>
                 </div>
             ` : ''}
-            <div style="margin: 20px 0;">
-                <p><strong>ℹ️ Additional Information:</strong></p>
-                <p>This location is part of our community food sharing network. 
-                Please check with the location directly for current availability and hours.</p>
-            </div>
         `;
         
         document.getElementById('locationModal').classList.add('show');

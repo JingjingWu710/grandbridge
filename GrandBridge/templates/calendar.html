@@ -462,34 +462,7 @@
         });
     });
 
-    // Add keyboard navigation
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'ArrowLeft' && e.ctrlKey) {
-            // Go to previous month
-            window.location.href = "{{ url_for('calendar.calendar_view', year=prev_year, month=prev_month) }}";
-        } else if (e.key === 'ArrowRight' && e.ctrlKey) {
-            // Go to next month
-            window.location.href = "{{ url_for('calendar.calendar_view', year=next_year, month=next_month) }}";
-        } else if (e.key === 't' && e.ctrlKey) {
-            // Go to today
-            window.location.href = "{{ url_for('calendar.calendar_view') }}";
-        }
-    });
 
-    // Tooltip for keyboard shortcuts
-    const shortcutTooltip = document.createElement('div');
-    shortcutTooltip.innerHTML = `
-        <div style="position: fixed; bottom: 20px; right: 20px; background: #333; color: white; 
-                    padding: 10px 15px; border-radius: 8px; font-size: 0.9rem; opacity: 0.8; z-index: 1000;">
-            Keyboard shortcuts: Ctrl+← Previous | Ctrl+→ Next | Ctrl+T Today
-        </div>
-    `;
-    document.body.appendChild(shortcutTooltip);
-    
-    // Hide tooltip after 5 seconds
-    setTimeout(() => {
-        shortcutTooltip.style.display = 'none';
-    }, 5000);
 </script>
 
 {% endblock %}

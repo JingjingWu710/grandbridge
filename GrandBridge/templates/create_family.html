@@ -1,43 +1,366 @@
 {% extends "layout.html" %}
 {% block content %}
-<div class="content-section">
+<style>
+    /* Elderly-friendly form styling */
+    .form-container {
+        max-width: 700px;
+        margin: 30px auto;
+        padding: 40px;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+    
+    .form-header {
+        background: linear-gradient(135deg, #e8f5e9, #f0f7f4);
+        padding: 30px;
+        border-radius: 15px;
+        margin: -40px -40px 30px -40px;
+        text-align: center;
+        border-bottom: 3px solid #4a7c59;
+    }
+    
+    .form-title {
+        font-size: 2.5rem;
+        color: #2c6f4f;
+        margin: 0;
+        font-weight: 600;
+    }
+    
+    .form-subtitle {
+        font-size: 1.3rem;
+        color: #666;
+        margin-top: 10px;
+    }
+    
+    .form-section {
+        margin-bottom: 30px;
+        padding: 25px;
+        background: #f8fafb;
+        border-radius: 12px;
+        border-left: 4px solid #4a7c59;
+    }
+    
+    .form-group {
+        margin-bottom: 25px;
+    }
+    
+    .form-label {
+        font-size: 1.4rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .form-label-icon {
+        font-size: 1.6rem;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 15px;
+        font-size: 1.3rem;
+        border: 2px solid #ddd;
+        border-radius: 10px;
+        transition: all 0.3s;
+        background: white;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: #4a7c59;
+        box-shadow: 0 0 0 3px rgba(74, 124, 89, 0.1);
+    }
+    
+    .form-control.is-invalid {
+        border-color: #dc3545;
+        background: #fff5f5;
+    }
+    
+    .help-text {
+        background: #fff9e6;
+        padding: 20px;
+        border-radius: 10px;
+        margin: 20px 0;
+        border-left: 4px solid #ffa726;
+        font-size: 1.2rem;
+        line-height: 1.6;
+    }
+    
+    .help-text-title {
+        font-weight: 600;
+        color: #f57c00;
+        margin-bottom: 10px;
+        font-size: 1.3rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .help-text ul {
+        margin: 10px 0 0 20px;
+        padding: 0;
+    }
+    
+    .help-text li {
+        margin-bottom: 8px;
+        color: #666;
+    }
+    
+    .error-feedback {
+        background: #fee;
+        border: 1px solid #fcc;
+        border-radius: 8px;
+        padding: 10px 15px;
+        margin-top: 10px;
+        color: #c00;
+        font-size: 1.15rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .error-icon {
+        font-size: 1.3rem;
+    }
+    
+    .btn-submit {
+        background: linear-gradient(135deg, #4a7c59, #5a8d69);
+        color: white;
+        padding: 18px 40px;
+        font-size: 1.5rem;
+        font-weight: 600;
+        border: none;
+        border-radius: 50px;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        margin-top: 20px;
+        box-shadow: 0 4px 15px rgba(74, 124, 89, 0.3);
+    }
+    
+    .btn-submit:hover {
+        background: linear-gradient(135deg, #5a8d69, #4a7c59);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(74, 124, 89, 0.4);
+    }
+    
+    .btn-submit:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+        transform: none;
+    }
+    
+    .btn-cancel {
+        background: #f5f5f5;
+        color: #666;
+        padding: 18px 40px;
+        font-size: 1.5rem;
+        border: 2px solid #ddd;
+        border-radius: 50px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        margin-left: 15px;
+        transition: all 0.3s;
+    }
+    
+    .btn-cancel:hover {
+        background: #e5e5e5;
+        border-color: #bbb;
+    }
+    
+    .divider {
+        text-align: center;
+        margin: 30px 0;
+        position: relative;
+    }
+    
+    .divider::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: #ddd;
+    }
+    
+    .divider-text {
+        background: white;
+        padding: 0 20px;
+        position: relative;
+        font-size: 1.2rem;
+        color: #999;
+        font-weight: 600;
+    }
+    
+    .option-cards {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .option-card {
+        padding: 20px;
+        border: 2px solid #e8f5e9;
+        border-radius: 12px;
+        background: white;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-align: center;
+    }
+    
+    .option-card:hover {
+        background: #e8f5e9;
+        border-color: #4a7c59;
+        transform: scale(1.02);
+    }
+    
+    .option-card.selected {
+        background: #e8f5e9;
+        border-color: #4a7c59;
+        box-shadow: 0 0 0 3px rgba(74, 124, 89, 0.2);
+    }
+    
+    .option-icon {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+    }
+    
+    .option-title {
+        font-size: 1.4rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 5px;
+    }
+    
+    .option-desc {
+        font-size: 1.1rem;
+        color: #666;
+    }
+</style>
+
+<div class="form-container">
+    <!-- Form Header -->
+    <div class="form-header">
+        <h1 class="form-title">👨‍👩‍👧‍👦 Add Family</h1>
+        <p class="form-subtitle">Create a new family or join an existing one</p>
+    </div>
+
+    <!-- Help Information -->
+    <div class="help-text">
+        <div class="help-text-title">
+            <span>💡</span> How this works:
+        </div>
+        <ul>
+            <li><strong>Create New Family:</strong> Leave the ID field empty and enter a family name</li>
+            <li><strong>Join Existing Family:</strong> Enter the family ID you received from your family admin</li>
+            <li>Family IDs are unique codes like "1" or "123"</li>
+        </ul>
+    </div>
+
+    <!-- Form -->
     <form method="POST" action="">
         {{ form.hidden_tag() }}
-        <fieldset class="form-group">
-            <legend class="border-bottom mb-4">Add Family</legend>
+        
+        <div class="form-section">
+            <!-- Family ID Field -->
             <div class="form-group">
-                {{ form.id.label(class="form-control-label") }}
+                <label class="form-label">
+                    <span class="form-label-icon">🔑</span>
+                    {{ form.id.label.text }}
+                    <span style="font-weight: normal; color: #999; font-size: 1.2rem;">(Optional)</span>
+                </label>
+                
                 {% if form.id.errors %}
-                    {{ form.id(class="form-control form-control-lg is-invalid") }}
-                    <div class="invalid-feedback">
+                    {{ form.id(class="form-control is-invalid", placeholder="e.g., FAM123 or leave empty for new family") }}
+                    <div class="error-feedback">
+                        <span class="error-icon">⚠️</span>
                         {% for error in form.id.errors %}
                             <span>{{ error }}</span>
                         {% endfor %}
                     </div>
                 {% else %}
-                    {{ form.id(class="form-control form-control-lg") }}
+                    {{ form.id(class="form-control", placeholder="e.g., 123 or leave empty for new family") }}
                 {% endif %}
+                
+                <div style="margin-top: 10px; font-size: 1.1rem; color: #666; padding-left: 10px;">
+                    📝 Leave empty to create a new family, or enter existing family ID to join
+                </div>
+            </div>
+
+            <!-- Family Name Field -->
             <div class="form-group">
-                {{ form.name.label(class="form-control-label") }}
+                <label class="form-label">
+                    <span class="form-label-icon">👨‍👩‍👧‍👦</span>
+                    {{ form.name.label.text }}
+                    <span style="color: #dc3545;">*</span>
+                </label>
+                
                 {% if form.name.errors %}
-                    {{ form.name(class="form-control form-control-lg is-invalid") }}
-                    <div class="invalid-feedback">
+                    {{ form.name(class="form-control is-invalid", placeholder="e.g., The Smith Family") }}
+                    <div class="error-feedback">
+                        <span class="error-icon">⚠️</span>
                         {% for error in form.name.errors %}
                             <span>{{ error }}</span>
                         {% endfor %}
                     </div>
                 {% else %}
-                    {{ form.name(class="form-control form-control-lg") }}
+                    {{ form.name(class="form-control", placeholder="e.g., The Smith Family") }}
                 {% endif %}
+                
+                <div style="margin-top: 10px; font-size: 1.1rem; color: #666; padding-left: 10px;">
+                    📝 Enter a name for the family group
+                </div>
             </div>
-        </fieldset>
-            <small class="form-text text-muted">
-                Leave ID section blank to create a new family.<br />
-                If you want to add an existing family, please enter the ID.
-            </small>
-        <div class="form-group">
-            {{ form.submit(class="btn btn-outline-info") }}
+        </div>
+
+        <!-- Action Buttons -->
+        <div style="text-align: center; margin-top: 40px;">
+            {{ form.submit(class="btn-submit") }}
+            <a href="{{ url_for('main.home') }}" class="btn-cancel">
+                Cancel
+            </a>
         </div>
     </form>
-</div>
+
+
+
+<script>
+    // Auto-detect based on ID field
+    document.addEventListener('DOMContentLoaded', function() {
+        const idField = document.querySelector('input[name="id"]');
+        if (idField && idField.value) {
+            selectOption('existing');
+        } else {
+            selectOption('new');
+        }
+        
+        // Listen for changes to ID field
+        idField.addEventListener('input', function() {
+            if (this.value) {
+                selectOption('existing');
+            }
+        });
+    });
+    
+    // Form validation
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const nameField = document.querySelector('input[name="name"]');
+        if (!nameField.value.trim()) {
+            e.preventDefault();
+            alert('Please enter a family name');
+            nameField.focus();
+        }
+    });
+</script>
+
 {% endblock content %}

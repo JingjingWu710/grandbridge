@@ -138,3 +138,23 @@ def food_record():
         options(db.joinedload(FoodRecord.entries)).\
         all()
     return render_template('food_record.html', records=records)
+
+@nutrition.route("/delete_record/<int:record_id>", methods=['POST'])
+@login_required
+def delete_record(record_id):
+    record = FoodRecord.query.get_or_404(record_id)
+    
+    # Security check: ensure the user owns this record
+    if record.user_id != current_user.id:
+        flash('You do not have permission to delete this record.', 'danger')
+        return redirect(url_for('nutrition.food_record'))
+    
+    try:
+        db.session.delete(record)
+        db.session.commit()
+        flash('Food record deleted successfully.', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error deleting record: {str(e)}', 'danger')
+    
+    return redirect(url_for('nutrition.food_record'))

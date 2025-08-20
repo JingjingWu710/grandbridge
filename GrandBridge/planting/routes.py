@@ -784,10 +784,10 @@ def view_vegetable(veg_id):
     # If harvested, show a simple completion page or redirect to garden
     return render_template("vegetable_complete.html", veg=veg, id=current_user.id)
 
-@planting.route("/plant/all_vegetables/<int:id>")
+@planting.route("/plant/all_vegetables")
 @login_required
-def all_vegetables(id):
-    veg = Vegetable.query.filter_by(userid=id).all()
+def all_vegetables():
+    veg = Vegetable.query.filter_by(userid=current_user.id).all()
     return render_template("vegetables.html", veg=veg)
 
 @planting.route("/plant/guide", methods=['GET'])
@@ -798,7 +798,7 @@ def fake_plant():
 @login_required
 def glory_hall():
     achievements = Achievement.query.filter_by(user_id=current_user.id).all()
-    return render_template("glory_hall.html", achievements=achievements)
+    return render_template("glory_hall.html", achievements=achievements, timedelta=timedelta)
 
 def update_user_stats():
     # print("update user stats")
