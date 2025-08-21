@@ -183,11 +183,6 @@
         margin-bottom: 15px;
     }
     
-    .rarity-common {
-        background: #e8f5e9;
-        color: #4caf50;
-    }
-    
     .rarity-rare {
         background: #e3f2fd;
         color: #2196f3;
@@ -328,39 +323,6 @@
         left: 0;
     }
     
-    /* Progress Indicator */
-    .unlock-progress {
-        background: white;
-        padding: 25px;
-        border-radius: 15px;
-        margin-bottom: 30px;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-    }
-    
-    .progress-title {
-        font-size: 1.2rem;
-        color: #2c6f4f;
-        margin-bottom: 15px;
-        font-weight: 600;
-    }
-    
-    .progress-bar-container {
-        background: #e8f5e9;
-        height: 30px;
-        border-radius: 15px;
-        overflow: hidden;
-    }
-    
-    .progress-bar-fill {
-        height: 100%;
-        background: linear-gradient(90deg, #4caf50, #45a049);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-weight: 600;
-        transition: width 1s ease;
-    }
     
     /* Animations */
     @keyframes fadeIn {
@@ -392,17 +354,6 @@
 </div>
 
 {% if locked %}
-    <!-- Progress Indicator -->
-    <div class="unlock-progress">
-        <div class="progress-title">
-            Collection Progress
-        </div>
-        <div class="progress-bar-container">
-            <div class="progress-bar-fill" id="progressBar" style="width: 0%">
-                <span id="progressText">Loading...</span>
-            </div>
-        </div>
-    </div>
     
     <!-- Tips Section -->
     <div class="tips-section">
@@ -438,9 +389,6 @@
                                 A wonderful addition to your garden!
                             {% endif %}
                         </p>
-                        <div class="vegetable-rarity rarity-{{ veg.rarity|default('common') }}">
-                            {{ veg.rarity|default('Common')|title }}
-                        </div>
                         <form method="POST" class="unlock-form">
                             <input type="hidden" name="vegetable" value="{{ veg.key }}">
                             <button type="submit" 
@@ -485,29 +433,6 @@
 </div>
 
 <script>
-    // Calculate and display progress
-    document.addEventListener('DOMContentLoaded', function() {
-        // Calculate collection progress (assuming some vegetables are already unlocked)
-        const totalLocked = {{ locked|length }};
-        // Estimate total unlocked based on typical progression
-        const totalVegetables = totalLocked + 5; // Assume 5 vegetables are already unlocked
-        const totalUnlocked = totalVegetables - totalLocked;
-        const progressPercent = Math.round((totalUnlocked / totalVegetables) * 100);
-        
-        // Update progress bar
-        const progressBar = document.getElementById('progressBar');
-        const progressText = document.getElementById('progressText');
-        if (progressBar && progressText) {
-            progressBar.style.width = progressPercent + '%';
-            progressText.textContent = `${totalUnlocked} / ${totalVegetables}`;
-            
-            // Update title
-            const progressTitle = document.querySelector('.progress-title');
-            if (progressTitle) {
-                progressTitle.textContent = `Collection Progress (${progressPercent}% Complete)`;
-            }
-        }
-    });
     
     // Add unlock animation
     document.querySelectorAll('.unlock-form').forEach(form => {

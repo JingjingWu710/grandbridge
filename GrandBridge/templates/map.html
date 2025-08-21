@@ -472,10 +472,9 @@
         let userAutocomplete = null;
         let tempMarker = null;
         
-        function initMap() {
+        window.initMap = function initMap() {
             console.log('Initializing map...');
             
-            // Initialize map centered on Cardiff
             map = new google.maps.Map(document.getElementById('map'), {
                 zoom: 12,
                 center: { lat: 51.4816, lng: -3.1791 },

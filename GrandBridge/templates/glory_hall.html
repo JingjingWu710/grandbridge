@@ -314,18 +314,6 @@
         </div>
     </div>
     
-    <!-- Progress Section -->
-    <div class="progress-section">
-        <div class="progress-title">
-            Progress to Next Level ({{ achievements|length }}/{{ ((achievements|length // 5) + 1) * 5 }})
-        </div>
-        <div class="achievement-progress">
-            <div class="achievement-progress-bar" style="width: {{ ((achievements|length % 5) / 5 * 100)|round|int }}%">
-                {{ ((achievements|length % 5) / 5 * 100)|round|int }}%
-            </div>
-        </div>
-    </div>
-    
     <!-- Motivational Quote -->
     <div class="motivation-box">
         <div class="motivation-quote">

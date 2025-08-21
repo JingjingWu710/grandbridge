@@ -790,9 +790,6 @@ def all_vegetables():
     veg = Vegetable.query.filter_by(userid=current_user.id).all()
     return render_template("vegetables.html", veg=veg)
 
-@planting.route("/plant/guide", methods=['GET'])
-def fake_plant():
-    return render_template("plant_guide.html")
 
 @planting.route("/glory_hall")
 @login_required
