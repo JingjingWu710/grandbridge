@@ -225,6 +225,185 @@
         color: #6c757d;
     }
     
+    /* Guidance System Styles - UPDATED FOR BRIGHTER TOOLTIP */
+    .guidance-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 9998;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+        opacity: 0;
+    }
+
+    .guidance-overlay.active {
+        pointer-events: auto;
+        opacity: 1;
+    }
+
+    .guidance-highlight {
+        position: fixed;
+        border: 3px solid #4CAF50;
+        border-radius: 8px;
+        box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.7);
+        z-index: 9999;
+        transition: all 0.3s ease;
+        pointer-events: none;
+    }
+
+    /* BRIGHTER TOOLTIP WITH ENHANCED VISIBILITY */
+    .guidance-tooltip {
+        position: fixed;
+        background: linear-gradient(135deg, #ffffff 0%, #f0fff4 100%);
+        border-radius: 12px;
+        padding: 20px;
+        max-width: 350px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15), 
+                    0 0 40px rgba(76, 175, 80, 0.3),
+                    inset 0 0 20px rgba(255, 255, 255, 0.8);
+        z-index: 10000;
+        animation: guidanceFadeIn 0.3s ease;
+        border: 2px solid rgba(76, 175, 80, 0.4);
+    }
+
+    .guidance-tooltip::before {
+        content: '';
+        position: absolute;
+        width: 0;
+        height: 0;
+        border-style: solid;
+    }
+
+    .guidance-tooltip.top::before {
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        border-width: 10px 10px 0 10px;
+        border-color: #f0fff4 transparent transparent transparent;
+    }
+
+    .guidance-tooltip.bottom::before {
+        top: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        border-width: 0 10px 10px 10px;
+        border-color: transparent transparent #f0fff4 transparent;
+    }
+
+    .guidance-tooltip.left::before {
+        right: -10px;
+        top: 50%;
+        transform: translateY(-50%);
+        border-width: 10px 0 10px 10px;
+        border-color: transparent transparent transparent #f0fff4;
+    }
+
+    .guidance-tooltip.right::before {
+        left: -10px;
+        top: 50%;
+        transform: translateY(-50%);
+        border-width: 10px 10px 10px 0;
+        border-color: transparent #f0fff4 transparent transparent;
+    }
+
+    /* ENHANCED TITLE AND CONTENT STYLING */
+    .guidance-title {
+        font-size: 19px;
+        font-weight: bold;
+        margin-bottom: 12px;
+        color: #1b5e3f;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+
+    .guidance-content {
+        font-size: 15px;
+        color: #333;
+        line-height: 1.6;
+        margin-bottom: 15px;
+        background: linear-gradient(135deg, rgba(76, 175, 80, 0.08), rgba(129, 199, 132, 0.05));
+        padding: 12px;
+        border-radius: 8px;
+        border-left: 3px solid #4CAF50;
+    }
+
+    /* NAVIGATION TIP HIGHLIGHT */
+    .guidance-content .nav-tip {
+        display: inline-block;
+        background: #fff3e0;
+        color: #e65100;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-weight: 600;
+        margin-top: 8px;
+    }
+
+    .guidance-buttons {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+    }
+
+    .guidance-btn {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: all 0.2s;
+        font-weight: 500;
+    }
+
+    .guidance-btn-skip {
+        background: #f0f0f0;
+        color: #666;
+    }
+
+    .guidance-btn-next {
+        background: linear-gradient(135deg, #4CAF50, #45a049);
+        color: white;
+        box-shadow: 0 2px 5px rgba(76, 175, 80, 0.3);
+    }
+
+    .guidance-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+    }
+
+    .start-tour-btn {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        background: linear-gradient(135deg, #4CAF50, #45a049);
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 50px;
+        font-size: 16px;
+        cursor: pointer;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+        transition: all 0.3s;
+    }
+
+    .start-tour-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    @keyframes guidanceFadeIn {
+        from { 
+            opacity: 0; 
+            transform: scale(0.9); 
+        }
+        to { 
+            opacity: 1; 
+            transform: scale(1); 
+        }
+    }
+    
     /* Animations */
     @keyframes fadeInDown {
         from {
@@ -270,6 +449,15 @@
         .feature-card {
             margin-bottom: 20px;
         }
+        
+        .guidance-tooltip {
+            max-width: 280px;
+        }
+        
+        .start-tour-btn {
+            bottom: 20px;
+            right: 20px;
+        }
     }
 </style>
 
@@ -277,7 +465,7 @@
     <!-- Logged In User View -->
     
     <!-- Welcome Back Message -->
-    <div class="welcome-message">
+    <div class="welcome-message" id="welcome-section">
         <h2 class="welcome-title">
             <i class="fas fa-sun"></i> Welcome back, {{ current_user.username }}!
         </h2>
@@ -292,30 +480,30 @@
     
     {% if not current_user.is_admin %}
         <!-- User Stats -->
-        <div class="stats-section">
+        <div class="stats-section" id="stats-section">
             <h2 class="section-title">Your Progress</h2>
             <div class="row">
                 <div class="col-md-3">
                     <div class="stat-item">
-                        <span class="stat-number">🌱 12</span>
-                        <span class="stat-label">Plants This Week</span>
+                        <span class="stat-number">🌱 {{ harvested }}</span>
+                        <span class="stat-label">Harvested</span>
                     </div>
                 </div>
                 <div class="col-md-3">
                     <div class="stat-item">
-                        <span class="stat-number">📸 8</span>
+                        <span class="stat-number">📸 {{ memories }}</span>
                         <span class="stat-label">Memories Shared</span>
                     </div>
                 </div>
                 <div class="col-md-3">
                     <div class="stat-item">
-                        <span class="stat-number">🏆 3</span>
+                        <span class="stat-number">🏆 {{ achivements }}</span>
                         <span class="stat-label">Achievements</span>
                     </div>
                 </div>
                 <div class="col-md-3">
                     <div class="stat-item">
-                        <span class="stat-number">📅 5</span>
+                        <span class="stat-number">📅 {{ participated }}</span>
                         <span class="stat-label">Events Joined</span>
                     </div>
                 </div>
@@ -324,58 +512,62 @@
     {% endif %}
 
     <!-- Quick Access Dashboard -->
-    <div class="dashboard-section">
+    <div class="dashboard-section" id="dashboard-section">
         <h2 class="section-title">Quick Access</h2>
         <div class="dashboard-grid">
             {% if current_user.is_admin %}
                 <!-- Admin Quick Access -->
-                <a href="{{ url_for('calendar.new_event') }}" class="dashboard-item">
+                <a href="{{ url_for('calendar.new_event') }}" class="dashboard-item" id="add-event-btn">
                     <span class="dashboard-icon">📅</span>
                     <span class="dashboard-label">Add Event</span>
                 </a>
-                <a href="{{ url_for('users.all_families') }}" class="dashboard-item">
+                <a href="{{ url_for('users.all_families') }}" class="dashboard-item" id="manage-families-btn">
                     <span class="dashboard-icon">👨‍👩‍👧‍👦</span>
                     <span class="dashboard-label">Manage Families</span>
                 </a>
-                <a href="{{ url_for('users.create_family') }}" class="dashboard-item">
+                <a href="{{ url_for('users.create_family') }}" class="dashboard-item" id="add-family-btn">
                     <span class="dashboard-icon">➕</span>
                     <span class="dashboard-label">Add Family</span>
                 </a>
-                <a href="{{ url_for('foodmap.view_map') }}" class="dashboard-item">
+                <a href="{{ url_for('foodmap.view_map') }}" class="dashboard-item" id="food-map-btn">
                     <span class="dashboard-icon">🗺️</span>
                     <span class="dashboard-label">Food Map</span>
+                </a>
+                <a href="{{ url_for('community.all_staffs') }}" class="dashboard-item" id="community-info-btn">
+                    <span class="dashboard-icon">🏘</span>
+                    <span class="dashboard-label">Community Support</span>
                 </a>
             {% else %}
                 <!-- Elder User Quick Access -->
-                <a href="{{ url_for('planting.daily_checkin') }}" class="dashboard-item">
+                <a href="{{ url_for('planting.daily_checkin') }}" class="dashboard-item" id="daily-checkin-btn">
                     <span class="dashboard-icon">✅</span>
                     <span class="dashboard-label">Daily Check-in</span>
                 </a>
-                <a href="{{ url_for('planting.plant') }}" class="dashboard-item">
+                <a href="{{ url_for('planting.plant') }}" class="dashboard-item" id="plant-btn">
                     <span class="dashboard-icon">🌱</span>
                     <span class="dashboard-label">Plant Today</span>
                 </a>
-                <a href="{{ url_for('memory.memories') }}" class="dashboard-item">
+                <a href="{{ url_for('memory.memories') }}" class="dashboard-item" id="memories-btn">
                     <span class="dashboard-icon">📸</span>
                     <span class="dashboard-label">Memories</span>
                 </a>
-                <a href="{{ url_for('nutrition.food_record') }}" class="dashboard-item">
+                <a href="{{ url_for('nutrition.food_record') }}" class="dashboard-item" id="food-record-btn">
                     <span class="dashboard-icon">🍽️</span>
                     <span class="dashboard-label">Food Record</span>
                 </a>
-                <a href="{{ url_for('calendar.calendar_view') }}" class="dashboard-item">
+                <a href="{{ url_for('calendar.calendar_view') }}" class="dashboard-item" id="calendar-btn">
                     <span class="dashboard-icon">📅</span>
                     <span class="dashboard-label">Calendar</span>
                 </a>
-                <a href="{{ url_for('foodmap.view_map') }}" class="dashboard-item">
+                <a href="{{ url_for('foodmap.view_map') }}" class="dashboard-item" id="food-map-btn">
                     <span class="dashboard-icon">🗺️</span>
                     <span class="dashboard-label">Food Map</span>
                 </a>
-                <a href="{{ url_for('planting.wellness_dashboard') }}" class="dashboard-item">
+                <a href="{{ url_for('planting.wellness_dashboard') }}" class="dashboard-item" id="wellness-btn">
                     <span class="dashboard-icon">📊</span>
                     <span class="dashboard-label">Dashboard</span>
                 </a>
-                <a href="{{ url_for('planting.glory_hall') }}" class="dashboard-item">
+                <a href="{{ url_for('planting.glory_hall') }}" class="dashboard-item" id="achievements-btn">
                     <span class="dashboard-icon">🏆</span>
                     <span class="dashboard-label">Achievements</span>
                 </a>
@@ -383,6 +575,10 @@
         </div>
     </div>
     
+    <!-- Help Tour Button -->
+    <button class="start-tour-btn" id="startTourBtn">
+        <i class="fas fa-question-circle"></i> Help Tour
+    </button>
 
     
 {% else %}
@@ -393,7 +589,7 @@
         <h1 class="hero-title">🌉 GrandBridge</h1>
         <p class="hero-subtitle">Connecting Generations, Empowering Caregivers</p>
         <p style="font-size: 1.2rem; margin-bottom: 30px; opacity: 0.9;">
-            A supportive community platform for caregivers of left-behind children (LBC)
+            A supportive community platform for caregivers of left-behind children
         </p>
         <div class="hero-buttons">
             <a href="{{ url_for('users.register') }}" class="hero-btn hero-btn-primary">
@@ -534,7 +730,267 @@
 {% endif %}
 
 <script>
-    // Add entrance animations
+    // Guidance System Class
+    class GuidanceSystem {
+        constructor(steps) {
+            this.steps = steps;
+            this.currentStep = 0;
+            this.overlay = null;
+            this.highlight = null;
+            this.tooltip = null;
+            this.resizeObserver = null;
+            this.scrollHandler = null;
+            this.animationFrame = null;
+        }
+
+        start() {
+            this.currentStep = 0;
+            this.createOverlay();
+            // Wait for animations to complete
+            setTimeout(() => {
+                this.showStep();
+            }, 500);
+        }
+
+        createOverlay() {
+            // Create overlay
+            this.overlay = document.createElement('div');
+            this.overlay.className = 'guidance-overlay';
+            
+            // Create highlight box
+            this.highlight = document.createElement('div');
+            this.highlight.className = 'guidance-highlight';
+            
+            // Create tooltip
+            this.tooltip = document.createElement('div');
+            this.tooltip.className = 'guidance-tooltip';
+            
+            document.body.appendChild(this.overlay);
+            document.body.appendChild(this.highlight);
+            document.body.appendChild(this.tooltip);
+            
+            // Add event listeners for window resize and scroll
+            this.scrollHandler = () => {
+                if (this.animationFrame) {
+                    cancelAnimationFrame(this.animationFrame);
+                }
+                this.animationFrame = requestAnimationFrame(() => this.updatePosition());
+            };
+            this.resizeHandler = () => {
+                if (this.animationFrame) {
+                    cancelAnimationFrame(this.animationFrame);
+                }
+                this.animationFrame = requestAnimationFrame(() => this.updatePosition());
+            };
+            
+            window.addEventListener('scroll', this.scrollHandler, { passive: true });
+            window.addEventListener('resize', this.resizeHandler, { passive: true });
+            
+            // Set overlay active
+            setTimeout(() => {
+                this.overlay.classList.add('active');
+            }, 10);
+        }
+
+        showStep() {
+            if (this.currentStep >= this.steps.length) {
+                this.end();
+                return;
+            }
+
+            const step = this.steps[this.currentStep];
+            const targetElement = document.querySelector(step.element);
+            
+            if (!targetElement) {
+                console.error(`Element ${step.element} not found`);
+                this.next();
+                return;
+            }
+
+            // Scroll element into view first
+            targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            // Wait for scroll and any animations to complete
+            setTimeout(() => {
+                this.highlightElement(targetElement);
+                this.showTooltip(targetElement, step);
+                
+                // Set up ResizeObserver to watch for element changes
+                if (this.resizeObserver) {
+                    this.resizeObserver.disconnect();
+                }
+                
+                this.resizeObserver = new ResizeObserver(() => {
+                    this.updatePosition();
+                });
+                
+                this.resizeObserver.observe(targetElement);
+                
+                // Also observe parent containers that might affect position
+                let parent = targetElement.parentElement;
+                while (parent && parent !== document.body) {
+                    this.resizeObserver.observe(parent);
+                    parent = parent.parentElement;
+                }
+            }, 600);
+        }
+
+        highlightElement(element) {
+            const rect = element.getBoundingClientRect();
+            
+            // Add padding around the element
+            const padding = 10;
+            
+            this.highlight.style.left = `${rect.left - padding}px`;
+            this.highlight.style.top = `${rect.top - padding}px`;
+            this.highlight.style.width = `${rect.width + padding * 2}px`;
+            this.highlight.style.height = `${rect.height + padding * 2}px`;
+            
+            // Store current target for position updates
+            this.currentTarget = element;
+        }
+
+        showTooltip(element, step) {
+            // Clear previous content
+            this.tooltip.innerHTML = '';
+            
+            // Add content
+            const title = document.createElement('div');
+            title.className = 'guidance-title';
+            title.textContent = step.title;
+            
+            const content = document.createElement('div');
+            content.className = 'guidance-content';
+            content.innerHTML = step.content; // Use innerHTML to support styled tips
+            
+            const buttons = document.createElement('div');
+            buttons.className = 'guidance-buttons';
+            
+            if (this.currentStep > 0) {
+                const skipBtn = document.createElement('button');
+                skipBtn.className = 'guidance-btn guidance-btn-skip';
+                skipBtn.textContent = 'Skip Tour';
+                skipBtn.onclick = () => this.end();
+                buttons.appendChild(skipBtn);
+            }
+            
+            const nextBtn = document.createElement('button');
+            nextBtn.className = 'guidance-btn guidance-btn-next';
+            nextBtn.textContent = this.currentStep === this.steps.length - 1 ? 'Finish' : 'Next';
+            nextBtn.onclick = () => this.next();
+            buttons.appendChild(nextBtn);
+            
+            this.tooltip.appendChild(title);
+            this.tooltip.appendChild(content);
+            this.tooltip.appendChild(buttons);
+            
+            // Position tooltip
+            this.positionTooltip(element, step.position || 'auto');
+        }
+
+        positionTooltip(element, preferredPosition) {
+            const rect = element.getBoundingClientRect();
+            const tooltipRect = this.tooltip.getBoundingClientRect();
+            
+            const spacing = 20;
+            const positions = {
+                top: {
+                    left: rect.left + rect.width / 2 - tooltipRect.width / 2,
+                    top: rect.top - tooltipRect.height - spacing
+                },
+                bottom: {
+                    left: rect.left + rect.width / 2 - tooltipRect.width / 2,
+                    top: rect.bottom + spacing
+                },
+                left: {
+                    left: rect.left - tooltipRect.width - spacing,
+                    top: rect.top + rect.height / 2 - tooltipRect.height / 2
+                },
+                right: {
+                    left: rect.right + spacing,
+                    top: rect.top + rect.height / 2 - tooltipRect.height / 2
+                }
+            };
+            
+            let position = preferredPosition;
+            
+            // Auto-detect best position if set to auto
+            if (position === 'auto') {
+                const viewportWidth = window.innerWidth;
+                const viewportHeight = window.innerHeight;
+                const scrollY = window.pageYOffset;
+                
+                // Check which position fits best
+                if (rect.top - scrollY > tooltipRect.height + spacing && rect.top > tooltipRect.height + spacing) {
+                    position = 'top';
+                } else if (viewportHeight - rect.bottom > tooltipRect.height + spacing) {
+                    position = 'bottom';
+                } else if (rect.left > tooltipRect.width + spacing) {
+                    position = 'left';
+                } else if (viewportWidth - rect.right > tooltipRect.width + spacing) {
+                    position = 'right';
+                } else {
+                    position = 'bottom'; // Default fallback
+                }
+            }
+            
+            // Apply position
+            const pos = positions[position];
+            
+            // Ensure tooltip stays within viewport
+            const margin = 10;
+            const finalLeft = Math.max(margin, Math.min(pos.left, window.innerWidth - tooltipRect.width - margin));
+            const finalTop = Math.max(margin, Math.min(pos.top, window.innerHeight - tooltipRect.height - margin));
+            
+            this.tooltip.style.left = `${finalLeft}px`;
+            this.tooltip.style.top = `${finalTop}px`;
+            
+            // Update tooltip class for arrow
+            this.tooltip.className = `guidance-tooltip ${position}`;
+        }
+
+        updatePosition() {
+            if (this.currentTarget && this.currentStep < this.steps.length) {
+                // Check if element is still in DOM
+                if (!document.body.contains(this.currentTarget)) {
+                    return;
+                }
+                
+                this.highlightElement(this.currentTarget);
+                this.positionTooltip(this.currentTarget, this.steps[this.currentStep].position || 'auto');
+            }
+        }
+
+        next() {
+            this.currentStep++;
+            this.showStep();
+        }
+
+        end() {
+            // Clean up
+            if (this.resizeObserver) {
+                this.resizeObserver.disconnect();
+            }
+            
+            if (this.animationFrame) {
+                cancelAnimationFrame(this.animationFrame);
+            }
+            
+            window.removeEventListener('scroll', this.scrollHandler);
+            window.removeEventListener('resize', this.resizeHandler);
+            
+            // Remove elements with fade out
+            this.overlay.classList.remove('active');
+            
+            setTimeout(() => {
+                if (this.overlay) this.overlay.remove();
+                if (this.highlight) this.highlight.remove();
+                if (this.tooltip) this.tooltip.remove();
+            }, 300);
+        }
+    }
+
+    // Initialize page animations and guidance system
     document.addEventListener('DOMContentLoaded', function() {
         // Animate feature cards on scroll
         const observerOptions = {
@@ -562,6 +1018,134 @@
             item.style.opacity = '0';
             item.style.animation = `fadeInUp 0.5s ease ${index * 0.1}s forwards`;
         });
+        
+        {% if current_user.is_authenticated %}
+        // Guidance System for logged-in users
+        const guidanceSteps = [
+            {% if current_user.is_admin %}
+            // Admin guidance steps
+            {
+                element: '#welcome-section',
+                title: 'Welcome to GrandBridge Admin',
+                content: 'As an administrator, you have access to powerful tools to manage the community. <br><br><span class="nav-tip">💡 Tip: Use the navigation toggle in the upper right corner (☰) to access all admin features.</span>',
+                position: 'auto'
+            },
+            {
+                element: '#add-event-btn',
+                title: 'Create Community Events',
+                content: 'Add new events to keep the community engaged and informed.',
+                position: 'auto'
+            },
+            {
+                element: '#manage-families-btn',
+                title: 'Manage Families',
+                content: 'View and manage all registered families in the community.',
+                position: 'auto'
+            },
+            {
+                element: '#add-family-btn',
+                title: 'Add New Families',
+                content: 'Register new families to expand the community.',
+                position: 'auto'
+            },
+            {
+                element: '#food-map-btn',
+                title: 'Food Distribution Map',
+                content: 'Manage and view food distribution points for the community.',
+                position: 'auto'
+            },
+            {
+                element: '#community-info-btn',
+                title: 'Community Public Support Info',
+                content: 'Manage public staff profile.',
+                position: 'auto'
+            }
+            {% else %}
+            // Regular user guidance steps
+            {
+                element: '#welcome-section',
+                title: 'Welcome to GrandBridge!',
+                content: 'Your personal dashboard for tracking wellness and connecting with the community. <br><br><span class="nav-tip">💡 Tip: Use the navigation toggle in the upper right corner (☰) to explore different features.</span>',
+                position: 'auto'
+            },
+            {
+                element: '#stats-section',
+                title: 'Track Your Progress',
+                content: 'See your achievements and milestones at a glance. Keep up the great work!',
+                position: 'auto'
+            },
+            {
+                element: '#daily-checkin-btn',
+                title: 'Daily Check-in',
+                content: 'Start each day with a quick check-in to track your wellness journey.',
+                position: 'auto'
+            },
+            {
+                element: '#plant-btn',
+                title: 'Mindfulness Garden',
+                content: 'Plant virtual vegetables to celebrate your daily achievements and practice mindfulness.',
+                position: 'auto'
+            },
+            {
+                element: '#memories-btn',
+                title: 'Memory Diary',
+                content: 'Capture and share precious moments with your loved ones.',
+                position: 'auto'
+            },
+            {
+                element: '#food-record-btn',
+                title: 'Nutrition Tracking',
+                content: 'Keep track of your meals and maintain a healthy diet.',
+                position: 'auto'
+            },
+            {
+                element: '#calendar-btn',
+                title: 'Community Calendar',
+                content: 'Stay updated with community events and important dates.',
+                position: 'auto'
+            },
+            {
+                element: '#food-map-btn',
+                title: 'Food Resources',
+                content: 'Find free food distribution points in your area.',
+                position: 'auto'
+            },
+            {
+                element: '#wellness-btn',
+                title: 'Wellness Dashboard',
+                content: 'Get detailed insights into your wellness journey and progress.',
+                position: 'auto'
+            },
+            {
+                element: '#achievements-btn',
+                title: 'Your Achievements',
+                content: 'View all your accomplishments and milestones in the Glory Hall.',
+                position: 'auto'
+            }
+            {% endif %}
+        ];
+        
+        // Initialize guidance system
+        const guidance = new GuidanceSystem(guidanceSteps);
+        
+        // Start tour button click handler
+        const startTourBtn = document.getElementById('startTourBtn');
+        if (startTourBtn) {
+            startTourBtn.addEventListener('click', function() {
+                guidance.start();
+            });
+        }
+        
+        // Auto-start for first-time users
+        const isFirstVisit = !localStorage.getItem('guidanceShown_{{ current_user.username }}');
+        if (isFirstVisit) {
+            // Wait for page to fully load and animations to complete
+            setTimeout(() => {
+                guidance.start();
+                localStorage.setItem('guidanceShown_{{ current_user.username }}', 'true');
+            }, 1500);
+        }
+        {% endif %}
     });
 </script>
 
