@@ -340,7 +340,6 @@ def google_logout():
 @calendar.route("/callback")
 @login_required
 def callback():
-    # print(">>>>> Callback route hit")
     try:
         get_flow().fetch_token(authorization_response=request.url)
 

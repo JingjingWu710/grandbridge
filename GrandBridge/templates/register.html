@@ -1,101 +1,403 @@
 {% extends "layout.html" %}
 {% block content %}
-    <div class="content-section">
-        <form method="POST" action="">
-            {{ form.hidden_tag() }}
-            <fieldset class="form-group">
-                <legend class="border-bottom mb-4">Register</legend>
-                <div class="form-group">
-                    {{ form.username.label(class="form-control-label") }}
-                    {% if form.username.errors %}
-                        {{ form.username(class="form-control form-control-lg is-invalid") }}
-                        <div class="invalid-feedback">
-                            {% for error in form.username.errors %}
-                                <span>{{ error }}</span>
-                            {% endfor %}
+<style>
+    /* Elder-friendly styling */
+    .form-control, .form-select {
+        font-size: 1.2rem;
+        padding: 12px;
+        border: 2px solid #e8f5e9;
+        border-radius: 10px;
+        transition: all 0.3s;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #4a7c59;
+        box-shadow: 0 0 0 0.2rem rgba(74, 124, 89, 0.25);
+        background-color: #f8fffe;
+    }
+    
+    .form-label {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #2c6f4f;
+        margin-bottom: 8px;
+        display: block;
+    }
+    
+    .welcome-box {
+        background: linear-gradient(135deg, #e8f5e9, #fff3e0);
+        border-radius: 15px;
+        padding: 30px;
+        margin-bottom: 30px;
+        text-align: center;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    .welcome-title {
+        font-size: 2rem;
+        color: #2c6f4f;
+        margin-bottom: 10px;
+    }
+    
+    .welcome-subtitle {
+        font-size: 1.2rem;
+        color: #666;
+        line-height: 1.6;
+    }
+    
+    .register-card {
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    .section-divider {
+        background-color: #f5f5f5;
+        padding: 15px;
+        margin: 25px -30px;
+        text-align: center;
+        font-size: 1.1rem;
+        font-weight: bold;
+        color: #4a7c59;
+    }
+    
+    .btn-register {
+        font-size: 1.3rem;
+        padding: 15px 40px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #4a7c59, #6fa881);
+        border: none;
+        color: white;
+        font-weight: bold;
+        transition: all 0.3s;
+        width: 100%;
+        margin-top: 20px;
+    }
+    
+    .btn-register:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(74, 124, 89, 0.3);
+        background: linear-gradient(135deg, #3a6549, #5f9871);
+    }
+    
+    .error-message {
+        background-color: #ffebee;
+        border-left: 4px solid #f44336;
+        padding: 10px;
+        margin-top: 5px;
+        border-radius: 5px;
+        font-size: 1.1rem;
+    }
+    
+    .help-text {
+        background-color: #f0f7ff;
+        border-left: 4px solid #2196f3;
+        padding: 12px;
+        margin-top: 8px;
+        border-radius: 5px;
+        font-size: 1rem;
+        color: #555;
+    }
+    
+    .login-prompt {
+        background-color: #f5f5f5;
+        padding: 20px;
+        border-radius: 10px;
+        margin-top: 30px;
+        text-align: center;
+        font-size: 1.1rem;
+    }
+    
+    .login-link {
+        color: #4a7c59;
+        font-weight: bold;
+        text-decoration: none;
+        font-size: 1.2rem;
+    }
+    
+    .login-link:hover {
+        color: #2c6f4f;
+        text-decoration: underline;
+    }
+    
+    .icon-helper {
+        font-size: 1.5rem;
+        margin-right: 10px;
+    }
+    
+    .checkbox-container {
+        background-color: #f9f9f9;
+        padding: 15px;
+        border-radius: 10px;
+        border: 2px solid #e8f5e9;
+    }
+    
+    .form-check-input {
+        width: 25px;
+        height: 25px;
+        margin-right: 10px;
+        cursor: pointer;
+    }
+    
+    .form-check-label {
+        font-size: 1.2rem;
+        cursor: pointer;
+        padding-left: 10px;
+    }
+    
+    .optional-badge {
+        background-color: #ffc107;
+        color: #000;
+        padding: 3px 8px;
+        border-radius: 5px;
+        font-size: 0.9rem;
+        margin-left: 10px;
+    }
+</style>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8">
+            <!-- Welcome Message -->
+            <div class="welcome-box">
+                <h1 class="welcome-title">🌱 Join Our Community!</h1>
+                <p class="welcome-subtitle">
+                    Create your account and start planting your daily achievements.<br>
+                    Every effort counts, and we're here to celebrate with you!
+                </p>
+            </div>
+
+            <!-- Registration Form -->
+            <div class="register-card">
+                <form method="POST" action="">
+                    {{ form.hidden_tag() }}
+                    
+                    <fieldset class="form-group">
+                        <legend class="border-bottom mb-4" style="font-size: 1.5rem; color: #2c6f4f; padding-bottom: 10px;">
+                            <span class="icon-helper">✨</span>Create Your Account
+                        </legend>
+                        
+                        <!-- Basic Information Section -->
+                        <div class="section-divider">📝 Basic Information</div>
+                        
+                        <!-- Username Field -->
+                        <div class="form-group mb-4">
+                            <label class="form-label">
+                                <span class="icon-helper">👤</span>{{ form.username.label.text }}
+                            </label>
+                            {% if form.username.errors %}
+                                {{ form.username(class="form-control is-invalid", 
+                                               placeholder="Choose a friendly name") }}
+                                <div class="error-message">
+                                    {% for error in form.username.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.username(class="form-control", 
+                                               placeholder="Choose a friendly name") }}
+                            {% endif %}
+                            <div class="help-text">
+                                💡 This is how others will see you in the community
+                            </div>
                         </div>
-                    {% else %}
-                        {{ form.username(class="form-control form-control-lg") }}
-                    {% endif %}
-                </div>
-                <div class="form-group">
-                    {{ form.email.label(class="form-control-label") }}
-                    {% if form.email.errors %}
-                        {{ form.email(class="form-control form-control-lg is-invalid") }}
-                        <div class="invalid-feedback">
-                            {% for error in form.email.errors %}
-                                <span>{{ error }}</span>
-                            {% endfor %}
+                        
+                        <!-- Email Field -->
+                        <div class="form-group mb-4">
+                            <label class="form-label">
+                                <span class="icon-helper">📧</span>{{ form.email.label.text }}
+                            </label>
+                            {% if form.email.errors %}
+                                {{ form.email(class="form-control is-invalid", 
+                                            placeholder="your.email@example.com") }}
+                                <div class="error-message">
+                                    {% for error in form.email.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.email(class="form-control", 
+                                            placeholder="your.email@example.com") }}
+                            {% endif %}
+                            <div class="help-text">
+                                💡 We'll use this to help you sign in
+                            </div>
                         </div>
-                    {% else %}
-                        {{ form.email(class="form-control form-control-lg") }}
-                    {% endif %}
-                </div>
-                <div class="form-group">
-                    {{ form.password.label(class="form-control-label") }}
-                    {% if form.password.errors %}
-                    {{ form.password(class="form-control form-control-lg is-invalid") }}
-                    <div class="invalid-feedback">
-                        {% for error in form.password.errors %}
-                            <span>{{ error }}</span>
-                        {% endfor %}
-                    </div>
-                {% else %}
-                    {{ form.password(class="form-control form-control-lg") }}
-                {% endif %}
-                </div>
-                <div class="form-group">
-                    {{ form.confirm_password.label(class="form-control-label") }}
-                    {% if form.confirm_password.errors %}
-                    {{ form.confirm_password(class="form-control form-control-lg is-invalid") }}
-                    <div class="invalid-feedback">
-                        {% for error in form.confirm_password.errors %}
-                            <span>{{ error }}</span>
-                        {% endfor %}
-                    </div>
-                {% else %}
-                    {{ form.confirm_password(class="form-control form-control-lg") }}
-                {% endif %}
-                </div>
+                        
+                        <!-- Security Section -->
+                        <div class="section-divider">🔐 Security</div>
+                        
+                        <!-- Password Field -->
+                        <div class="form-group mb-4">
+                            <label class="form-label">
+                                <span class="icon-helper">🔑</span>{{ form.password.label.text }}
+                            </label>
+                            {% if form.password.errors %}
+                                {{ form.password(class="form-control is-invalid", 
+                                               placeholder="Create a secure password") }}
+                                <div class="error-message">
+                                    {% for error in form.password.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.password(class="form-control", 
+                                               placeholder="Create a secure password") }}
+                            {% endif %}
+                            <div class="help-text">
+                                💡 Make it at least 8 characters long with a mix of letters and numbers
+                            </div>
+                        </div>
+                        
+                        <!-- Confirm Password Field -->
+                        <div class="form-group mb-4">
+                            <label class="form-label">
+                                <span class="icon-helper">🔑</span>{{ form.confirm_password.label.text }}
+                            </label>
+                            {% if form.confirm_password.errors %}
+                                {{ form.confirm_password(class="form-control is-invalid", 
+                                                       placeholder="Type your password again") }}
+                                <div class="error-message">
+                                    {% for error in form.confirm_password.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.confirm_password(class="form-control", 
+                                                       placeholder="Type your password again") }}
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Optional Settings Section -->
+                        <div class="section-divider">
+                            ⚙️ Optional Settings
+                            <span class="optional-badge">You can skip these</span>
+                        </div>
+                        
+                        <!-- Admin Checkbox -->
+                        <div class="form-group mb-4">
+                            <div class="checkbox-container">
+                                <div class="form-check">
+                                    {{ form.is_admin(class="form-check-input") }}
+                                    <label class="form-check-label" for="{{ form.is_admin.id }}">
+                                        <span class="icon-helper">👑</span>
+                                        I want admin privileges
+                                    </label>
+                                </div>
+                                <div class="help-text mt-2">
+                                    💡 Admins can manage multiple families and help others
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Family ID Field -->
+                        <div class="form-group mb-4">
+                            <label class="form-label">
+                                <span class="icon-helper">👨‍👩‍👧‍👦</span>
+                                {{ form.family_id.label.text }}
+                                <span class="optional-badge">Optional</span>
+                            </label>
+                            {% if form.family_id.errors %}
+                                {{ form.family_id(class="form-control is-invalid", 
+                                                placeholder="Enter existing family code or leave blank") }}
+                                <div class="error-message">
+                                    {% for error in form.family_id.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.family_id(class="form-control", 
+                                                placeholder="Enter existing family code or leave blank") }}
+                            {% endif %}
+                            <div class="help-text">
+                                💡 Have a family code? Enter it here to join them!<br>
+                                💡 No code? No problem! Leave this blank and we'll create a new family for you<br>
+                                💡 Admins can join multiple families after signing up
+                            </div>
+                        </div>
+                    </fieldset>
+                    
+                    <!-- Submit Button -->
                     <div class="form-group">
-                    {{ form.is_admin.label(class="form-control-label") }}
-                    {% if form.is_admin.errors %}
-                    {{ form.is_admin(class="form-control form-control-lg is-invalid") }}
-                    <div class="invalid-feedback">
-                        {% for error in form.is_admin.errors %}
-                            <span>{{ error }}</span>
-                        {% endfor %}
+                        {{ form.submit(class="btn btn-register", value="🌟 Create My Garden Account") }}
                     </div>
-                {% else %}
-                    {{ form.is_admin(class="form-control form-control-lg") }}
-                {% endif %}
-                <div class="form-group">
-                    {{ form.family_id.label(class="form-control-label") }}
-                    {% if form.family_id.errors %}
-                        {{ form.family_id(class="form-control form-control-lg is-invalid") }}
-                        <div class="invalid-feedback">
-                            {% for error in form.family_id.errors %}
-                                <span>{{ error }}</span>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        {{ form.family_id(class="form-control form-control-lg") }}
-                    {% endif %}
-                    <small class="form-text text-muted">
-                        Optional: Enter your family ID if you already have one. Leave blank to create a new family.<br />
-                        You don't have to enter family ID in this stage, and you may be allowed to add multiple families after logging in <strong>if you are an admin</strong>.
-                    </small>
+                </form>
+            </div>
+            
+            <!-- Login Prompt -->
+            <div class="login-prompt">
+                <p style="margin-bottom: 10px;">Already have an account?</p>
+                <a class="login-link" href="{{ url_for('users.login') }}">
+                    🔐 Sign In Here
+                </a>
+            </div>
+        </div>
+    </div>
 </div>
 
-            </fieldset>
-            <div class="form-group">
-                {{ form.submit(class="btn btn-outline-info") }}
-            </div>
-        </form>
-    </div>
-    <div class="border-top pt-3">
-        <small class="text-muted">
-            Already Have An Account? <a class="ml-2" href="{{ url_for('users.login') }}">Log In</a>
-        </small>
-    </div>
+<script>
+    // Add gentle animations and helpful interactions
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add focus animations
+        const inputs = document.querySelectorAll('.form-control');
+        inputs.forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.style.transform = 'scale(1.02)';
+                this.parentElement.style.transition = 'transform 0.3s';
+            });
+            
+            input.addEventListener('blur', function() {
+                this.parentElement.style.transform = 'scale(1)';
+            });
+        });
+        
+        // Password strength indicator
+        const passwordInput = document.querySelector('#password');
+        if (passwordInput) {
+            passwordInput.addEventListener('input', function() {
+                const strength = checkPasswordStrength(this.value);
+                updatePasswordFeedback(strength);
+            });
+        }
+        
+        // Add loading animation to submit button
+        const form = document.querySelector('form');
+        form.addEventListener('submit', function() {
+            const submitBtn = document.querySelector('.btn-register');
+            submitBtn.innerHTML = '🌱 Creating your account...';
+            submitBtn.style.opacity = '0.7';
+        });
+        
+        // Make checkbox more interactive
+        const adminCheckbox = document.querySelector('.form-check-input');
+        if (adminCheckbox) {
+            adminCheckbox.addEventListener('change', function() {
+                const container = this.closest('.checkbox-container');
+                if (this.checked) {
+                    container.style.backgroundColor = '#e8f5e9';
+                    container.style.borderColor = '#4a7c59';
+                } else {
+                    container.style.backgroundColor = '#f9f9f9';
+                    container.style.borderColor = '#e8f5e9';
+                }
+            });
+        }
+    });
+    
+    function checkPasswordStrength(password) {
+        let strength = 0;
+        if (password.length >= 8) strength++;
+        if (password.match(/[a-z]+/)) strength++;
+        if (password.match(/[A-Z]+/)) strength++;
+        if (password.match(/[0-9]+/)) strength++;
+        if (password.match(/[$@#&!]+/)) strength++;
+        return strength;
+    }
+    
+    function updatePasswordFeedback(strength) {
+        // This would update a password strength indicator if added to the template
+        console.log('Password strength:', strength);
+    }
+</script>
 {% endblock content %}
