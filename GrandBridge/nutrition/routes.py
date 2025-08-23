@@ -2,13 +2,15 @@ from flask import render_template, url_for, flash, redirect, Blueprint, request
 from GrandBridge.models import db
 from GrandBridge.nutrition.forms import FoodForm
 from GrandBridge.models import FoodEntry, FoodRecord
-from transformers import pipeline
 from flask_login import login_required, current_user
+from openai import OpenAI
+import os
+from datetime import datetime
 
 
-# Load pipeline once (at module level)
-gpt2_pipe = pipeline("text-generation", model="openai-community/gpt2")
-
+client = OpenAI(
+    api_key=os.getenv('OPENAI_API_KEY')
+)
 
 nutrition = Blueprint('nutrition', __name__)
 
@@ -87,23 +89,57 @@ def add_food():
                         # Prepare prompt content
                         duration = (end - start).days + 1
                         food_list_text = "\n".join([
-                            f"- {item['amount']} {item['unit']} of {item['food_name']}" for item in food_items
+                            f"- {item['amount']} {item['unit']} of {item['food_name']}" 
+                            for item in food_items
                         ])
 
-                        prompt_text = (
-                            f"The user recorded the following food consumption over {duration} days:\n"
-                            f"{food_list_text}\n\n"
-                            "Please analyze the nutrition intake, give dietary advice, "
-                            "and recommend a balanced daily menu based on the above."
-                        )
+                        # Create a more detailed prompt for better GPT responses
+                        prompt_text = f"""
+                        Food Diary Analysis:
+                        
+                        Duration: {duration} day(s) (from {start.strftime('%Y-%m-%d')} to {end.strftime('%Y-%m-%d')})
+                        
+                        Foods consumed:
+                        {food_list_text}
+                        
+                        Please provide:
+                        1. Nutritional analysis of these foods (estimated calories, macronutrients, key vitamins/minerals)
+                        2. Assessment of dietary balance and any nutritional gaps
+                        3. Specific dietary advice and recommendations for improvement
+                        4. A suggested balanced daily menu that complements these foods
+                        5. Any health considerations or warnings if applicable
+                        
+                        Keep the response concise but informative (under 300 words).
+                        """
 
-                        # Use local transformers pipeline
-                        result = gpt2_pipe(prompt_text, max_new_tokens=200, do_sample=True, temperature=0.7)
-
-                        if isinstance(result, list) and "generated_text" in result[0]:
-                            record.nutrition_advice = result[0]["generated_text"]
-                        else:
-                            record.nutrition_advice = "Unable to generate advice at this time."
+                        # Call OpenAI API (for OpenAI library v1.0+)
+                        try:
+                            response = client.chat.completions.create(
+                                model="gpt-3.5-turbo", 
+                                messages=[
+                                    {"role": "system", "content": "You are a professional nutritionist providing personalized dietary advice based on food consumption data."},
+                                    {"role": "user", "content": prompt_text}
+                                ],
+                                max_tokens=500,
+                                temperature=0.7,
+                                top_p=0.9
+                            )
+                            
+                            record.nutrition_advice = response.choices[0].message.content.strip()
+                            
+                        except Exception as e:
+                            # Handle specific OpenAI errors
+                            error_message = str(e)
+                            if "rate_limit" in error_message.lower():
+                                record.nutrition_advice = "API rate limit reached. Please try again later."
+                                flash('Rate limit reached, but food entries were saved.', 'warning')
+                            elif "authentication" in error_message.lower() or "api_key" in error_message.lower():
+                                record.nutrition_advice = "Authentication failed. Please check API key."
+                                flash('API authentication failed, but food entries were saved.', 'warning')
+                            else:
+                                record.nutrition_advice = f"Unable to generate advice: {error_message[:100]}"
+                                flash('Could not generate advice, but food entries were saved.', 'warning')
+                            print(f"OpenAI API error: {e}")
 
                         db.session.commit()
                         flash('All food entries added successfully!', 'success')

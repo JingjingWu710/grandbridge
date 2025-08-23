@@ -76,9 +76,6 @@ class ChatMessage(db.Model):
     author = db.relationship('User', backref=db.backref('sent_chat_messages', lazy='dynamic'))
     # Note: event relationship is created by Event.chat_messages backref
     
-    # Optional: Track if message has been edited
-    edited = db.Column(db.Boolean, default=False)
-    edited_at = db.Column(db.DateTime)
     
     def __repr__(self):
         return f"ChatMessage('{self.author.username}', '{self.content[:20]}...', '{self.timestamp}')"
@@ -277,7 +274,7 @@ class Location(db.Model):
     
     # Relationships
     created_by = db.relationship('User', backref='created_locations')
-    visits = db.relationship('LocationVisit', backref='location', cascade='all, delete-orphan')
+    # visits = db.relationship('LocationVisit', backref='location', cascade='all, delete-orphan')
     
     def to_dict(self):
         """Convert location to dictionary for JSON serialization"""
@@ -301,21 +298,21 @@ class Location(db.Model):
         return f'<Location {self.name}>'
 
 
-class LocationVisit(db.Model):
-    """Track user visits to food pickup locations"""
-    __tablename__ = 'location_visits'
+# class LocationVisit(db.Model):
+#     """Track user visits to food pickup locations"""
+#     __tablename__ = 'location_visits'
     
-    id = db.Column(db.Integer, primary_key=True)
-    location_id = db.Column(db.Integer, db.ForeignKey('locations.id'), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    visit_date = db.Column(db.DateTime, default=datetime.utcnow)
-    notes = db.Column(db.Text)
+#     id = db.Column(db.Integer, primary_key=True)
+#     location_id = db.Column(db.Integer, db.ForeignKey('locations.id'), nullable=False)
+#     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+#     visit_date = db.Column(db.DateTime, default=datetime.utcnow)
+#     notes = db.Column(db.Text)
     
-    # Relationships
-    user = db.relationship('User', backref='location_visits')
+#     # Relationships
+#     user = db.relationship('User', backref='location_visits')
     
-    def __repr__(self):
-        return f'<LocationVisit {self.user_id} -> {self.location_id}>'
+#     def __repr__(self):
+#         return f'<LocationVisit {self.user_id} -> {self.location_id}>'
     
 class Memory(db.Model):
     id = db.Column(db.Integer, primary_key=True)

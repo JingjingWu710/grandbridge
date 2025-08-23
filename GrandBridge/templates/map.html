@@ -460,6 +460,7 @@
     <script>
         // Global variables
         let adminModeActive = false;
+        let foodMap;
         let map;
         let markers = [];
         let userMarker = null;
@@ -995,13 +996,17 @@
             document.getElementById('locationModal').classList.add('show');
         }
         
-        function closeModal() {
-            document.getElementById('locationModal').classList.remove('show');
-        }
-        
         function getDirections() {
-            if (selectedLocation) {
-                getDirectionsToLocation(selectedLocation.lat, selectedLocation.lng);
+            if (window.foodMap) {
+                window.foodMap.getDirections();
+            }
+        }
+
+        function closeModal() {
+            if (window.foodMap) {
+                window.foodMap.closeModal();
+            } else {
+                document.getElementById('locationModal').classList.remove('show');
             }
         }
         

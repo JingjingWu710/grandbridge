@@ -1,4 +1,3 @@
-// Enhanced Food Map JavaScript
 
 class FoodMapManager {
     constructor(isAdmin) {
@@ -738,12 +737,6 @@ class FoodMapManager {
 // Initialize map when page loads
 let foodMap;
 
-// function initMap() {
-//     // Get isAdmin value from the template (should be set in the HTML)
-//     const isAdminValue = typeof isAdmin !== 'undefined' ? isAdmin : false;
-//     foodMap = new FoodMapManager(isAdminValue);
-//     foodMap.init();
-// }
 
 // Global functions for HTML onclick handlers
 function useCurrentLocation() {
