@@ -111,12 +111,44 @@
         font-weight: 600;
         display: flex;
         align-items: center;
-        gap: 10px;
+        justify-content: space-between;
         border-bottom: 2px solid #a5d6a7;
+    }
+    
+    .memory-date-left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
     }
     
     .memory-date-icon {
         font-size: 1.5rem;
+    }
+    
+    /* Delete button styling */
+    .delete-memory-btn {
+        background: #ff6b6b;
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 20px;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        text-decoration: none;
+    }
+    
+    .delete-memory-btn:hover {
+        background: #ff5252;
+        transform: scale(1.05);
+        box-shadow: 0 2px 10px rgba(255, 107, 107, 0.3);
+    }
+    
+    .delete-memory-btn span {
+        font-size: 1.2rem;
     }
     
     .memory-content {
@@ -317,6 +349,103 @@
         animation: shimmer 2s infinite;
     }
     
+    /* Confirmation modal */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+        animation: fadeIn 0.3s;
+    }
+    
+    .modal.show {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .modal-content {
+        background: white;
+        padding: 30px;
+        border-radius: 20px;
+        max-width: 400px;
+        text-align: center;
+        animation: slideUp 0.3s;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    }
+    
+    .modal-icon {
+        font-size: 4rem;
+        margin-bottom: 20px;
+    }
+    
+    .modal-title {
+        font-size: 1.8rem;
+        color: #333;
+        margin-bottom: 15px;
+    }
+    
+    .modal-text {
+        font-size: 1.3rem;
+        color: #666;
+        margin-bottom: 25px;
+    }
+    
+    .modal-buttons {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+    }
+    
+    .modal-btn {
+        padding: 12px 30px;
+        border: none;
+        border-radius: 25px;
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-weight: 600;
+    }
+    
+    .modal-btn-cancel {
+        background: #e0e0e0;
+        color: #333;
+    }
+    
+    .modal-btn-cancel:hover {
+        background: #bdbdbd;
+    }
+    
+    .modal-btn-delete {
+        background: #ff6b6b;
+        color: white;
+    }
+    
+    .modal-btn-delete:hover {
+        background: #ff5252;
+        transform: scale(1.05);
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    @keyframes slideUp {
+        from {
+            transform: translateY(50px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+    
     /* Responsive adjustments */
     @media (max-width: 768px) {
         .memories-container {
@@ -325,6 +454,16 @@
         
         .memory-title {
             font-size: 2.2rem;
+        }
+        
+        .memory-date {
+            flex-direction: column;
+            gap: 10px;
+            align-items: flex-start;
+        }
+        
+        .delete-memory-btn {
+            align-self: flex-end;
         }
     }
 </style>
@@ -335,56 +474,34 @@
 
 <!-- Header Section -->
 <div class="memory-header">
-    <h1 class="memory-title">📚 Your Memory Wall</h1>
-    <p class="memory-subtitle">Every moment tells a story worth remembering</p>
+    <h1 class="memory-title">💝 Our Journey Together</h1>
+    <p class="memory-subtitle">Celebrating the precious moments that bridge hearts across miles</p>
 </div>
-
-<!-- Statistics Bar -->
-{% if memories %}
-<div class="memory-stats">
-    <div class="stat-item">
-        <div class="stat-number">{{ memories|length }}</div>
-        <div class="stat-label">Total Memories</div>
-    </div>
-    <div class="stat-item">
-        <div class="stat-number">{{ memories|selectattr("filetype", "search", "image")|list|length }}</div>
-        <div class="stat-label">Photos</div>
-    </div>
-    <div class="stat-item">
-        <div class="stat-number">{{ memories|selectattr("filetype", "search", "video")|list|length }}</div>
-        <div class="stat-label">Videos</div>
-    </div>
-    <div class="stat-item">
-        <div class="stat-number">{{ memories|selectattr("filetype", "search", "audio")|list|length }}</div>
-        <div class="stat-label">Audio</div>
-    </div>
-</div>
-{% endif %}
 
 <!-- Add Memory Button -->
 <div style="text-align: center;">
     <a href="/memories_wall/upload" class="add-memory-btn">
-        <span>➕</span>
-        Add New Memory
+        <span>💫</span>
+        Share Today's Special Moment
     </a>
 </div>
 
 <!-- Filter Buttons -->
 <div class="filter-buttons">
     <button class="filter-btn active" onclick="filterMemories('all')">
-        🌟 All Memories
+        🌈 All Our Memories
     </button>
     <button class="filter-btn" onclick="filterMemories('photo')">
-        📸 Photos
+        📸 Happy Faces
     </button>
     <button class="filter-btn" onclick="filterMemories('video')">
-        🎥 Videos
+        🎥 Moments in Motion
     </button>
     <button class="filter-btn" onclick="filterMemories('audio')">
-        🎵 Audio
+        🎵 Their Voices
     </button>
     <button class="filter-btn" onclick="filterMemories('text')">
-        ✍️ Text Only
+        💌 Letters of Love
     </button>
 </div>
 
@@ -392,11 +509,17 @@
 {% if memories %}
 <div class="memories-container">
     {% for memory in memories %}
-    <div class="memory-card" data-type="{% if 'image' in memory.filetype %}photo{% elif 'video' in memory.filetype %}video{% elif 'audio' in memory.filetype %}audio{% else %}text{% endif %}">
-        <!-- Date Header -->
+    <div class="memory-card" data-type="{% if 'image' in memory.filetype %}photo{% elif 'video' in memory.filetype %}video{% elif 'audio' in memory.filetype %}audio{% else %}text{% endif %}" data-memory-id="{{ memory.id }}">
+        <!-- Date Header with Delete Button -->
         <div class="memory-date">
-            <span class="memory-date-icon">📅</span>
-            <span>{{ memory.created_at.strftime("%B %d, %Y at %I:%M %p") }}</span>
+            <div class="memory-date-left">
+                <span class="memory-date-icon">📅</span>
+                <span>{{ memory.created_at.strftime("%B %d, %Y at %I:%M %p") }}</span>
+            </div>
+            <button class="delete-memory-btn" onclick="confirmDelete({{ memory.id }})">
+                <span>🗑️</span>
+                Delete
+            </button>
         </div>
         
         <!-- Memory Content -->
@@ -444,17 +567,60 @@
 {% else %}
 <!-- Empty State -->
 <div class="empty-state">
-    <div class="empty-state-icon">📚</div>
-    <h2 class="empty-state-title">Your family story begins here</h2>
-    <p class="empty-state-text">Start capturing your precious memories with the little ones today</p>
+    <div class="empty-state-icon">🌟</div>
+    <h2 class="empty-state-title">Your love story with them starts here</h2>
+    <p class="empty-state-text">Every photo, every word becomes a bridge connecting hearts. Start documenting your beautiful journey together.</p>
     <a href="/memories_wall/upload" class="add-memory-btn">
-        <span>✨</span>
-        Create Your First Memory
+        <span>💝</span>
+        Capture Your First Memory Together
     </a>
 </div>
 {% endif %}
 
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-icon">⚠️</div>
+        <h2 class="modal-title">Delete Memory?</h2>
+        <p class="modal-text">This memory will be permanently removed. This action cannot be undone.</p>
+        <div class="modal-buttons">
+            <button class="modal-btn modal-btn-cancel" onclick="closeModal()">Cancel</button>
+            <button class="modal-btn modal-btn-delete" onclick="deleteMemory()">Delete</button>
+        </div>
+    </div>
+</div>
+
 <script>
+    let memoryToDelete = null;
+    
+    // Show delete confirmation modal
+    function confirmDelete(memoryId) {
+        memoryToDelete = memoryId;
+        document.getElementById('deleteModal').classList.add('show');
+    }
+    
+    // Close modal
+    function closeModal() {
+        document.getElementById('deleteModal').classList.remove('show');
+        memoryToDelete = null;
+    }
+    
+    // Delete memory
+    function deleteMemory() {
+        if (memoryToDelete) {
+            // Redirect to delete route
+            window.location.href = `/memory/delete/${memoryToDelete}`;
+        }
+    }
+    
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        const modal = document.getElementById('deleteModal');
+        if (event.target == modal) {
+            closeModal();
+        }
+    }
+    
     // Filter memories by type
     function filterMemories(type) {
         const cards = document.querySelectorAll('.memory-card');

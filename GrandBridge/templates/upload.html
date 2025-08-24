@@ -14,7 +14,7 @@
     }
     
     .upload-header::before {
-        content: '✨';
+        content: '💝';
         position: absolute;
         font-size: 100px;
         opacity: 0.1;
@@ -24,7 +24,7 @@
     }
     
     .upload-header::after {
-        content: '📸';
+        content: '🌟';
         position: absolute;
         font-size: 100px;
         opacity: 0.1;
@@ -407,33 +407,33 @@
 
 <!-- Breadcrumb Navigation -->
 <div class="breadcrumb">
-    <a href="{{ url_for('memory.memories') }}">📚 Memory Wall</a> 
+    <a href="{{ url_for('memory.memories') }}">💝 Our Journey Together</a> 
     <span style="margin: 0 10px;">›</span>
-    <span style="color: #666;">Add New Memory</span>
+    <span style="color: #666;">Share a Special Moment</span>
 </div>
 
 <!-- Header -->
 <div class="upload-header">
-    <h1 class="upload-title">Create a New Memory</h1>
-    <p class="upload-subtitle">Capture moments that matter to you</p>
+    <h1 class="upload-title">A Moment Worth Keeping Forever</h1>
+    <p class="upload-subtitle">Every memory you save becomes a treasure they'll cherish when they're older</p>
 </div>
 
 <!-- Info Cards -->
 <div class="info-cards">
     <div class="info-card">
         <div class="info-card-icon">📸</div>
-        <div class="info-card-title">Photos</div>
-        <div class="info-card-text">JPG, PNG, GIF up to 10MB</div>
+        <div class="info-card-title">Their Smiles</div>
+        <div class="info-card-text">Capture those precious expressions</div>
     </div>
     <div class="info-card">
         <div class="info-card-icon">🎥</div>
-        <div class="info-card-title">Videos</div>
-        <div class="info-card-text">MP4, MOV up to 50MB</div>
+        <div class="info-card-title">Growing Moments</div>
+        <div class="info-card-text">Record their milestones & achievements</div>
     </div>
     <div class="info-card">
         <div class="info-card-icon">🎵</div>
-        <div class="info-card-title">Audio</div>
-        <div class="info-card-text">MP3, WAV up to 20MB</div>
+        <div class="info-card-title">Sweet Voices</div>
+        <div class="info-card-text">Save their laughter and songs</div>
     </div>
 </div>
 
@@ -442,23 +442,23 @@
     <form method="POST" enctype="multipart/form-data" id="uploadForm">
         <!-- File Upload Area -->
         <div class="file-upload-area" id="fileUploadArea">
-            <div class="upload-icon">📁</div>
-            <div class="upload-main-text">Drop your files here</div>
-            <div class="upload-sub-text">or click to browse</div>
+            <div class="upload-icon">💌</div>
+            <div class="upload-main-text">Share your beautiful moments</div>
+            <div class="upload-sub-text">Drop photos, videos, or voice messages here</div>
             <input type="file" name="file[]" multiple class="file-input" id="fileInput" 
                    accept="image/*,video/*,audio/*">
             <button type="button" class="upload-button" onclick="document.getElementById('fileInput').click()">
                 <span>📂</span> Choose Files
             </button>
             <div style="margin-top: 15px; font-size: 1.1rem; color: #999;">
-                You can select multiple files at once
+                Each file is a bridge connecting your hearts
             </div>
         </div>
         
         <!-- File Preview -->
         <div class="file-preview-container" id="filePreviewContainer">
             <div class="file-preview-title">
-                <span id="fileCount">0</span> file(s) selected
+                <span id="fileCount">0</span> precious moment(s) selected
             </div>
             <div class="file-preview-grid" id="filePreviewGrid"></div>
         </div>
@@ -466,28 +466,31 @@
         <!-- Journal Entry Section -->
         <div class="journal-section">
             <label class="journal-label">
-                <span>✍️</span> Write Your Story
+                <span>💝</span> Tell Their Story
             </label>
             <textarea name="text" 
                       class="journal-textarea" 
                       id="journalText"
-                      placeholder="What made this moment special? How did you feel? Who was with you? What do you want to remember about today?"></textarea>
+                      placeholder="What did they say today that made you smile? What new thing did they learn? How did they show their love? What do you want them to know about this day when they read this years from now?"></textarea>
             <div class="char-counter" id="charCounter">0 / 5000 characters</div>
             
             <!-- Writing Prompts -->
             <div class="writing-prompts">
-                <div class="prompts-title">💡 Need inspiration? Try these prompts:</div>
-                <div class="prompt-item" onclick="addPrompt('Today I am grateful for...')">
-                    • Today I am grateful for...
+                <div class="prompts-title">💡 Capture the moment with these thoughts:</div>
+                <div class="prompt-item" onclick="addPrompt('Today you made me so proud when...')">
+                    • Today you made me so proud when...
                 </div>
-                <div class="prompt-item" onclick="addPrompt('The best part of my day was...')">
-                    • The best part of my day was...
+                <div class="prompt-item" onclick="addPrompt('I saw you growing up when you...')">
+                    • I saw you growing up when you...
                 </div>
-                <div class="prompt-item" onclick="addPrompt('I want to remember this moment because...')">
-                    • I want to remember this moment because...
+                <div class="prompt-item" onclick="addPrompt('Your parents would be so happy to know that...')">
+                    • Your parents would be so happy to know that...
                 </div>
-                <div class="prompt-item" onclick="addPrompt('Something that made me smile today...')">
-                    • Something that made me smile today...
+                <div class="prompt-item" onclick="addPrompt('The way you laughed today reminded me that...')">
+                    • The way you laughed today reminded me that...
+                </div>
+                <div class="prompt-item" onclick="addPrompt('I want you to always remember that today...')">
+                    • I want you to always remember that today...
                 </div>
             </div>
         </div>
@@ -495,10 +498,10 @@
         <!-- Submit Section -->
         <div class="submit-section">
             <button type="submit" class="submit-btn" id="submitBtn">
-                <span style="font-size: 1.8rem;">💫</span> Save Memory
+                <span style="font-size: 1.8rem;">💖</span> Save This Treasure
             </button>
             <a href="{{ url_for('memory.memories') }}" class="cancel-link">
-                Cancel
+                Maybe Later
             </a>
         </div>
     </form>
@@ -639,7 +642,7 @@
     document.getElementById('uploadForm').addEventListener('submit', (e) => {
         const submitBtn = document.getElementById('submitBtn');
         submitBtn.disabled = true;
-        submitBtn.innerHTML = '<span style="font-size: 1.8rem;">⏳</span> Saving...';
+        submitBtn.innerHTML = '<span style="font-size: 1.8rem;">⏳</span> Saving this treasure...';
     });
 </script>
 

@@ -93,7 +93,7 @@ def add_food():
                             for item in food_items
                         ])
 
-                        # Create a more detailed prompt for better GPT responses
+
                         prompt_text = f"""
                         Food Diary Analysis:
                         
@@ -107,17 +107,19 @@ def add_food():
                         2. Assessment of dietary balance and any nutritional gaps
                         3. Specific dietary advice and recommendations for improvement
                         4. A suggested balanced daily menu that complements these foods
-                        5. Any health considerations or warnings if applicable
+                        5. Any health considerations or warnings if applicable consider the user is a caregiver of \
+                            behind childen
                         
                         Keep the response concise but informative (under 300 words).
                         """
 
-                        # Call OpenAI API (for OpenAI library v1.0+)
+                        # Call OpenAI API
                         try:
                             response = client.chat.completions.create(
-                                model="gpt-3.5-turbo", 
+                                model="gpt-4.0", 
                                 messages=[
-                                    {"role": "system", "content": "You are a professional nutritionist providing personalized dietary advice based on food consumption data."},
+                                    {"role": "system", "content": "You are a professional nutritionist providing personalized dietary advice\
+                                        based on food consumption data."},
                                     {"role": "user", "content": prompt_text}
                                 ],
                                 max_tokens=500,

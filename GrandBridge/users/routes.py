@@ -265,7 +265,7 @@ def all_families():
         return redirect(url_for('main.home'))
     
     # Assuming current_user.admin_families relationship exists
-    families = current_user.admin_families  
+    families = current_user.admin_families.all()
     return render_template('all_families.html', families=families)
 
 

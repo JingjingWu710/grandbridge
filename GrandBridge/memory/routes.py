@@ -1,4 +1,4 @@
-from flask import current_app, render_template, request, redirect, url_for, Blueprint
+from flask import current_app, render_template, request, redirect, url_for, Blueprint, flash
 import os
 from werkzeug.utils import secure_filename
 from GrandBridge.models import db, Memory
@@ -38,3 +38,33 @@ def upload():
         return redirect(url_for('memory.memories', id=current_user.id))
 
     return render_template('upload.html')
+
+@memory.route('/memory/delete/<int:id>')
+@login_required
+def delete_memory(id):
+    # Find the memory by ID and ensure it belongs to the current user
+    memory_to_delete = Memory.query.filter_by(id=id, userid=current_user.id).first()
+    
+    # If memory doesn't exist or doesn't belong to the user, redirect
+    if not memory_to_delete:
+        # You could also flash an error message here
+        return redirect(url_for('memory.memories'))
+    
+    # Delete the file from the filesystem if it exists
+    if memory_to_delete.filename:
+        file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], memory_to_delete.filename)
+        if os.path.exists(file_path):
+            try:
+                os.remove(file_path)
+            except OSError:
+                # Log the error or flash a warning, but continue with database deletion
+                pass
+    
+    # Delete the memory from the database
+    db.session.delete(memory_to_delete)
+    db.session.commit()
+    
+    flash('You have successfully deleted this memory.', 'info')
+    
+    # Redirect back to the memories page
+    return redirect(url_for('memory.memories'))

@@ -85,22 +85,39 @@ def new_event():
     if not current_user.is_admin:
         flash('Only an admin can access this page', 'danger')
         return redirect(url_for("main.home"))
-        
+    
     form = EventForm()
+    
+    # Filter families to only show those the current admin manages
+    admin_families = current_user.admin_families.all()
+    
+    # Update the form's family_ids field choices dynamically
+    form.family_ids.choices = [(f.id, f'{f.name} (ID: {f.id})') for f in admin_families]
+    
     if form.validate_on_submit():
+        # Validate that selected families are actually managed by this admin
+        selected_family_ids = form.family_ids.data
+        valid_family_ids = [f.id for f in admin_families]
+        
+        # Filter out any invalid selections
+        valid_selections = [fid for fid in selected_family_ids if fid in valid_family_ids]
+        
+        if not valid_selections:
+            flash('Please select at least one family', 'danger')
+            return render_template("create_event.html", form=form)
+        
         event = Event(
             title=form.title.data,
             start=form.start.data,
             end=form.end.data,
             location=form.location.data,
             description=form.description.data,
-            family_ids=form.family_ids.data  # This is now a list of family IDs
+            family_ids=valid_selections  # Use validated selections
         )
         db.session.add(event)
         db.session.commit()
         
-        # Create a nice message showing which families were selected
-        selected_families = Family.query.filter(Family.id.in_(form.family_ids.data)).all()
+        selected_families = Family.query.filter(Family.id.in_(valid_selections)).all()
         family_names = [f.name for f in selected_families]
         flash(f"Event created successfully for families: {', '.join(family_names)}!", "success")
         return redirect(url_for("calendar.calendar_view"))

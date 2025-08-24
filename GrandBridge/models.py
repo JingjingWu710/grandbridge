@@ -34,7 +34,6 @@ class User(db.Model, UserMixin):
     contact_info = db.Column(db.String(60), nullable=True)
     
     
-    # Family relationship for normal users
     family_id = db.Column(db.Integer, db.ForeignKey('family.id'), nullable=True)
     admin_families = db.relationship(
     'Family',
@@ -96,7 +95,6 @@ class Family(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), nullable=False)
 
-    # One-to-many: a family has multiple users
     members = db.relationship('User', backref='family', lazy=True)
 
     def __repr__(self):

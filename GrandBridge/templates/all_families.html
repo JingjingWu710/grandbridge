@@ -297,6 +297,18 @@
         box-shadow: 0 0 0 3px rgba(74, 124, 89, 0.1);
     }
     
+    /* Animation */
+    @keyframes fadeIn {
+        from { 
+            opacity: 0; 
+            transform: translateY(10px); 
+        }
+        to { 
+            opacity: 1; 
+            transform: translateY(0); 
+        }
+    }
+    
     /* Responsive */
     @media (max-width: 768px) {
         .families-grid {
@@ -320,7 +332,11 @@
 
     <!-- Statistics Bar -->
     {% if families %}
-
+    <div class="stats-bar">
+        <div class="stat-card">
+            <div class="stat-number">{{ families|length }}</div>
+            <div class="stat-label">Total Families</div>
+        </div>
         <div class="stat-card">
             <div class="stat-number">{{ families|map(attribute='members')|map('length')|sum }}</div>
             <div class="stat-label">Total Members</div>
@@ -456,12 +472,6 @@
     // Confirm removal
     function confirmRemove(familyName) {
         return confirm(`Are you sure you want to remove "${familyName}" from your managed families?\n\nThis action cannot be undone.`);
-    }
-    
-    // Animation
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
     }
 </script>
 

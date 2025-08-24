@@ -138,43 +138,43 @@ def delete_location(location_id):
         return jsonify({'status': 'failed', 'message': str(e)}), 500
     
 
-foodmap.route('/foodmap/update_location/<int:location_id>', methods=['PUT'])
-@login_required
-def update_location(location_id):
-    """Admin: Update a food pickup location"""
-    if not current_user.is_admin:
-        return jsonify({'status': 'failed', 'message': 'Unauthorized'}), 403
+# foodmap.route('/foodmap/update_location/<int:location_id>', methods=['PUT'])
+# @login_required
+# def update_location(location_id):
+#     """Admin: Update a food pickup location"""
+#     if not current_user.is_admin:
+#         return jsonify({'status': 'failed', 'message': 'Unauthorized'}), 403
     
-    try:
-        location = Location.query.get(location_id)
-        if not location:
-            return jsonify({'status': 'failed', 'message': 'Location not found'}), 404
+#     try:
+#         location = Location.query.get(location_id)
+#         if not location:
+#             return jsonify({'status': 'failed', 'message': 'Location not found'}), 404
         
-        data = request.get_json()
+#         data = request.get_json()
         
-        if 'name' in data:
-            location.name = data['name']
-        if 'address' in data:
-            location.address = data['address']
-        if 'lat' in data and 'lng' in data:
-            location.latitude = float(data['lat'])
-            location.longitude = float(data['lng'])
+#         if 'name' in data:
+#             location.name = data['name']
+#         if 'address' in data:
+#             location.address = data['address']
+#         if 'lat' in data and 'lng' in data:
+#             location.latitude = float(data['lat'])
+#             location.longitude = float(data['lng'])
         
-        db.session.commit()
+#         db.session.commit()
         
-        return jsonify({
-            'status': 'success',
-            'location': {
-                'id': location.id,
-                'lat': location.latitude,
-                'lng': location.longitude,
-                'name': location.name,
-                'address': location.address
-            }
-        })
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({'status': 'failed', 'message': str(e)}), 500
+#         return jsonify({
+#             'status': 'success',
+#             'location': {
+#                 'id': location.id,
+#                 'lat': location.latitude,
+#                 'lng': location.longitude,
+#                 'name': location.name,
+#                 'address': location.address
+#             }
+#         })
+#     except Exception as e:
+#         db.session.rollback()
+#         return jsonify({'status': 'failed', 'message': str(e)}), 500
 
 @foodmap.route('/foodmap/bulk_upload', methods=['POST'])
 @login_required
