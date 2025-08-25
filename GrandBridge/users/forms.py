@@ -17,14 +17,7 @@ class RegistrationForm(FlaskForm):
     family_id = IntegerField('Family ID', validators=[Optional()])
 
 
-    is_admin = SelectField(
-        'Are you a community admin?',
-        choices=[
-            ('false', 'No'),
-            ('true', 'Yes')
-        ],
-        coerce=str_to_bool
-    )
+    is_admin = BooleanField('I am a community admin.')
 
     submit = SubmitField('Sign up')
     
