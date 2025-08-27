@@ -245,9 +245,7 @@
                                 {{ form.password(class="form-control", 
                                                placeholder="Create a secure password") }}
                             {% endif %}
-                            <div class="help-text">
-                                💡 Make it at least 8 characters long with a mix of letters and numbers
-                            </div>
+
                         </div>
                         
                         <!-- Confirm Password Field -->
@@ -352,15 +350,6 @@
             });
         });
         
-        // Password strength indicator
-        const passwordInput = document.querySelector('#password');
-        if (passwordInput) {
-            passwordInput.addEventListener('input', function() {
-                const strength = checkPasswordStrength(this.value);
-                updatePasswordFeedback(strength);
-            });
-        }
-        
         // Add loading animation to submit button
         const form = document.querySelector('form');
         form.addEventListener('submit', function() {
@@ -385,19 +374,6 @@
         }
     });
     
-    function checkPasswordStrength(password) {
-        let strength = 0;
-        if (password.length >= 8) strength++;
-        if (password.match(/[a-z]+/)) strength++;
-        if (password.match(/[A-Z]+/)) strength++;
-        if (password.match(/[0-9]+/)) strength++;
-        if (password.match(/[$@#&!]+/)) strength++;
-        return strength;
-    }
-    
-    function updatePasswordFeedback(strength) {
-        // This would update a password strength indicator if added to the template
-        console.log('Password strength:', strength);
-    }
+
 </script>
 {% endblock content %}

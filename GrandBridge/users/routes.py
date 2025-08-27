@@ -8,8 +8,8 @@ users = Blueprint('users', __name__)
 
 @users.route("/register", methods=['GET', 'POST'])
 def register():
-    if current_user.is_authenticated:
-        return redirect(url_for('main.home'))
+    # if current_user.is_authenticated:
+    #     return redirect(url_for('main.home'))
 
     form = RegistrationForm()
 
@@ -59,8 +59,8 @@ def register():
 
 @users.route("/login", methods=['GET','POST'])
 def login():
-    if current_user.is_authenticated:
-        return redirect(url_for('main.home'))
+    # if current_user.is_authenticated:
+    #     return redirect(url_for('main.home'))
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
@@ -79,6 +79,7 @@ def login():
 @users.route("/logout")
 def logout():
     logout_user()
+    flash('You have logged out.', 'info')
     return redirect(url_for('main.home'))
 
 @users.route("/account", methods=['GET','POST'])
@@ -189,9 +190,9 @@ def create_family():
                 if family not in current_user.admin_families:
                     current_user.admin_families.append(family)
                     db.session.commit()
-                    flash(f"You have been added as an admin for existing family '{family.name}'.", "success")
+                    flash(f"You have been added as an admin for existing family (ID: {family.id}) You may change its name on this page.", "success")
                 else:
-                    flash(f"You are already an admin for family '{family.name}'. You may update its name on 'All Families' Page.", "info")
+                    flash(f"You are already an admin for family '{family.name}' (ID: {family.id}). You may update its name on 'All Families' Page.", "info")
             else:
                 # Family with this ID doesn't exist - show error
                 flash(f'No family found with ID {provided_id}. Leave ID blank to create a new family.', 'danger')

@@ -1,266 +1,10 @@
 {% extends "layout.html" %}
-{% block content %}
 
-<style>
-    /* Dashboard Styling to match the events theme */
-    .dashboard-header {
-        background: linear-gradient(135deg, #4a7c59, #2c6f4f);
-        color: white;
-        padding: 30px;
-        border-radius: 15px;
-        margin-bottom: 30px;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-    }
-    
-    .dashboard-header h2 {
-        font-size: 2.5rem;
-        margin: 0;
-        display: flex;
-        align-items: center;
-        gap: 15px;
-    }
-    
-    /* Weekly Report Card - Always Visible */
-    .weekly-report-card {
-        background: linear-gradient(135deg, #fff3cd, #ffeeba);
-        border: 3px solid #ffc107;
-        border-radius: 15px;
-        padding: 25px;
-        margin-bottom: 30px;
-        box-shadow: 0 5px 15px rgba(255, 193, 7, 0.3);
-        position: relative;
-        overflow: hidden;
-        animation: pulse 2s infinite;
-    }
-    
-    @keyframes pulse {
-        0% { transform: scale(1); }
-        50% { transform: scale(1.02); }
-        100% { transform: scale(1); }
-    }
-    
-    .weekly-report-card::before {
-        content: "📊";
-        position: absolute;
-        top: -20px;
-        right: -20px;
-        font-size: 100px;
-        opacity: 0.1;
-    }
-    
-    .weekly-report-card h3 {
-        color: #856404;
-        font-size: 1.8rem;
-        margin-bottom: 10px;
-    }
-    
-    .weekly-report-card p {
-        color: #856404;
-        font-size: 1.2rem;
-        margin-bottom: 20px;
-    }
-    
-    .weekly-report-card .btn {
-        font-size: 1.3rem;
-        padding: 15px 30px;
-        border-radius: 10px;
-        background: linear-gradient(135deg, #ff9800, #f57c00);
-        border: none;
-        color: white;
-        box-shadow: 0 3px 10px rgba(0,0,0,0.2);
-        transition: all 0.3s;
-    }
-    
-    .weekly-report-card .btn:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 5px 20px rgba(0,0,0,0.3);
-    }
-    
-    /* Daily Check-In Card */
-    .checkin-card {
-        background: linear-gradient(135deg, #d1ecf1, #bee5eb);
-        border: 2px solid #17a2b8;
-        border-radius: 15px;
-        padding: 25px;
-        margin-bottom: 30px;
-        text-align: center;
-        transition: all 0.3s;
-    }
-    
-    .checkin-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-    }
-    
-    .checkin-card h4 {
-        color: #0c5460;
-        font-size: 1.6rem;
-        margin-bottom: 10px;
-    }
-    
-    .checkin-card p {
-        color: #0c5460;
-        font-size: 1.1rem;
-        margin-bottom: 20px;
-    }
-    
-    /* Wellness Score Card */
-    .wellness-score-card {
-        background: white;
-        border-radius: 15px;
-        padding: 25px;
-        margin-bottom: 30px;
-        box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-    }
-    
-    .wellness-score-card h4 {
-        color: #2c6f4f;
-        font-size: 1.8rem;
-        margin-bottom: 20px;
-    }
-    
-    .progress {
-        height: 40px;
-        border-radius: 20px;
-        background: #e8f5e9;
-    }
-    
-    .progress-bar {
-        font-size: 1.2rem;
-        line-height: 40px;
-        border-radius: 20px;
-        background: linear-gradient(135deg, #4a7c59, #2c6f4f);
-    }
-    
-    /* Stats Cards */
-    .stat-card {
-        background: white;
-        border-radius: 15px;
-        padding: 20px;
-        margin-bottom: 20px;
-        text-align: center;
-        transition: all 0.3s;
-        box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-    }
-    
-    .stat-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-    }
-    
-    .stat-card h3 {
-        font-size: 3rem;
-        margin-bottom: 10px;
-    }
-    
-    .stat-card h5 {
-        font-size: 2rem;
-        color: #4a7c59;
-        margin-bottom: 10px;
-    }
-    
-    .stat-card p {
-        font-size: 1.2rem;
-        color: #6c757d;
-    }
-    
-    /* Quick Actions */
-    .quick-actions {
-        background: #f8f9fa;
-        border-radius: 15px;
-        padding: 25px;
-        margin: 30px 0;
-    }
-    
-    .quick-actions h4 {
-        color: #2c6f4f;
-        font-size: 1.6rem;
-        margin-bottom: 20px;
-    }
-    
-    .quick-actions .btn {
-        margin: 5px;
-        font-size: 1.2rem;
-        padding: 15px 25px;
-        border-radius: 10px;
-        transition: all 0.3s;
-    }
-    
-    .quick-actions .btn:hover {
-        transform: scale(1.05);
-    }
-    
-    /* Recent Activity */
-    .activity-section {
-        background: white;
-        border-radius: 15px;
-        padding: 25px;
-        margin-bottom: 20px;
-        box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-    }
-    
-    .activity-section h4 {
-        color: #2c6f4f;
-        font-size: 1.5rem;
-        margin-bottom: 20px;
-        border-bottom: 2px solid #e8f5e9;
-        padding-bottom: 10px;
-    }
-    
-    .activity-item {
-        padding: 15px;
-        border-radius: 10px;
-        margin-bottom: 15px;
-        font-size: 1.1rem;
-    }
-    
-    .activity-item.plant {
-        background: linear-gradient(135deg, #d4edda, #c3e6cb);
-        border-left: 4px solid #28a745;
-    }
-    
-    .activity-item.mindfulness {
-        background: linear-gradient(135deg, #d1ecf1, #bee5eb);
-        border-left: 4px solid #17a2b8;
-    }
-    
-    .activity-item strong {
-        font-size: 1.2rem;
-        color: #2c6f4f;
-    }
-    
-    .activity-item small {
-        color: #6c757d;
-        font-size: 0.95rem;
-    }
-    
-    .no-activity {
-        text-align: center;
-        padding: 30px;
-        color: #6c757d;
-        font-size: 1.2rem;
-    }
-    
-    /* Ensure weekly report never disappears */
-    .sticky-report {
-        position: sticky;
-        top: 80px;
-        z-index: 100;
-    }
-    
-    @media (max-width: 768px) {
-        .stat-card h3 {
-            font-size: 2rem;
-        }
-        .stat-card h5 {
-            font-size: 1.5rem;
-        }
-        .weekly-report-card {
-            position: relative;
-            top: auto;
-        }
-    }
-</style>
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
+{% endblock %}
+
+{% block content %}
 
 <!-- Dashboard Header -->
 <div class="dashboard-header">
@@ -273,12 +17,12 @@
     <p>See your progress, patterns, and personalized insights from the past 7 days</p>
     <div class="text-center">
         <a href="{{ url_for('planting.weekly_report') }}" class="btn btn-warning btn-lg">
-            <i class="fas fa-chart-line"></i> View Weekly Report
+            View Weekly Report
         </a>
     </div>
     <div class="mt-3 text-center">
         <small style="color: #856404;">
-            <i class="fas fa-clock"></i> Updated every Monday morning
+            Updated every Monday morning
         </small>
     </div>
 </div>
@@ -288,14 +32,14 @@
     <h4>📝 Daily Check-In</h4>
     <p>Track your wellbeing in just 2 minutes</p>
     <a href="{{ url_for('planting.daily_checkin') }}" class="btn btn-info btn-lg">
-        <i class="fas fa-clipboard-check"></i> Start Today's Check-In
+        Start Today's Check-In
     </a>
 </div>
 
 <!-- Wellness Score -->
 <div class="wellness-score-card">
     <h4>
-        <i class="fas fa-heart"></i> Wellness Score: 
+        Wellness Score: 
         <span style="color: #4a7c59;">{{ wellness_score }}/200</span>
     </h4>
     <div class="progress">
@@ -314,9 +58,9 @@
             {% elif wellness_score < 100 %}
                 Great progress! You're building momentum 🌿
             {% elif wellness_score < 150 %}
-                Excellent work! You're thriving 🌳
-            {% else %}
                 Outstanding! You're a wellness champion 🏆
+            {% else %}
+                Outstanding! You're a wellness champion
             {% endif %}
         </small>
     </div>
@@ -377,21 +121,19 @@
 <div class="row">
     <div class="col-md-6">
         <div class="activity-section">
-            <h4><i class="fas fa-seedling"></i> Recent Plants</h4>
+            <h4>Recent Plants</h4>
             {% if recent_plants %}
                 {% for plant in recent_plants %}
                 <div class="activity-item plant">
                     <strong>{{ plant.name }}</strong> 
                     <span class="badge bg-success">{{ plant.type }}</span><br>
                     <small>
-                        <i class="fas fa-clock"></i> 
                         {{ plant.plant_time.strftime('%B %d at %I:%M %p') }}
                     </small>
                 </div>
                 {% endfor %}
             {% else %}
                 <div class="no-activity">
-                    <i class="fas fa-leaf fa-3x text-muted mb-3"></i>
                     <p>No plants yet. Start your garden!</p>
                     <a href="{{ url_for('planting.plant') }}" class="btn btn-success">
                         Start Planting
@@ -403,21 +145,19 @@
     
     <div class="col-md-6">
         <div class="activity-section">
-            <h4><i class="fas fa-brain"></i> Recent Mindfulness</h4>
+            <h4>Recent Mindfulness</h4>
             {% if recent_mindfulness %}
                 {% for log in recent_mindfulness %}
                 <div class="activity-item mindfulness">
                     <strong>{{ log.activity_type|capitalize }}</strong>
                     <span class="badge bg-info">{{ log.duration_minutes }} min</span><br>
                     <small>
-                        <i class="fas fa-calendar"></i> 
                         {{ log.date_completed.strftime('%B %d, %Y') }}
                     </small>
                 </div>
                 {% endfor %}
             {% else %}
                 <div class="no-activity">
-                    <i class="fas fa-spa fa-3x text-muted mb-3"></i>
                     <p>Start your mindfulness journey!</p>
                     <a href="{{ url_for('planting.daily_checkin') }}" class="btn btn-info">
                         Try Mindfulness
@@ -428,36 +168,40 @@
     </div>
 </div>
 
-<script>
-    // Ensure weekly report card is always visible
-    document.addEventListener('DOMContentLoaded', function() {
-        const reportCard = document.getElementById('weeklyReportCard');
-        
-        // Check if the card exists
-        if (!reportCard) {
-            console.error('Weekly report card not found!');
-            return;
-        }
-        
-        // Make sure it's visible
-        reportCard.style.display = 'block';
-        reportCard.style.visibility = 'visible';
-        reportCard.style.opacity = '1';
-        
-        // Add a subtle animation to draw attention
-        setTimeout(() => {
-            reportCard.style.animation = 'pulse 2s infinite';
-        }, 1000);
-        
+<script defer>
+document.addEventListener('DOMContentLoaded', function() {
+    const reportCard = document.getElementById('weeklyReportCard');
+    
+    // Check if the card exists
+    if (!reportCard) {
+        console.error('Weekly report card not found!');
+        return;
+    }
+    
+    // Make sure it's visible
+    reportCard.style.display = 'block';
+    reportCard.style.visibility = 'visible';
+    reportCard.style.opacity = '1';
+    
+    // Delay non-critical operations
+    setTimeout(() => {
         // Check if user has dismissed it (using localStorage)
-        const dismissed = localStorage.getItem('weeklyReportDismissed');
-        const today = new Date().toDateString();
-        
-        if (dismissed !== today) {
-            // Show the report card prominently
-            reportCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        try {
+            const dismissed = localStorage.getItem('weeklyReportDismissed');
+            const today = new Date().toDateString();
+            
+            if (dismissed !== today) {
+                // Show the report card prominently
+                reportCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        } catch (error) {
+            console.log('LocalStorage not available');
         }
-    });
+        
+        // Add animation after initial load
+        reportCard.style.animation = 'pulse 2s infinite';
+    }, 1000);
+});
 </script>
 
 {% endblock %}

@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    {% block extra_css %}{% endblock %}
     <title>GrandBridge - Connecting Generations</title>
     
     <!-- Font Awesome for Icons -->
@@ -323,7 +324,7 @@
                             <a class="nav-link" href="{{ url_for('planting.plant') }}">
                                 <i class="fas fa-seedling"></i> Plant
                             </a>
-                            <a class="nav-link" href="{{ url_for('planting.all_vegetables', id=current_user.id) }}">
+                            <a class="nav-link" href="{{ url_for('planting.all_vegetables') }}">
                                 <i class="fas fa-leaf"></i> Garden
                             </a>
                             <a class="nav-link" href="{{ url_for('planting.unlock') }}">

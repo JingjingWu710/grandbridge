@@ -334,22 +334,22 @@
 <div class="food-container">
     <!-- Header -->
     <div class="food-header">
-        <h2 class="food-title">🍛 Daily Food Journal</h2>
-        <p class="food-subtitle">Track your meals and celebrate your healthy choices!</p>
+        <h2 class="food-title">👨‍👩‍👧‍👦 Family's Meal Record</h2>
+        <p class="food-subtitle">Caring for their nutrition while parents are away</p>
     </div>
 
     <!-- Encouragement Section -->
     <div class="encouragement-box">
         <div class="encouragement-title">
-            <span>🌟</span> Great job on tracking your nutrition!
+            <span>💝</span> You're doing an amazing job caring for the children!
         </div>
         <div class="encouragement-text">
-            Recording your meals helps you:
+            Recording the children's meals helps:
             <ul class="tips-list">
-                <li>Understand your eating patterns</li>
-                <li>Make healthier food choices</li>
-                <li>Maintain balanced nutrition</li>
-                <li>Feel more in control of your health</li>
+                <li>Show parents their children are eating well</li>
+                <li>Ensure balanced nutrition for growing bodies</li>
+                <li>Track if children have regular meal times</li>
+                <li>Share updates that bring peace of mind to parents</li>
             </ul>
         </div>
     </div>
@@ -367,7 +367,7 @@
         <!-- Date Selection -->
         <div class="form-section">
             <h3 class="section-title">
-                <span>📅</span> When will you eat?
+                <span>📅</span> When will your family eat?
             </h3>
             <div class="date-section">
                 <div class="date-field">
@@ -394,7 +394,7 @@
         <!-- Food Items Section -->
         <div class="form-section">
             <h3 class="section-title">
-                <span>🥘</span> What will you eat?
+                <span>🍽️</span> What will your family eat?
             </h3>
             
             <div id="food-items">
@@ -404,9 +404,9 @@
                     <div class="food-fields">
                         <div class="field-group">
                             <label class="form-label">
-                                <span class="field-icon">🍽️</span>Food Name
+                                <span class="field-icon">🥘</span>Food Name
                             </label>
-                            {{ item_form.food_name(class="form-control", placeholder="e.g., Apple, Rice, Chicken") }}
+                            {{ item_form.food_name(class="form-control", placeholder="e.g., Porridge, Vegetables, Eggs") }}
                             {% if item_form.food_name.errors %}
                             <div class="text-danger" style="margin-top: 5px;">{{ item_form.food_name.errors[0] }}</div>
                             {% endif %}
@@ -444,15 +444,14 @@
 
         <!-- Motivational Quote -->
         <div class="motivation-quote">
-            💚 "Every healthy choice you make is an investment in your future wellbeing!"
+            🌟 "Your care and dedication make all the difference in these children's lives. Every meal you provide shows them they are loved and cared for!"
         </div>
 
         <!-- Submit Section -->
         <div class="action-buttons">
-            {{ form.submit(class="btn btn-submit", value="Save Food Entry 🎉") }}
+            {{ form.submit(class="btn btn-submit", value="Save Record 📝") }}
             <div class="helper-text">
-                <strong>Tip:</strong> Don't worry about being perfect! Any tracking is better than none. 
-                You're doing great! 👏
+                <strong>Remember:</strong> Parents will be grateful to know their children are eating well. Your efforts in recording meals help maintain the family connection! 💕
             </div>
         </div>
     </form>
@@ -473,11 +472,11 @@ function addFoodItem() {
         <div class="food-fields">
             <div class="field-group">
                 <label class="form-label">
-                    <span class="field-icon">🍽️</span>Food Name
+                    <span class="field-icon">🥘</span>Food Name
                 </label>
                 <input class="form-control" id="items-${itemIndex}-food_name" 
                        name="items-${itemIndex}-food_name" required type="text" 
-                       placeholder="e.g., Apple, Rice, Chicken">
+                       placeholder="e.g., Porridge, Vegetables, Eggs">
             </div>
             <div class="field-group">
                 <label class="form-label">
@@ -526,8 +525,8 @@ function removeItem(button) {
             updateItemNumbers();
         }, 300);
     } else {
-        // More encouraging message
-        alert('Keep at least one food item to track your meal! You\'re doing great! 😊');
+        // More encouraging message for caregivers
+        alert('Please keep at least one food item to track what the children ate. You\'re doing great! 👍');
     }
 }
 
@@ -572,7 +571,7 @@ document.head.appendChild(style);
 document.getElementById('food-form').addEventListener('submit', function(e) {
     // You could add a loading state here
     const submitBtn = document.querySelector('.btn-submit');
-    submitBtn.textContent = 'Saving your healthy choices... 🌟';
+    submitBtn.textContent = 'Recording the children\'s meals... 💝';
     submitBtn.disabled = true;
 });
 </script>

@@ -17,7 +17,7 @@ def memories():
     memories = Memory.query.filter_by(userid=current_user.id).order_by(Memory.created_at.desc()).all()
     return render_template('memory.html', memories=memories)
 
-@memory.route('/memories_wall/upload', methods=['GET', 'POST'])
+@memory.route('/memory/upload', methods=['GET', 'POST'])
 @login_required
 def upload():
     if request.method == 'POST':
@@ -35,6 +35,7 @@ def upload():
                 db.session.add(memory)
 
         db.session.commit()
+        flash('You have successfully uploaded this memory.', 'success')
         return redirect(url_for('memory.memories', id=current_user.id))
 
     return render_template('upload.html')

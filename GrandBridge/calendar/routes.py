@@ -122,7 +122,7 @@ def new_event():
         flash(f"Event created successfully for families: {', '.join(family_names)}!", "success")
         return redirect(url_for("calendar.calendar_view"))
 
-    return render_template("create_event.html", form=form)
+    return render_template("create_event.html", form=form, type="Create New")
 
 @calendar.route("/event/<int:id>/edit", methods=['GET', 'POST'])
 @login_required
@@ -158,7 +158,7 @@ def edit_event(id):
         form.description.data = event.description
         form.family_ids.data = event.family_ids  # Pre-select current families
         
-    return render_template("create_event.html", form=form)
+    return render_template("create_event.html", form=form, type="Edit the")
 
 @calendar.route("/event/<int:id>/delete", methods=['POST'])
 @login_required
@@ -170,7 +170,7 @@ def delete_event(id):
         flash('You have deleted this event', 'success')
     else:
         flash('Only an admin can access this page', 'danger')
-    return redirect(url_for("main.home"))
+    return redirect(url_for("calendar.calendar_view"))
 
 def get_month_calendar(year, month):
     cal = py_calendar.Calendar(firstweekday=6)  # Sunday start

@@ -9,7 +9,7 @@ class StaffForm(FlaskForm):
                                validators=[DataRequired()])
     tel = StringField('Telephone number:',
                       validators=[DataRequired()])
-    email = StringField('Email adress:',
+    email = StringField('Email address:',
                         validators=[DataRequired(),Email()])
     intro = TextAreaField('Introduction:')
     submit = SubmitField('Submit')

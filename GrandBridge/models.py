@@ -87,7 +87,6 @@ class ChatMessage(db.Model):
             'username': self.author.username,
             'user_id': self.user_id,
             'timestamp': self.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
-            'edited': self.edited
         }
 
 
