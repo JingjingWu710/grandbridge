@@ -1,4 +1,4 @@
-from flask import render_template, url_for, flash, redirect, Blueprint, request, jsonify
+from flask import render_template, Blueprint, request, jsonify
 from GrandBridge.models import db, Location
 from flask_login import current_user, login_required
 import math
@@ -138,44 +138,6 @@ def delete_location(location_id):
         return jsonify({'status': 'failed', 'message': str(e)}), 500
     
 
-# foodmap.route('/foodmap/update_location/<int:location_id>', methods=['PUT'])
-# @login_required
-# def update_location(location_id):
-#     """Admin: Update a food pickup location"""
-#     if not current_user.is_admin:
-#         return jsonify({'status': 'failed', 'message': 'Unauthorized'}), 403
-    
-#     try:
-#         location = Location.query.get(location_id)
-#         if not location:
-#             return jsonify({'status': 'failed', 'message': 'Location not found'}), 404
-        
-#         data = request.get_json()
-        
-#         if 'name' in data:
-#             location.name = data['name']
-#         if 'address' in data:
-#             location.address = data['address']
-#         if 'lat' in data and 'lng' in data:
-#             location.latitude = float(data['lat'])
-#             location.longitude = float(data['lng'])
-        
-#         db.session.commit()
-        
-#         return jsonify({
-#             'status': 'success',
-#             'location': {
-#                 'id': location.id,
-#                 'lat': location.latitude,
-#                 'lng': location.longitude,
-#                 'name': location.name,
-#                 'address': location.address
-#             }
-#         })
-#     except Exception as e:
-#         db.session.rollback()
-#         return jsonify({'status': 'failed', 'message': str(e)}), 500
-
 @foodmap.route('/foodmap/bulk_upload', methods=['POST'])
 @login_required
 def bulk_upload_locations():
@@ -290,3 +252,106 @@ def calculate_distance(lat1, lon1, lat2, lon2):
     c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
     
     return R * c
+
+@foodmap.route('/foodmap/search_locations', methods=['POST'])
+@login_required
+def search_locations():
+    """Search locations by keyword and/or proximity"""
+    try:
+        data = request.get_json()
+        keyword = data.get('keyword', '').strip()
+        user_lat = data.get('lat')
+        user_lng = data.get('lng')
+        radius = data.get('radius')
+        
+        # Start with all active locations
+        query = Location.query.filter_by(is_active=True)
+        
+        # Apply keyword filter if provided
+        if keyword:
+            # Case-insensitive search in name field
+            search_pattern = f'%{keyword}%'
+            query = query.filter(
+                db.or_(
+                    Location.name.ilike(search_pattern),
+                    Location.address.ilike(search_pattern),
+                    Location.food_types.ilike(search_pattern)
+                )
+            )
+        
+        locations = query.all()
+        
+        # Calculate distances if user location provided
+        results = []
+        for loc in locations:
+            location_dict = {
+                'id': loc.id,
+                'lat': loc.latitude,
+                'lng': loc.longitude,
+                'name': loc.name or 'Food Pickup Point',
+                'address': loc.address or 'Address not specified',
+                'food_types': loc.food_types,
+                'operating_hours': loc.operating_hours
+            }
+            
+            # Calculate distance if user coordinates provided
+            if user_lat is not None and user_lng is not None:
+                distance = calculate_distance(
+                    float(user_lat), float(user_lng),
+                    loc.latitude, loc.longitude
+                )
+                location_dict['distance'] = round(distance, 2)
+                
+                # Filter by radius if specified
+                if radius is not None and distance > float(radius):
+                    continue
+            
+            results.append(location_dict)
+        
+        # Sort by distance if distances were calculated
+        if user_lat is not None and user_lng is not None:
+            results.sort(key=lambda x: x.get('distance', float('inf')))
+        
+        return jsonify({
+            'status': 'success',
+            'locations': results,
+            'total': len(results),
+            'keyword': keyword
+        })
+        
+    except Exception as e:
+        return jsonify({'status': 'failed', 'message': str(e)}), 500
+
+
+@foodmap.route('/foodmap/autocomplete', methods=['GET'])
+@login_required
+def autocomplete_locations():
+    """Provide location name suggestions for autocomplete"""
+    try:
+        query = request.args.get('q', '').strip()
+        
+        if not query or len(query) < 2:
+            return jsonify([])
+        
+        # Find locations with names starting with or containing the query
+        locations = Location.query.filter(
+            Location.is_active == True,
+            Location.name.ilike(f'%{query}%')
+        ).limit(10).all()
+        
+        # Return unique location names
+        suggestions = []
+        seen = set()
+        for loc in locations:
+            if loc.name and loc.name not in seen:
+                suggestions.append({
+                    'id': loc.id,
+                    'name': loc.name,
+                    'address': loc.address
+                })
+                seen.add(loc.name)
+        
+        return jsonify(suggestions)
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500

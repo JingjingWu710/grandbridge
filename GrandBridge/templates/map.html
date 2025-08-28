@@ -394,7 +394,23 @@
                     </div>
                 </div>
             </div>
-            
+            <div class="keyword-search" style="margin: 15px 0;">
+                <h4 style="color: #2c6f4f;">🔎 Search by Name:</h4>
+                <div class="row">
+                    <div class="col-md-8">
+                        <input id="keyword-search-box" 
+                            type="text" 
+                            class="search-input" 
+                            placeholder="Search for location name (e.g., 'Chinese restaurant', 'Church', 'Community Centre')..."
+                            onkeyup="filterLocationsByKeyword(event)">
+                    </div>
+                    <div class="col-md-4">
+                        <button onclick="clearKeywordSearch()" class="btn-custom btn-secondary-custom w-100">
+                            ✖️ Clear Search
+                        </button>
+                    </div>
+                </div>
+            </div>
             <button onclick="searchNearbyLocations()" class="btn-custom btn-primary-custom">
                 🔍 Search Nearby
             </button>
@@ -504,6 +520,23 @@
             // Load existing locations from database
             loadLocations();
         }
+        document.addEventListener('DOMContentLoaded', function() {
+            const keywordSearchBox = document.getElementById('keyword-search-box');
+            if (keywordSearchBox) {
+                keywordSearchBox.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        // If user location is set, search nearby with keyword
+                        // Otherwise just filter by keyword
+                        if (userMarker) {
+                            searchNearbyLocations();
+                        } else {
+                            filterLocationsByKeyword(e);
+                        }
+                    }
+                });
+            }
+        });
         
         function setupAutocomplete() {
             console.log('Setting up autocomplete...');
@@ -561,6 +594,86 @@
                 });
             }
         }
+
+        function filterLocationsByKeyword(event) {
+    const keyword = event.target.value.toLowerCase().trim();
+    
+    if (keyword === '') {
+        // If search is empty, show all current locations
+        displayLocationCards(allLocations);
+        displayMarkers(allLocations);
+        return;
+    }
+    
+    // Filter locations by keyword in name
+    const filteredLocations = allLocations.filter(location => {
+        const locationName = (location.name || 'Food Pickup Point').toLowerCase();
+        return locationName.includes(keyword);
+    });
+    
+    console.log(`Found ${filteredLocations.length} locations matching "${keyword}"`);
+    
+    // Update the display
+    displayLocationCards(filteredLocations);
+    displayMarkers(filteredLocations);
+    
+    // Show notification about results
+    if (filteredLocations.length === 0) {
+        showNotification(`No locations found matching "${keyword}"`, 'warning');
+        
+        // Show helpful message in location cards area
+        const container = document.getElementById('location-cards');
+        if (container) {
+            container.innerHTML = `
+                <div class="info-box">
+                    <p>No locations found matching "<strong>${escapeHtml(keyword)}</strong>".</p>
+                    <p>Try different keywords or <button onclick="clearKeywordSearch()" class="btn-custom btn-secondary-custom" style="padding: 5px 10px;">clear the search</button> to see all locations.</p>
+                </div>
+            `;
+        }
+    } else {
+        showNotification(`Found ${filteredLocations.length} location(s) matching "${keyword}"`, 'success');
+        
+        // Update the heading to show filtered results
+        const heading = document.querySelector('#locations-list h3');
+        if (heading) {
+            heading.innerHTML = `📍 Food Pickup Points (${filteredLocations.length} matching "${escapeHtml(keyword)}")`;
+        }
+    }
+    
+    // If user has set their location and we have distances, maintain distance sorting
+    if (userMarker && filteredLocations.some(loc => loc.distance !== undefined)) {
+        filteredLocations.sort((a, b) => (a.distance || 999) - (b.distance || 999));
+        displayLocationCards(filteredLocations);
+    }
+}
+
+        function clearKeywordSearch() {
+            const searchBox = document.getElementById('keyword-search-box');
+            if (searchBox) {
+                searchBox.value = '';
+            }
+            
+            // Reset the heading
+            const heading = document.querySelector('#locations-list h3');
+            if (heading) {
+                heading.innerHTML = '📍 Food Pickup Points';
+            }
+            
+            // Show all locations again
+            displayLocationCards(allLocations);
+            displayMarkers(allLocations);
+            
+            showNotification('Search cleared. Showing all locations.', 'info');
+        }
+
+        // Helper function to escape HTML to prevent XSS
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
         
         function addTemporaryMarker(location) {
             // Remove existing temporary marker
@@ -843,14 +956,18 @@
             
             const userPos = userMarker.getPosition();
             const radius = parseFloat(document.querySelector('input[name="radius"]:checked').value);
+            const keyword = document.getElementById('keyword-search-box').value.toLowerCase().trim();
             
             console.log('Searching within', radius, 'km of', userPos.lat(), userPos.lng());
+            if (keyword) {
+                console.log('With keyword filter:', keyword);
+            }
             
             // Draw search circle
             drawSearchCircle(userPos, radius);
             
             // Filter locations within radius
-            const nearbyLocations = allLocations.filter(location => {
+            let nearbyLocations = allLocations.filter(location => {
                 const distance = calculateDistance(
                     userPos.lat(), userPos.lng(),
                     parseFloat(location.lat), parseFloat(location.lng)
@@ -858,6 +975,14 @@
                 location.distance = distance;
                 return distance <= radius;
             });
+            
+            // Apply keyword filter if present
+            if (keyword) {
+                nearbyLocations = nearbyLocations.filter(location => {
+                    const locationName = (location.name || 'Food Pickup Point').toLowerCase();
+                    return locationName.includes(keyword);
+                });
+            }
             
             // Sort by distance
             nearbyLocations.sort((a, b) => a.distance - b.distance);
@@ -868,8 +993,22 @@
             displayLocationCards(nearbyLocations);
             highlightNearbyMarkers(nearbyLocations);
             
-            showNotification(`Found ${nearbyLocations.length} location(s) within ${radius}km`, 
-                nearbyLocations.length > 0 ? 'success' : 'warning');
+            let message = `Found ${nearbyLocations.length} location(s) within ${radius}km`;
+            if (keyword) {
+                message += ` matching "${keyword}"`;
+            }
+            
+            showNotification(message, nearbyLocations.length > 0 ? 'success' : 'warning');
+            
+            // Update heading if keyword is present
+            const heading = document.querySelector('#locations-list h3');
+            if (heading) {
+                if (keyword) {
+                    heading.innerHTML = `📍 Food Pickup Points (${nearbyLocations.length} within ${radius}km matching "${escapeHtml(keyword)}")`;
+                } else {
+                    heading.innerHTML = `📍 Food Pickup Points (${nearbyLocations.length} within ${radius}km)`;
+                }
+            }
         }
         
         function drawSearchCircle(center, radius) {
@@ -921,6 +1060,8 @@
         function showAllLocations() {
             console.log('Showing all locations');
             
+            const keyword = document.getElementById('keyword-search-box').value.toLowerCase().trim();
+            
             // Clear search circle if exists
             if (searchCircle) {
                 searchCircle.setMap(null);
@@ -932,36 +1073,35 @@
                 delete location.distance;
             });
             
-            // Display all locations
-            displayLocationCards(allLocations);
-            displayMarkers(allLocations);
+            // Apply keyword filter if present
+            let locationsToShow = allLocations;
+            if (keyword) {
+                locationsToShow = allLocations.filter(location => {
+                    const locationName = (location.name || 'Food Pickup Point').toLowerCase();
+                    return locationName.includes(keyword);
+                });
+            }
             
-            showNotification(`Showing all ${allLocations.length} locations`, 'info');
-        }
-        
-        function centerOnLocation(lat, lng) {
-            lat = parseFloat(lat);
-            lng = parseFloat(lng);
-            map.setCenter({ lat: lat, lng: lng });
-            map.setZoom(16);
+            // Display locations
+            displayLocationCards(locationsToShow);
+            displayMarkers(locationsToShow);
             
-            // Find and animate the marker
-            markers.forEach(marker => {
-                const pos = marker.getPosition();
-                if (Math.abs(pos.lat() - lat) < 0.0001 && Math.abs(pos.lng() - lng) < 0.0001) {
-                    marker.setAnimation(google.maps.Animation.BOUNCE);
-                    setTimeout(() => marker.setAnimation(null), 2000);
-                    
-                    // Open info window for this marker
-                    const location = allLocations.find(loc => 
-                        Math.abs(parseFloat(loc.lat) - lat) < 0.0001 && 
-                        Math.abs(parseFloat(loc.lng) - lng) < 0.0001
-                    );
-                    if (location) {
-                        showMarkerInfo(location, marker);
-                    }
+            let message = `Showing ${locationsToShow.length} location(s)`;
+            if (keyword) {
+                message += ` matching "${keyword}"`;
+            }
+            
+            showNotification(message, 'info');
+            
+            // Update heading
+            const heading = document.querySelector('#locations-list h3');
+            if (heading) {
+                if (keyword) {
+                    heading.innerHTML = `📍 Food Pickup Points (${locationsToShow.length} matching "${escapeHtml(keyword)}")`;
+                } else {
+                    heading.innerHTML = '📍 Food Pickup Points';
                 }
-            });
+            }
         }
         
         function showLocationDetails(locationId) {

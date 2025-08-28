@@ -215,7 +215,7 @@ def create_family():
 @login_required
 def edit_family(family_id):
     if not current_user.is_admin:
-        flash("You do not have permission to create a family.", "danger")
+        flash("You do not have permission to edit this family.", "danger")
         return redirect(url_for('main.home'))
 
     family = Family.query.get_or_404(family_id)
@@ -248,7 +248,7 @@ def remove_admin(family_id):
     # Ensure current user is an admin for this family
     if not current_user.admin_families.filter_by(id=family.id).first():
         flash("You do not have permission to remove yourself as an admin from this family.", "danger")
-        return redirect(url_for('users.all_families'))
+        return redirect(url_for('main.home'))
 
     # Remove the admin relationship
     current_user.admin_families.remove(family)
