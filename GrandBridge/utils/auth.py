@@ -13,34 +13,42 @@ from datetime import datetime, timedelta
 from googleapiclient.discovery import build
 
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
-GOOGLE_CLIENT_ID = Config.GOOGLE_CLIENT_ID
-GOOGLE_CLIENT_SECRET = Config.GOOGLE_CLIENT_SECRET
-GOOGLE_CLIENT_JSON_PATH = Config.GOOGLE_CLIENT_JSON_PATH
 
-if not GOOGLE_CLIENT_JSON_PATH:
-    raise RuntimeError("Missing GOOGLE_CLIENT_JSON_PATH environment variable")
+# Get credentials from environment variables instead of JSON file
+GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID') or Config.GOOGLE_CLIENT_ID
+GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET') or Config.GOOGLE_CLIENT_SECRET
+GOOGLE_PROJECT_ID = os.environ.get('GOOGLE_PROJECT_ID') or Config.GOOGLE_PROJECT_ID
 
-from pathlib import Path
+# Check if required environment variables are set
+if not GOOGLE_CLIENT_ID:
+    raise RuntimeError("Missing GOOGLE_CLIENT_ID environment variable")
+if not GOOGLE_CLIENT_SECRET:
+    raise RuntimeError("Missing GOOGLE_CLIENT_SECRET environment variable")
+if not GOOGLE_PROJECT_ID:
+    raise RuntimeError("Missing GOOGLE_PROJECT_ID environment variable")
 
-# Resolve path relative to the project root
-project_root = Path(__file__).resolve().parents[2]  # Adjust this if needed
-json_path = project_root / GOOGLE_CLIENT_JSON_PATH
+# Create client configuration from environment variables instead of JSON file
+CLIENT_CONFIG = {
+    "web": {
+        "client_id": GOOGLE_CLIENT_ID,
+        "project_id": GOOGLE_PROJECT_ID,
+        "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+        "token_uri": "https://oauth2.googleapis.com/token",
+        "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+        "client_secret": GOOGLE_CLIENT_SECRET,
+        "redirect_uris": ["https://grandbridge.azurewebsites.net/callback"],  # Updated for Azure
+        "javascript_origins": ["https://grandbridge.azurewebsites.net"]  # Updated for Azure
+    }
+}
 
-if not json_path.exists():
-    raise FileNotFoundError(f"Google client secrets file not found: {json_path}")
-
-with open(json_path, 'r') as f:
-    CLIENT_CONFIG = json.load(f)
-
-SCOPES=["https://www.googleapis.com/auth/userinfo.profile", 
-            "https://www.googleapis.com/auth/userinfo.email", 
-            "openid", 
-            "https://www.googleapis.com/auth/calendar"]
-
+SCOPES = ["https://www.googleapis.com/auth/userinfo.profile", 
+          "https://www.googleapis.com/auth/userinfo.email", 
+          "openid", 
+          "https://www.googleapis.com/auth/calendar"]
 
 flow = Flow.from_client_config(
-        client_config=CLIENT_CONFIG,
-        scopes=SCOPES)
+    client_config=CLIENT_CONFIG,
+    scopes=SCOPES)
 
 authorization_url, state = flow.authorization_url(
     access_type='offline',
@@ -48,8 +56,8 @@ authorization_url, state = flow.authorization_url(
     prompt='consent'
 )
 
-flow.redirect_uri = 'http://localhost:8080/callback'
-
+# Updated redirect URI for Azure deployment
+flow.redirect_uri = 'https://grandbridge.azurewebsites.net/callback'
 
 def get_id_info(credentials):
     token_request = google.auth.transport.requests.Request(session=requests.session())
@@ -62,8 +70,6 @@ def get_id_info(credentials):
         return id_info
     except Exception as error:
         raise Exception(f"Error occured: {error}")
-
-
 
 def refresh_token(credentials):
     print(credentials.refresh_token)
@@ -100,13 +106,11 @@ def refresh_token(credentials):
     except Exception as error:
         raise Exception(f"Error occured: {error}")
 
-
 def get_flow():
     return flow
 
 class SQLAlchemyDBError(Exception):
     pass
-
 
 def db_add_user(id, google_id, credentials):
     credentials_data = {
@@ -136,7 +140,6 @@ def db_add_user(id, google_id, credentials):
     except Exception as e:
         db.session.rollback()
         raise SQLAlchemyDBError(f"Error adding/updating user: {e}")
-
 
 def db_get_user_credentials(user_id):
     # print(user_id)
