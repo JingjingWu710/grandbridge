@@ -15,9 +15,9 @@ from googleapiclient.discovery import build
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
 # Get credentials from environment variables instead of JSON file
-GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID') or Config.GOOGLE_CLIENT_ID
-GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET') or Config.GOOGLE_CLIENT_SECRET
-GOOGLE_PROJECT_ID = os.environ.get('GOOGLE_PROJECT_ID') or Config.GOOGLE_PROJECT_ID
+GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID') or getattr(Config, 'GOOGLE_CLIENT_ID', None)
+GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET') or getattr(Config, 'GOOGLE_CLIENT_SECRET', None)
+GOOGLE_PROJECT_ID = os.environ.get('GOOGLE_PROJECT_ID') or getattr(Config, 'GOOGLE_PROJECT_ID', 'grandbridge')
 
 # Check if required environment variables are set
 if not GOOGLE_CLIENT_ID:
