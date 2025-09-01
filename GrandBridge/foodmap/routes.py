@@ -265,7 +265,7 @@ def search_locations():
         radius = data.get('radius')
         
         # Start with all active locations
-        query = Location.query.filter_by(is_active=True)
+        query = Location.query
         
         # Apply keyword filter if provided
         if keyword:
@@ -335,7 +335,6 @@ def autocomplete_locations():
         
         # Find locations with names starting with or containing the query
         locations = Location.query.filter(
-            Location.is_active == True,
             Location.name.ilike(f'%{query}%')
         ).limit(10).all()
         

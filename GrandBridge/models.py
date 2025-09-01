@@ -264,7 +264,7 @@ class Location(db.Model):
     food_types = db.Column(db.String(500))  # Types of food available
     
     # Status and tracking
-    is_active = db.Column(db.Boolean, default=True)
+    # is_active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     created_by_id = db.Column(db.Integer, db.ForeignKey('user.id'))
@@ -286,7 +286,6 @@ class Location(db.Model):
             'contact_info': self.contact_info,
             'capacity': self.capacity,
             'food_types': self.food_types,
-            'is_active': self.is_active,
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'visit_count': len(self.visits) if self.visits else 0
         }

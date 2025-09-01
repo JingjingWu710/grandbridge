@@ -25,31 +25,31 @@ def user_id_is_required(function):
         return function(user_id=user_id,*args, **kwargs)
     return wrapper
 
-def validate_dates(function):
-    def wrapper(*args, **kwargs):
-        try:
-            start_date_str = request.form.get("start_date")
-            end_date_str = request.form.get("end_date")
-        except:
-            raise Exception("Enter both dates")
+# def validate_dates(function):
+#     def wrapper(*args, **kwargs):
+#         try:
+#             start_date_str = request.form.get("start_date")
+#             end_date_str = request.form.get("end_date")
+#         except:
+#             raise Exception("Enter both dates")
 
-        try:
-            start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date()
-            end_date = datetime.strptime(end_date_str, "%Y-%m-%d").date()
+#         try:
+#             start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date()
+#             end_date = datetime.strptime(end_date_str, "%Y-%m-%d").date()
 
-            if start_date > end_date:
-                raise ValueError("Start date should be before end date.")
-            dates = (start_date, end_date)
-        except ValueError as ve:
-            return f"ValueError: {str(ve)}"
-        except TypeError as te:
-            return f"TypeError: {str(te)}"
-        except Exception as e:
-            return f"Exception occurred: {str(e)}"
+#             if start_date > end_date:
+#                 raise ValueError("Start date should be before end date.")
+#             dates = (start_date, end_date)
+#         except ValueError as ve:
+#             return f"ValueError: {str(ve)}"
+#         except TypeError as te:
+#             return f"TypeError: {str(te)}"
+#         except Exception as e:
+#             return f"Exception occurred: {str(e)}"
 
-        return function(dates=dates, *args, **kwargs)
+#         return function(dates=dates, *args, **kwargs)
 
-    return wrapper
+#     return wrapper
 
 
 def fetchCredentials(function):

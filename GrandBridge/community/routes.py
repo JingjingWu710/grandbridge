@@ -50,7 +50,7 @@ def all_staffs():
     emergency_only = request.args.get('emergency', False)
     
     # Build query
-    query = Staff.query.filter_by(is_active=True) if hasattr(Staff, 'is_active') else Staff.query
+    query = Staff.query
     
     if role_filter != 'all':
         query = query.filter_by(role_type=role_filter)
