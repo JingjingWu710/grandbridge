@@ -1,52 +1,258 @@
 {% extends "layout.html" %}
 {% block content %}
-    <div class="content-section">
-        <form method="POST" action="">
-            {{ form.hidden_tag() }}
-            <fieldset class="form-group">
-                <legend class="border-bottom mb-4">Add Staff</legend>
-                <div class="form-group">
-                    {{ form.name.label(class="form-control-label") }}
-                    {% if form.name.errors %}
-                        {{ form.name(class="form-control form-control-lg is-invalid") }}
-                        <div class="invalid-feedback">
-                            {% for error in form.name.errors %}
-                                <span>{{ error }}</span>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        {{ form.name(class="form-control form-control-lg") }}
-                    {% endif %}
-                </div>
-                <div class="form-group">
-                    {{ form.organisation.label(class="form-control-label") }}
-                    {% if form.organisation.errors %}
+<style>
+    .content-section {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 30px;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    }
+    
+    .form-header {
+        background: linear-gradient(135deg, #4a7c59 0%, #6fa882 100%);
+        color: white;
+        padding: 25px;
+        border-radius: 10px;
+        margin: -30px -30px 30px -30px;
+    }
+    
+    .form-header h2 {
+        margin: 0;
+        font-size: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .form-header p {
+        margin-top: 10px;
+        opacity: 0.95;
+        font-size: 1.1rem;
+    }
+    
+    .form-section {
+        margin-bottom: 35px;
+        padding: 25px;
+        background: #f8f9fa;
+        border-radius: 10px;
+        border-left: 4px solid #4a7c59;
+    }
+    
+    .section-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: #2c6f4f;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-control-label {
+        font-size: 1.1rem;
+        font-weight: 500;
+        color: #333;
+        margin-bottom: 8px;
+        display: block;
+        text-align: left;
+    }
+    
+    .required-field::after {
+        content: " *";
+        color: #dc3545;
+    }
+    
+    .form-control, .form-select {
+        font-size: 1.05rem;
+        padding: 12px 15px;
+        border: 2px solid #dee2e6;
+        border-radius: 8px;
+        transition: all 0.3s;
+        width: 100%;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #4a7c59;
+        box-shadow: 0 0 0 0.2rem rgba(74, 124, 89, 0.25);
+        outline: none;
+    }
+    
+    textarea.form-control {
+        min-height: 100px;
+        resize: vertical;
+    }
+    
+    .form-check {
+        padding: 15px;
+        background: white;
+        border-radius: 8px;
+        margin-bottom: 15px;
+    }
+    
+    .form-check-input {
+        width: 20px;
+        height: 20px;
+        margin-right: 10px;
+        cursor: pointer;
+    }
+    
+    .form-check-label {
+        font-size: 1.1rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+    }
+    
+    .checkbox-group {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 15px;
+        margin-top: 10px;
+        padding: 15px;
+        background: white;
+        border-radius: 8px;
+    }
+    
+    .checkbox-group .form-check {
+        margin: 0;
+        padding: 10px;
+    }
+    
+    .checkbox-group .form-check-label {
+        margin-left: 8px;
+        line-height: 1.5;
+    }
+    
+    .help-text {
+        font-size: 0.9rem;
+        color: #6c757d;
+        margin-top: 5px;
+        font-style: italic;
+    }
+    
+    .btn-submit {
+        background: #4a7c59;
+        color: white;
+        font-size: 1.2rem;
+        font-weight: 600;
+        padding: 15px 40px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .btn-submit:hover {
+        background: #3a6c49;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(74, 124, 89, 0.3);
+    }
+    
+    .btn-cancel {
+        background: #6c757d;
+        color: white;
+        font-size: 1.1rem;
+        padding: 15px 30px;
+        border: none;
+        border-radius: 10px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-left: 15px;
+        transition: all 0.3s;
+    }
+    
+    .btn-cancel:hover {
+        background: #5a6268;
+        color: white;
+        text-decoration: none;
+    }
+    
+    .invalid-feedback {
+        color: #dc3545;
+        font-size: 0.95rem;
+        margin-top: 5px;
+    }
+    
+    .is-invalid {
+        border-color: #dc3545 !important;
+    }
+</style>
+
+<div class="content-section">
+    <div class="form-header">
+        <h2>➕ Add New Support Staff Member</h2>
+        <p>Register a new professional to support caregivers of left-behind children</p>
+    </div>
+    
+    <form method="POST" action="">
+        {{ form.hidden_tag() }}
+        
+        <!-- Basic Information Section -->
+        <div class="form-section">
+            <h3 class="section-title">👤 Basic Information</h3>
+            
+            <div class="form-group">
+                {{ form.name.label(class="form-control-label required-field") }}
+                {% if form.name.errors %}
+                    {{ form.name(class="form-control form-control-lg is-invalid") }}
+                    <div class="invalid-feedback">
+                        {% for error in form.name.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.name(class="form-control form-control-lg", placeholder="e.g., Dr. Sarah Johnson") }}
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                {{ form.organisation.label(class="form-control-label required-field") }}
+                {% if form.organisation.errors %}
                     {{ form.organisation(class="form-control form-control-lg is-invalid") }}
                     <div class="invalid-feedback">
                         {% for error in form.organisation.errors %}
                             <span>{{ error }}</span>
                         {% endfor %}
-                </div>
-                    {% else %}
-                        {{ form.organisation(class="form-control form-control-lg") }}
-                    {% endif %}
-                <div class="form-group">
-                    {{ form.email.label(class="form-control-label") }}
-                    {% if form.email.errors %}
-                        {{ form.email(class="form-control form-control-lg is-invalid") }}
-                        <div class="invalid-feedback">
-                            {% for error in form.email.errors %}
-                                <span>{{ error }}</span>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        {{ form.email(class="form-control form-control-lg") }}
-                    {% endif %}
-                </div>
-                </div>
-                <div class="form-group">
-                    {{ form.tel.label(class="form-control-label") }}
-                    {% if form.tel.errors %}
+                    </div>
+                {% else %}
+                    {{ form.organisation(class="form-control form-control-lg", placeholder="e.g., County Social Services Department") }}
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                {{ form.role_type.label(class="form-control-label required-field") }}
+                {% if form.role_type.errors %}
+                    {{ form.role_type(class="form-select form-control-lg is-invalid") }}
+                    <div class="invalid-feedback">
+                        {% for error in form.role_type.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.role_type(class="form-select form-control-lg") }}
+                {% endif %}
+                <small class="help-text">Select the primary role of this staff member</small>
+            </div>
+        </div>
+        
+        <!-- Contact Information Section -->
+        <div class="form-section">
+            <h3 class="section-title">📞 Contact Information</h3>
+            
+            <div class="form-group">
+                {{ form.tel.label(class="form-control-label required-field") }}
+                {% if form.tel.errors %}
                     {{ form.tel(class="form-control form-control-lg is-invalid") }}
                     <div class="invalid-feedback">
                         {% for error in form.tel.errors %}
@@ -54,25 +260,207 @@
                         {% endfor %}
                     </div>
                 {% else %}
-                    {{ form.tel(class="form-control form-control-lg") }}
+                    {{ form.tel(class="form-control form-control-lg", placeholder="e.g., 0800-123-4567") }}
                 {% endif %}
-                </div>
-                    <div class="form-group">
-                    {{ form.intro.label(class="form-control-label") }}
-                    {% if form.intro.errors %}
-                    {{ form.intro(class="form-control form-control-lg is-invalid") }}
+            </div>
+            
+            <div class="form-group">
+                {{ form.email.label(class="form-control-label required-field") }}
+                {% if form.email.errors %}
+                    {{ form.email(class="form-control form-control-lg is-invalid") }}
+                    <div class="invalid-feedback">
+                        {% for error in form.email.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.email(class="form-control form-control-lg", placeholder="e.g., sarah.johnson@socialservices.gov.uk") }}
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                {{ form.availability_hours.label(class="form-control-label") }}
+                {% if form.availability_hours.errors %}
+                    {{ form.availability_hours(class="form-control form-control-lg is-invalid") }}
+                    <div class="invalid-feedback">
+                        {% for error in form.availability_hours.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.availability_hours(class="form-control form-control-lg", placeholder="e.g., Monday-Friday 9AM-5PM, Saturday 10AM-2PM") }}
+                {% endif %}
+                <small class="help-text">Specify when this staff member is available for contact</small>
+            </div>
+            
+            <div class="form-check">
+                {{ form.emergency_contact(class="form-check-input", id="emergency_contact") }}
+                {{ form.emergency_contact.label(class="form-check-label", for="emergency_contact") }}
+                <small class="help-text">Check if this staff member is available for 24/7 emergency calls</small>
+            </div>
+        </div>
+        
+        <!-- Professional Details Section -->
+        <div class="form-section">
+            <h3 class="section-title">🎓 Professional Details</h3>
+            
+            <div class="form-group">
+                {{ form.specializations.label(class="form-control-label") }}
+                {% if form.specializations.errors %}
+                    {{ form.specializations(class="form-control is-invalid", rows="3") }}
+                    <div class="invalid-feedback">
+                        {% for error in form.specializations.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.specializations(class="form-control", rows="3", placeholder="e.g., Behavioral issues, Educational support, Trauma counseling, Family mediation") }}
+                {% endif %}
+                <small class="help-text">List specializations separated by commas</small>
+            </div>
+            
+            <div class="form-group">
+                {{ form.training_certifications.label(class="form-control-label") }}
+                {% if form.training_certifications.errors %}
+                    {{ form.training_certifications(class="form-control is-invalid", rows="3") }}
+                    <div class="invalid-feedback">
+                        {% for error in form.training_certifications.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.training_certifications(class="form-control", rows="3", placeholder="e.g., MSW in Child Welfare, Certified Family Therapist, Safeguarding Level 3") }}
+                {% endif %}
+                <small class="help-text">List relevant qualifications and certifications</small>
+            </div>
+            
+            <div class="form-group">
+                {{ form.languages_spoken.label(class="form-control-label") }}
+                {% if form.languages_spoken.errors %}
+                    {{ form.languages_spoken(class="form-control form-control-lg is-invalid") }}
+                    <div class="invalid-feedback">
+                        {% for error in form.languages_spoken.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.languages_spoken(class="form-control form-control-lg", placeholder="e.g., English, Mandarin, Polish") }}
+                {% endif %}
+                <small class="help-text">Languages this staff member can communicate in</small>
+            </div>
+        </div>
+        
+        <!-- Service Information Section -->
+        <div class="form-section">
+            <h3 class="section-title">🗺️ Service Information</h3>
+            
+            <div class="form-group">
+                {{ form.age_groups.label(class="form-control-label") }}
+                {% if form.age_groups.errors %}
+                    {{ form.age_groups(class="form-control form-control-lg is-invalid", placeholder="e.g., 0-4, 5-10, 11-15, 16-18") }}
+                    <div class="invalid-feedback">
+                        {% for error in form.age_groups.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.age_groups(class="form-control form-control-lg", placeholder="e.g., 0-4, 5-10, 11-15, 16-18") }}
+                {% endif %}
+                <small class="help-text">Enter age groups this staff member works with (e.g., 0-4, 5-10, 11-15, 16-18)</small>
+            </div>
+            
+            <div class="form-group">
+                {{ form.service_areas.label(class="form-control-label") }}
+                {% if form.service_areas.errors %}
+                    {{ form.service_areas(class="form-control is-invalid", rows="3") }}
+                    <div class="invalid-feedback">
+                        {% for error in form.service_areas.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.service_areas(class="form-control", rows="3", placeholder="e.g., North London, Westminster, Camden, Online services available nationwide") }}
+                {% endif %}
+                <small class="help-text">Specify geographic areas or communities served</small>
+            </div>
+        </div>
+        
+        <!-- Introduction Section -->
+        <div class="form-section">
+            <h3 class="section-title">💬 Personal Introduction</h3>
+            
+            <div class="form-group">
+                {{ form.intro.label(class="form-control-label required-field") }}
+                {% if form.intro.errors %}
+                    {{ form.intro(class="form-control is-invalid", rows="5") }}
                     <div class="invalid-feedback">
                         {% for error in form.intro.errors %}
                             <span>{{ error }}</span>
                         {% endfor %}
                     </div>
                 {% else %}
-                    {{ form.intro(class="form-control form-control-lg") }}
+                    {{ form.intro(class="form-control", rows="5", placeholder="Write a warm, friendly introduction that explains their experience working with families and children, their approach to support, and what caregivers can expect when contacting them...") }}
                 {% endif %}
-            </fieldset>
-            <div class="form-group">
-                {{ form.submit(class="btn btn-outline-info") }}
+                <small class="help-text">A personal message to help caregivers feel comfortable reaching out</small>
             </div>
-        </form>
-    </div>
-{% endblock content %}
+        </div>
+        
+        <!-- Submit Buttons -->
+        <div style="text-align: center; padding-top: 20px; border-top: 2px solid #e0e0e0;">
+            {{ form.submit(class="btn-submit") }}
+            <a href="{{ url_for('community.all_staffs') }}" class="btn-cancel">
+                ❌ Cancel
+            </a>
+        </div>
+    </form>
+</div>
+
+<script>
+// Form validation and user experience enhancements
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-format phone number
+    const phoneInput = document.querySelector('input[name="tel"]');
+    if (phoneInput) {
+        phoneInput.addEventListener('input', function(e) {
+            // Basic phone formatting (adjust based on your region)
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 0) {
+                if (value.length <= 4) {
+                    value = value;
+                } else if (value.length <= 7) {
+                    value = value.slice(0, 4) + '-' + value.slice(4);
+                } else {
+                    value = value.slice(0, 4) + '-' + value.slice(4, 7) + '-' + value.slice(7, 11);
+                }
+            }
+            e.target.value = value;
+        });
+    }
+    
+    // Character counter for textarea fields
+    const textareas = document.querySelectorAll('textarea');
+    textareas.forEach(textarea => {
+        const maxLength = 500; // Adjust as needed
+        const counter = document.createElement('div');
+        counter.style.textAlign = 'right';
+        counter.style.fontSize = '0.9rem';
+        counter.style.color = '#6c757d';
+        counter.style.marginTop = '5px';
+        textarea.parentNode.appendChild(counter);
+        
+        function updateCounter() {
+            const remaining = maxLength - textarea.value.length;
+            counter.textContent = `${remaining} characters remaining`;
+            if (remaining < 50) {
+                counter.style.color = '#dc3545';
+            } else {
+                counter.style.color = '#6c757d';
+            }
+        }
+        
+        textarea.addEventListener('input', updateCounter);
+        updateCounter();
+    });
+});
+</script>
+{% endblock %}

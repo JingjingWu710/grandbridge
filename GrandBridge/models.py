@@ -348,3 +348,12 @@ class Staff(db.Model):
     tel = db.Column(db.String(60), nullable=False)
     email = db.Column(db.String(60), nullable=False)
     intro = db.Column(db.Text, nullable=False)
+    
+    role_type = db.Column(db.String(50), nullable=False)
+    specializations = db.Column(db.Text)
+    languages_spoken = db.Column(db.String(200))
+    availability_hours = db.Column(db.String(200))
+    emergency_contact = db.Column(db.Boolean, default=False)
+    age_groups = db.Column(db.String(100))
+    service_areas = db.Column(db.Text)
+    training_certifications = db.Column(db.Text) 
