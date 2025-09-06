@@ -45,7 +45,6 @@
             line-height: 1.6;
         }
         
-        /* Enhanced Navbar Styling */
         .navbar {
             background: linear-gradient(135deg, var(--primary-green), var(--secondary-green)) !important;
             padding: 15px 0;
@@ -53,7 +52,7 @@
             position: sticky;
             top: 0;
             z-index: 1000;
-            position: relative; /* For absolute positioned dropdown */
+            position: relative; 
         }
         
         .navbar-brand {
@@ -79,14 +78,13 @@
         .navbar-toggler {
             border: 2px solid white;
             padding: 8px 12px;
-            display: block !important; /* Always show toggle button */
+            display: block !important; 
         }
         
         .navbar-toggler-icon {
             background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 1%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
         }
         
-        /* Navigation Menu */
         .navbar-nav {
             margin-left: auto;
             gap: 5px;
@@ -124,7 +122,6 @@
             border-radius: 2px;
         }
         
-        /* Dropdown Menu Styling */
         .navbar-collapse {
             background: linear-gradient(135deg, var(--primary-green), var(--secondary-green));
             margin-top: 10px;
@@ -138,7 +135,6 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
         
-        /* Ensure navbar starts collapsed */
         .navbar-collapse:not(.show) {
             display: none !important;
         }
@@ -147,7 +143,7 @@
             display: block !important;
         }
         
-        /* Keep collapse behavior on all screen sizes */
+
         @media (min-width: 992px) {
             .navbar-collapse {
                 position: absolute;
@@ -158,14 +154,12 @@
             }
         }
         
-        /* Main Container */
         .main-container {
             padding: 30px 15px;
             max-width: 1400px;
             margin: 0 auto;
         }
         
-        /* Alert Styling */
         .alert {
             border-radius: 15px;
             padding: 20px;
@@ -238,22 +232,11 @@
             }
         }
         
-        /* Footer (optional) */
-        .footer {
-            background: linear-gradient(135deg, var(--primary-green), var(--secondary-green));
-            color: white;
-            padding: 30px 0;
-            margin-top: 50px;
-            text-align: center;
-        }
-        
-        /* Accessibility Features */
         .nav-link:focus {
             outline: 3px solid white;
             outline-offset: 2px;
         }
         
-        /* Loading Animation */
         .page-loading {
             animation: fadeIn 0.5s ease;
         }
@@ -263,7 +246,6 @@
             to { opacity: 1; }
         }
         
-        /* Enhanced Button Styles */
         .btn {
             font-size: 1.1rem;
             padding: 12px 24px;

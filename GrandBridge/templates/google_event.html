@@ -390,25 +390,7 @@
         }
     }
     
-    // Keyboard accessibility
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            hideDeleteModal();
-        }
-    });
     
-    // Add calendar event to user's calendar (optional)
-    function addToCalendar() {
-        const title = "{{ title }}";
-        const date = "{{ date }}";
-        const startTime = "{{ start_time }}";
-        const endTime = "{{ end_time }}";
-        const location = "{{ location }}";
-        
-        // Create calendar URL (Google Calendar)
-        const googleCalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${date}/${date}&location=${encodeURIComponent(location)}`;
-        window.open(googleCalUrl, '_blank');
-    }
 </script>
 
 {% endblock %}

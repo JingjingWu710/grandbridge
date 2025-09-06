@@ -1,7 +1,6 @@
 {% extends "layout.html" %}
 {% block content %}
 <style>
-    /* Make everything more elder-friendly */
     .form-control, .form-select {
         font-size: 1.2rem;
         padding: 12px;
@@ -65,7 +64,7 @@
 <form method="POST" action="">
     {{ form.hidden_tag() }}
 
-    <!-- Name Field - Make it more meaningful -->
+    <!-- Name Field -->
     <div class="form-group mb-3">
         <label style="font-size: 1.2rem; font-weight: bold; color: #2c6f4f;">
             What are you celebrating? ✨
@@ -83,7 +82,7 @@
         {{ form.type(class="form-control form-select") }}
     </div>
 
-    <!-- NEW: Intention Selection -->
+    <!-- Intention Selection -->
     <div class="form-group mb-3">
         <label style="font-size: 1.2rem; font-weight: bold; color: #2c6f4f;">
             What does this represent? (Optional)
@@ -104,7 +103,7 @@
         </div>
     </div>
 
-    <!-- NEW: Mood Check -->
+    <!-- Mood Check -->
     <div class="form-group mb-3">
         <label style="font-size: 1.2rem; font-weight: bold; color: #2c6f4f;">
             How are you feeling? (Optional)

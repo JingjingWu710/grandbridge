@@ -1,7 +1,6 @@
 {% extends "layout.html" %}
 {% block content %}
 <style>
-    /* Simple elderly-friendly styling */
     .staff-container {
         max-width: 1200px;
         margin: 0 auto;
@@ -16,7 +15,6 @@
         border-left: 5px solid #4a7c59;
     }
     
-    /* Enhanced Filter Tabs Styling */
     .filter-tabs {
         display: flex;
         flex-wrap: wrap;
@@ -74,7 +72,6 @@
         background: rgba(255,255,255,0.3);
     }
     
-    /* Quick Help Section Enhanced */
     .quick-help-banner {
         background: linear-gradient(135deg, #fff3e0 0%, #ffe8cc 100%);
         padding: 25px;
@@ -265,7 +262,6 @@
         color: #666;
     }
     
-    /* Quick contact buttons */
     .quick-actions {
         display: flex;
         gap: 15px;
@@ -506,7 +502,7 @@
                 {% endif %}
             </div>
             
-            <!-- Introduction/Bio -->
+            <!-- Introduction -->
             {% if staff.intro %}
             <div class="intro-section">
                 <h4 style="font-size: 1.4rem; margin-bottom: 10px; color: #555;">
